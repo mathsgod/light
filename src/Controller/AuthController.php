@@ -5,7 +5,10 @@ namespace Light\Controller;
 use Error;
 use Firebase\JWT\JWT;
 use Light\Model\User;
+use TheCodingMachine\GraphQLite\Annotations\InjectUser;
+use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
+use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class AuthController
 {
@@ -51,5 +54,13 @@ class AuthController
         } else {
             return password_verify($password, $hash);
         }
+    }
+
+
+    #[Query]
+    #[Logged]
+    public function getMy(#[InjectUser] User $user): User
+    {
+        return $user;
     }
 }

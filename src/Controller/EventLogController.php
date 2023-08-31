@@ -14,9 +14,10 @@ class EventLogController
 {
     #[Query]
     #[Logged]
+    #[Right("ADMIN")]
     /**
      * @return EventLog[]
-     * @params ?mixed $filters
+     * @param ?mixed $filters
      */
     public function listEventLog($filters = [],  ?string $sort = '', #[InjectUser] \Light\Model\User $user): \R\DB\Query
     {

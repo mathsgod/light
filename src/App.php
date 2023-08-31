@@ -20,9 +20,7 @@ class App implements MiddlewareInterface
     public function __construct()
     {
         $this->container = new \League\Container\Container();
-
         $this->factory = new SchemaFactory(new Psr16Cache(new FilesystemAdapter()), $this->container);
-
 
         $this->factory->addControllerNamespace("\\Light\\Controller\\");
         $this->factory->addTypeNamespace("\\Light\\Model\\");
@@ -31,6 +29,7 @@ class App implements MiddlewareInterface
         $this->container->add(Controller\AuthController::class);
         $this->container->add(Controller\UserController::class);
         $this->container->add(Controller\RoleController::class);
+        $this->container->add(Controller\EventLogController::class);
 
 
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);

@@ -48,7 +48,7 @@ if ($command == "make:controller") {
     $method->addAttribute("#[Logged]");
 
     $method->setDocBlock("@return {$name}[]
-@params ?mixed \$filters");
+@param ?mixed \$filters");
 
     $param1 = new ParameterGenerator("filters", null, []);
     $param2 = new ParameterGenerator("sort", "?string", "");

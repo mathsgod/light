@@ -151,16 +151,19 @@ if ($command == "make:model") {
     $class->setExtendedClass("Light\Model");
     $class->addAttribute("#[Type]");
 
-
     foreach (Q($name)->getFields() as $field) {
         $type = $field->getType();
         $type = explode("(", $type)[0];
         switch ($type) {
+            case "timestamp":
             case "int":
                 $gql_type = "Int";
                 break;
             case "varchar":
             case "text":
+            case "datetime":
+            case "data":
+            case "time":
                 $gql_type = "String";
                 break;
             case "float":

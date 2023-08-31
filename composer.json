@@ -14,7 +14,8 @@
         "firebase/php-jwt": "^6.8",
         "thecodingmachine/graphqlite": "^6.0",
         "mathsgod/graphqlite-mixed-type": "^2.1",
-        "laminas/laminas-diactoros": "^3.1"
+        "laminas/laminas-diactoros": "^3.1",
+        "laminas/laminas-permissions-rbac": "^3.4"
     },
     "autoload": {
         "psr-4": {

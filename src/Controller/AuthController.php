@@ -26,7 +26,7 @@ class AuthController
         $user = User::Get(["username" => $username]);
         if (self::PasswordVerify($password, $user->password)) {
             $payload = [
-                "iss" => "https://api.e-post.com.hk/v5",
+                "iss" => "light server",
                 "iat" => time(),
                 "exp" => time() + 3600 * 8,
                 "role" => "Users",

@@ -10,6 +10,6 @@ class Installer
 
         $path = __DIR__ . "/Light.php";
 
-        file_put_contents("Light", file_get_contents($path));
+        file_put_contents("light", file_get_contents($path));
     }
 }

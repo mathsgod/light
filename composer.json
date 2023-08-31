@@ -24,6 +24,9 @@
     "scripts": {
         "post-install-cmd": [
             "Light\\Installer::postInstall"
+        ],
+        "post-update-cmd": [
+            "Light\\Installer::postInstall"
         ]
     }
 }

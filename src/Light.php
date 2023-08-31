@@ -1,0 +1,257 @@
+<?php
+
+// cli tool for generating code
+
+use Laminas\Code\Generator\TypeGenerator;
+use Light\Code\PropertyGenerator;
+use Light\Code\ClassGenerator;
+use Light\Code\MethodGenerator;
+use Light\Code\ParameterGenerator;
+
+use function R\DB\Q;
+
+require_once 'vendor/autoload.php';
+
+$cwd = getcwd();
+
+
+$command = isset($argv[1]) ? $argv[1] : null;
+
+if($command == "help"){
+    echo <<<EOT
+Usage: php light make:controller <name>
+       php light make:model <name>
+       php light make:input <name>
+EOT;
+
+    exit;
+}
+
+if ($command == "make:controller") {
+    $name = isset($argv[2]) ? $argv[2] : null;
+    if (!$name) {
+        echo "Please provide a name for the controller\n";
+        exit;
+    }
+    $name = ucfirst($name);
+    $path = $cwd . "/src/Controller/{$name}Controller.php";
+    if (file_exists($path)) {
+        echo "Controller $name already exists\n";
+        exit;
+    }
+
+    $class = new ClassGenerator($name . "Controller", "Controller");
+    $class->addUse("Model\\$name");
+    $class->addUse("TheCodingMachine\GraphQLite\Annotations\InjectUser");
+    $class->addUse("TheCodingMachine\GraphQLite\Annotations\Query");
+    $class->addUse("TheCodingMachine\GraphQLite\Annotations\Mutation");
+    $class->addUse("TheCodingMachine\GraphQLite\Annotations\Right");
+    $class->addUse("TheCodingMachine\GraphQLite\Annotations\Logged");
+
+
+    // list
+    $method = new MethodGenerator("list$name");
+    $method->setReturnType("R\DB\Query");
+    $method->addAttribute("#[Query]");
+    $method->addAttribute("#[Logged]");
+
+    $method->setDocBlock("@return {$name}[]
+@params ?mixed \$filters");
+
+    $param1 = new ParameterGenerator("filters", null, []);
+    $param2 = new ParameterGenerator("sort", "?string", "");
+    $param3 = new ParameterGenerator("user", "Light\\Model\\User");
+    $param3->addAttribute("#[InjectUser]");
+    $method->setParameters([$param1, $param2, $param3]);
+    $method->setBody(
+        <<<EOT
+    return {$name}::Query()->filters(\$filters)->sort(\$sort);
+EOT
+    );
+    $class->addMethodFromGenerator($method);
+
+
+    // get snake_case of name
+    $snake_name = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $name));
+
+    // add
+    $method = new MethodGenerator("add$name");
+    $method->setReturnType("int");
+    $method->addAttribute("#[Mutation]");
+    $method->addAttribute("#[Logged]");
+    $param1 = new ParameterGenerator("data", "Input\\{$name}");
+    $param2 = new ParameterGenerator("user", "Light\\Model\\User");
+    $param2->addAttribute("#[InjectUser]");
+    $method->setParameters([$param1, $param2]);
+    $method->setBody(
+        <<<EOT
+\$obj={$name}::Create(\$data);
+\$obj->save();
+return \$obj->{$snake_name}_id;
+EOT
+    );
+    $class->addMethodFromGenerator($method);
+
+    //update
+    $method = new MethodGenerator("update$name");
+    $method->setReturnType("bool");
+    $method->addAttribute("#[Mutation]");
+    $method->addAttribute("#[Logged]");
+    $param1 = new ParameterGenerator("id", "int");
+    $param2 = new ParameterGenerator("data", "Input\\{$name}");
+    $param3 = new ParameterGenerator("user", "Light\\Model\\User");
+    $param3->addAttribute("#[InjectUser]");
+    $method->setParameters([$param1, $param2, $param3]);
+    $method->setBody(
+        <<<EOT
+if(!\$obj={$name}::Get(\$id)) return false;
+\$obj->bind(\$data);
+\$obj->save();
+return true;
+EOT
+    );
+    $class->addMethodFromGenerator($method);
+
+
+    //remove 
+    $method = new MethodGenerator("remove$name");
+    $method->setReturnType("bool");
+    $method->addAttribute("#[Mutation]");
+    $method->addAttribute("#[Logged]");
+    $param1 = new ParameterGenerator("id", "int");
+    $param2 = new ParameterGenerator("user", "Light\\Model\\User");
+    $param2->addAttribute("#[InjectUser]");
+    $method->setParameters([$param1, $param2]);
+    $method->setBody(
+        <<<EOT
+if(!\$obj={$name}::Get(\$id)) return false;
+\$obj->delete();
+return true;
+EOT
+    );
+    $class->addMethodFromGenerator($method);
+
+    file_put_contents($path, "<?php\n\n" . $class->generate());
+
+    echo "Controller $name created\n";
+    exit;
+}
+
+
+if ($command == "make:model") {
+    $name = isset($argv[2]) ? $argv[2] : null;
+    if (!$name) {
+        echo "Please provide a name for the model\n";
+        exit;
+    }
+    $name = ucfirst($name);
+    $path = $cwd . "/src/Model/$name.php";
+    if (file_exists($path)) {
+        echo "Model $name already exists\n";
+        exit;
+    }
+
+    $class = new ClassGenerator($name, "Model");
+    $class->addUse("TheCodingMachine\GraphQLite\Annotations\Field");
+    $class->addUse("TheCodingMachine\GraphQLite\Annotations\MagicField");
+    $class->addUse("TheCodingMachine\GraphQLite\Annotations\Type");
+    $class->setExtendedClass("Light\Model");
+    $class->addAttribute("#[Type]");
+
+
+    foreach (Q($name)->getFields() as $field) {
+        $type = $field->getType();
+        $type = explode("(", $type)[0];
+        switch ($type) {
+            case "int":
+                $gql_type = "Int";
+                break;
+            case "varchar":
+            case "text":
+                $gql_type = "String";
+                break;
+            case "float":
+                $gql_type = "Float";
+                break;
+            case "tinyint":
+                $gql_type = "Boolean";
+                break;
+            default:
+                $gql_type = "mixed";
+        }
+        if (!$field->isNullable()) {
+            $gql_type = "!$gql_type";
+        }
+
+        $class->addAttribute("#[MagicField(name: \"{$field->getName()}\", outputType: \"$gql_type\")]");
+    }
+
+    file_put_contents($path, "<?php\n\n" . $class->generate());
+
+    echo "Model $name created\n";
+
+
+    exit;
+}
+
+if ($command == "make:input") {
+    $name = isset($argv[2]) ? $argv[2] : null;
+    if (!$name) {
+        echo "Please provide a name for the input\n";
+        exit;
+    }
+    $name = ucfirst($name);
+    $path = $cwd . "/src/Input/$name.php";
+    if (file_exists($path)) {
+        echo "Input $name already exists\n";
+        exit;
+    }
+
+    $class = new ClassGenerator($name, "Input");
+    $class->addUse("TheCodingMachine\GraphQLite\Annotations\Field");
+    $class->addUse("TheCodingMachine\GraphQLite\Annotations\Input");
+    $class->addAttribute("#[Input]");
+
+
+    foreach (Q($name)->getFields() as $field) {
+        if ($field->isPrimary()) continue;
+        $type = $field->getType();
+        $type = explode("(", $type)[0];
+        switch ($type) {
+            case "int":
+                $php_type = "int";
+                break;
+            case "varchar":
+            case "text":
+                $php_type = "string";
+                break;
+            case "float":
+                $php_type = "float";
+                break;
+            case "tinyint":
+                $php_type = "bool";
+                break;
+            default:
+                $php_type = "mixed";
+        }
+
+        if (!$field->isNullable()) {
+            $php_type = "?$php_type";
+        }
+
+        $property = new PropertyGenerator($field->getName());
+
+        $property->setType(TypeGenerator::fromTypeString($php_type));
+        $property->addAttribute("#[Field]");
+        $class->addPropertyFromGenerator($property);
+    }
+
+    file_put_contents($path, "<?php\n\n" . $class->generate());
+
+    echo "Input $name created\n";
+    exit;
+}
+
+
+
+echo "Unknown command\n";

@@ -1,0 +1,24 @@
+{
+    "name": "mathsgod/light",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Raymond Chong",
+            "email": "mathsgod@yahoo.com"
+        }
+    ],
+    "require": {
+        "laminas/laminas-code": "^4.7",
+        "mathsgod/r-db": "^5.0",
+        "league/container": "^4.2",
+        "firebase/php-jwt": "^6.8",
+        "thecodingmachine/graphqlite": "^6.0",
+        "mathsgod/graphqlite-mixed-type": "^2.1",
+        "laminas/laminas-diactoros": "^3.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Light\\": "src/"
+        }
+    }
+}

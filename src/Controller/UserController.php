@@ -31,11 +31,36 @@ class UserController
     #[Right("ADMIN")]
     public function updateUser(int $id, InputUser $data): bool
     {
-        $user = User::get($id);
+        $user = User::Get($id);
         $user->first_name = $data->first_name;
         $user->last_name = $data->last_name;
         $user->phone = $data->phone;
         $user->email = $data->email;
         return $user->save();
+    }
+
+    #[Mutation]
+    #[Right("ADMIN")]
+    public function updateUserPassword(int $id, string $password): bool
+    {
+        if ($user = User::Get($id)) {
+            $user->password = password_hash($password, PASSWORD_DEFAULT);
+            $user->save();
+            return true;
+        }
+        return false;
+    }
+
+    #[Mutation]
+    #[Logged]
+    public function updateMyPassword(string $old_password, string $new_password, #[InjectUser] User $user): bool
+    {
+        if (!password_verify($old_password, $user->password)) {
+            return false;
+        }
+
+        $user->password = password_hash($new_password, PASSWORD_DEFAULT);
+        $user->save();
+        return true;
     }
 }

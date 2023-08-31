@@ -9,7 +9,7 @@ class Installer
         //copy Light.php to root
 
         $path = __DIR__ . "/Light.php";
-        $dest = getcwd() . "/light";
-        copy($path, $dest);
+
+        file_put_contents("Light", file_get_contents($path));
     }
 }

@@ -20,5 +20,10 @@
         "psr-4": {
             "Light\\": "src/"
         }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "Light\\Installer::postInstall"
+        ]
     }
 }

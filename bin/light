@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 // cli tool for generating code
@@ -180,7 +181,7 @@ if ($command == "make:model") {
                 $gql_type = "mixed";
         }
         if (!$field->isNullable()) {
-            $gql_type = "!$gql_type";
+            $gql_type = "$gql_type!";
         }
 
         $class->addAttribute("#[MagicField(name: \"{$field->getName()}\", outputType: \"$gql_type\")]");

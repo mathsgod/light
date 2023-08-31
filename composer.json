@@ -18,15 +18,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Light\\": "src\/"
+            "Light\\": "src/"
         }
     },
-    "scripts": {
-        "post-install-cmd": [
-            "Light\\Installer::postInstall"
-        ],
-        "post-update-cmd": [
-            "Light\\Installer::postInstall"
-        ]
-    }
+    "bin": "bin\/light"
 }

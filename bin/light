@@ -11,22 +11,13 @@ use Light\Code\ParameterGenerator;
 
 use function R\DB\Q;
 
-require_once 'vendor/autoload.php';
+require_once $_composer_autoload_path ?? __DIR__ . "/../vendor/autoload.php";
 
 $cwd = getcwd();
 
 
 $command = isset($argv[1]) ? $argv[1] : null;
 
-if($command == "help"){
-    echo <<<EOT
-Usage: php light make:controller <name>
-       php light make:model <name>
-       php light make:input <name>
-EOT;
-
-    exit;
-}
 
 if ($command == "make:controller") {
     $name = isset($argv[2]) ? $argv[2] : null;
@@ -86,7 +77,8 @@ EOT
     $method->setParameters([$param1, $param2]);
     $method->setBody(
         <<<EOT
-\$obj={$name}::Create(\$data);
+\$obj={$name}::Create();
+\$obj->bind(\$data);
 \$obj->save();
 return \$obj->{$snake_name}_id;
 EOT
@@ -241,6 +233,7 @@ if ($command == "make:input") {
         }
 
         $property = new PropertyGenerator($field->getName());
+        $property->omitDefaultValue(true);
 
         $property->setType(TypeGenerator::fromTypeString($php_type));
         $property->addAttribute("#[Field]");
@@ -253,6 +246,9 @@ if ($command == "make:input") {
     exit;
 }
 
+echo <<<EOT
+Usage: php light make:controller <name>
+       php light make:model <name>
+       php light make:input <name>
 
-
-echo "Unknown command\n";
+EOT;

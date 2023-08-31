@@ -27,7 +27,7 @@ class App implements MiddlewareInterface
         $this->factory->addControllerNamespace("\\Light\\Controller\\");
         $this->factory->addTypeNamespace("\\Light\\Model\\");
         $this->factory->addTypeNamespace("\\Light\\Input\\");
-        
+
         $this->container->add(Controller\AuthController::class);
         $this->container->add(Controller\UserController::class);
         $this->container->add(Controller\RoleController::class);

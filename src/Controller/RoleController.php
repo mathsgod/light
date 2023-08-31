@@ -16,7 +16,7 @@ class RoleController
     #[Logged]
     /**
      * @return Role[]
-     * @params ?mixed $filters
+     * @param ?mixed $filters
      */
     public function listRole($filters = [],  ?string $sort = '', #[InjectUser] \Light\Model\User $user): \R\DB\Query
     {
@@ -25,6 +25,7 @@ class RoleController
 
     #[Mutation]
     #[Logged]
+    #[Right("ADMIN")]
     public function addRole(\Light\Input\Role $data, #[InjectUser] \Light\Model\User $user): int
     {
         $obj = Role::Create();
@@ -35,6 +36,7 @@ class RoleController
 
     #[Mutation]
     #[Logged]
+    #[Right("ADMIN")]
     public function updateRole(int $id,  \Light\Input\Role $data, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = Role::Get($id)) return false;
@@ -45,6 +47,7 @@ class RoleController
 
     #[Mutation]
     #[Logged]
+    #[Right("ADMIN")]
     public function removeRole(int $id, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = Role::Get($id)) return false;

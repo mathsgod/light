@@ -17,6 +17,9 @@
         "laminas/laminas-diactoros": "^3.1",
         "laminas/laminas-permissions-rbac": "^3.4"
     },
+    "require-dev": {
+        "laminas/laminas-httphandlerrunner": "*"
+    },
     "autoload": {
         "psr-4": {
             "Light\\": "src/"

@@ -6,13 +6,11 @@ use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
 
 #[Input()]
-class User
+class UpdateUser
 {
-    #[Field]
-    public string $username;
 
     #[Field]
-    public string $first_name;
+    public ?string $first_name;
 
     #[Field]
     public ?string $last_name;
@@ -21,7 +19,7 @@ class User
     public ?string $phone;
 
     #[Field]
-    public string $email;
+    public ?string $email;
 
     #[Field]
     public ?string $addr1;
@@ -36,11 +34,5 @@ class User
     public ?string $birthdate;
 
     #[Field]
-    public string $join_date;
-
-    #[Field]
-    /**
-     * @var string[]
-     */
-    public array $roles = [];
+    public ?string $join_date;
 }

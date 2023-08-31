@@ -5,6 +5,7 @@ namespace Light;
 use GQL\Type\MixedTypeMapperFactory;
 use GraphQL\GraphQL;
 use Laminas\Diactoros\Response\EmptyResponse;
+use Laminas\Permissions\Rbac\Rbac;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -17,6 +18,8 @@ class App implements MiddlewareInterface
 {
     protected $container;
     protected $factory;
+
+    protected $rbac;
     public function __construct()
     {
         $this->container = new \League\Container\Container();
@@ -34,6 +37,14 @@ class App implements MiddlewareInterface
 
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
+
+        $this->rbac = new Rbac();
+        $this->rbac->addRole("Everyone");
+    }
+
+    public function getRbac()
+    {
+        return $this->rbac;
     }
 
     public function getContainer()

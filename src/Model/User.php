@@ -36,7 +36,6 @@ class User extends \Light\Model
     #[Field]
     public function canDelete(): bool
     {
-
         $roles = $this->getRoles();
         if (in_array("Administrators", $roles)) {
             return false;

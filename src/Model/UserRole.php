@@ -12,4 +12,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "role", outputType: "String")]
 class UserRole extends \Light\Model
 {
+
+    
 }

@@ -2,14 +2,18 @@
 
 namespace Light\Controller;
 
+use Light\Input\AddUser;
+use Light\Input\UpdateUser;
 use Light\Input\User as InputUser;
 use Light\Model\User;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use R\DB\Query as DBQuery;
+use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
+use TheCodingMachine\GraphQLite\Annotations\Security;
 
 class UserController
 {
@@ -29,13 +33,10 @@ class UserController
     #[Mutation]
     #[Logged]
     #[Right("ADMIN")]
-    public function updateUser(int $id, InputUser $data): bool
+    public function updateUser(int $id, UpdateUser $data): bool
     {
         $user = User::Get($id);
-        $user->first_name = $data->first_name;
-        $user->last_name = $data->last_name;
-        $user->phone = $data->phone;
-        $user->email = $data->email;
+        $user->bind($data);
         return $user->save();
     }
 
@@ -62,5 +63,19 @@ class UserController
         $user->password = password_hash($new_password, PASSWORD_DEFAULT);
         $user->save();
         return true;
+    }
+
+    #[Mutation]
+    #[Security("is_granted('ADMIN') or (is_granted('POWER_USER'))")]
+    public function addUser(InputUser $data): int
+    {
+        $user = new User();
+        $user->bind($data);
+        $user->save();
+
+        foreach ($data->roles as $role) {
+            $user->addRole($role);
+        }
+        return $user->user_id;
     }
 }

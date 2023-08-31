@@ -21,7 +21,7 @@ class AuthController
 
 
     #[Mutation]
-    public function login(string $username, string $password): string
+    public function login(string $username, string $password): bool
     {
         $user = User::Get(["username" => $username]);
         if (self::PasswordVerify($password, $user->password)) {
@@ -38,7 +38,7 @@ class AuthController
 
             //set cookie
             setcookie("access_token", $token, time() + 3600 * 8, "/", "", true, true);
-            return $token;
+            return true;
         }
         throw new Error("password error");
     }

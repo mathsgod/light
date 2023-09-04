@@ -78,5 +78,4 @@ class UserController
         }
         return $user->user_id;
     }
-
 }

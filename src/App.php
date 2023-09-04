@@ -62,8 +62,14 @@ class App implements MiddlewareInterface
         foreach (Role::Query(["name" => "Users"]) as $q) {
             $parents[] = $q->parent;
         }
-        $this->rbac->addRole("Users", $parents);
+        $this->rbac->addRole("Power Users", $parents);
 
+        $parents = ["Power Users"];
+        foreach (Role::Query(["name" => "Everyone"]) as $q) {
+            $parents[] = $q->parent;
+        }
+        $this->rbac->addRole("Users", $parents);
+        
         $parents = ["Users"];
         foreach (Role::Query(["name" => "Everyone"]) as $q) {
             $parents[] = $q->parent;

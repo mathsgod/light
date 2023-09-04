@@ -54,7 +54,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
             $rbac = $this->app->getRbac();
 
             foreach ($user->getRoles() as $role) {
-                if ($rbac->isGranted($role, $right)) {
+                if ($rbac->isGranted($role, $right, $subject)) {
                     return true;
                 }
             }

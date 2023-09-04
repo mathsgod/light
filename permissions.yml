@@ -1,7 +1,17 @@
-Users:
+Power Users:
   - user.list
   - user.create
   - user.delete
   - user.update
   - role.list
+  - user.role.add
+  - user.role.remove
+
+Administrators:
+  - role.create
+  - role.delete
+  - role.update
+  - role.permission.add
+  - role.permission.remove
+
   

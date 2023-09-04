@@ -30,6 +30,10 @@ class User extends \Light\Model
             $roles[] = $r->role;
         }
 
+        if(empty($roles)){
+            $roles[] = "Everyone";
+        }
+
         return $roles;
     }
 

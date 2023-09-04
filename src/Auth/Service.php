@@ -14,6 +14,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
 {
     protected $is_logged = false;
     protected $user = null;
+    protected $org_user = null;
     protected $app;
     public function __construct(ServerRequestInterface $request)
     {
@@ -25,7 +26,13 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
         if ($access_token = $cookies["access_token"]) {
             try {
                 $payload = JWT::decode($access_token, new Key($_ENV["JWT_SECRET"], "HS256"));
-                $this->user = User::Get($payload->id);
+
+                if ($payload->view_as) {
+                    $this->user = User::Get($payload->view_as);
+                    $this->org_user = User::Get($payload->id);
+                } else {
+                    $this->user = User::Get($payload->id);
+                }
                 $this->is_logged = true;
             } catch (Exception $e) {
                 $this->is_logged = false;
@@ -41,6 +48,11 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
     public function getUser(): ?object
     {
         return $this->user;
+    }
+
+    public function getOrginalUser(): ?object
+    {
+        return $this->org_user;
     }
 
     public function isAllowed(string $right, $subject = null): bool

@@ -31,12 +31,14 @@ class App implements MiddlewareInterface
         $this->factory->addTypeNamespace("\\Light\\Model\\");
         $this->factory->addTypeNamespace("\\Light\\Input\\");
 
+        $this->container->add(Controller\SystemController::class);
         $this->container->add(Controller\AuthController::class);
         $this->container->add(Controller\UserController::class);
         $this->container->add(Controller\RoleController::class);
         $this->container->add(Controller\EventLogController::class);
         $this->container->add(Controller\UserRoleController::class);
         $this->container->add(Controller\PermissionController::class);
+        $this->container->add(Controller\ConfigController::class);
 
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
@@ -57,6 +59,7 @@ class App implements MiddlewareInterface
         $this->rbac->addRole("Power Users", ["Administrators"]);
         $this->rbac->addRole("Users", ["Power Users"]);
         $this->rbac->addRole("Everyone", ["Users"]);
+
 
         foreach (Role::Query() as $q) {
 
@@ -113,6 +116,8 @@ class App implements MiddlewareInterface
 
         $this->factory->setAuthenticationService($auth_service);
         $this->factory->setAuthorizationService($auth_service);
+
+        $this->container->add(Auth\Service::class, $auth_service);
 
         return $handler->handle($request);
     }

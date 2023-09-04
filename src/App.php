@@ -41,6 +41,8 @@ class App implements MiddlewareInterface
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
 
+
+
         $this->rbac = new Rbac();
         $this->loadRbac();
     }
@@ -57,7 +59,7 @@ class App implements MiddlewareInterface
         $this->rbac->addRole("Everyone", ["Users"]);
 
         foreach (Role::Query() as $q) {
-            
+
             if (!$this->rbac->hasRole($q->name)) {
                 $this->rbac->addRole($q->name);
             }
@@ -106,6 +108,11 @@ class App implements MiddlewareInterface
         }
 
         $request = $request->withAttribute(self::class, $this);
+
+        $auth_service = new Auth\Service($request);
+
+        $this->factory->setAuthenticationService($auth_service);
+        $this->factory->setAuthorizationService($auth_service);
 
         return $handler->handle($request);
     }

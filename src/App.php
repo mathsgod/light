@@ -36,6 +36,7 @@ class App implements MiddlewareInterface
         $this->container->add(Controller\RoleController::class);
         $this->container->add(Controller\EventLogController::class);
         $this->container->add(Controller\UserRoleController::class);
+        $this->container->add(Controller\PermissionController::class);
 
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
@@ -46,38 +47,29 @@ class App implements MiddlewareInterface
 
     public function loadRbac()
     {
-
-
         $this->rbac->setCreateMissingRoles(true);
 
+
         /** Roles */
-        $parents = [];
-        foreach (Role::Query(["name" => "Administrators"]) as $q) {
-            $parents[] = $q->parent;
+        $this->rbac->addRole("Administrators");
+        $this->rbac->addRole("Power Users", ["Administrators"]);
+        $this->rbac->addRole("Users", ["Power Users"]);
+        $this->rbac->addRole("Everyone", ["Users"]);
+
+        foreach (Role::Query() as $q) {
+            
+            if (!$this->rbac->hasRole($q->name)) {
+                $this->rbac->addRole($q->name);
+            }
+
+            if (!$this->rbac->hasRole($q->child)) {
+                $this->rbac->addRole($q->child);
+            }
+
+            $this->rbac->getRole($q->name)->addChild($this->rbac->getRole($q->child));
         }
-        $this->rbac->addRole("Administrators", $parents);
 
-
-        $parents = ["Administrators"];
-        foreach (Role::Query(["name" => "Users"]) as $q) {
-            $parents[] = $q->parent;
-        }
-        $this->rbac->addRole("Power Users", $parents);
-
-        $parents = ["Power Users"];
-        foreach (Role::Query(["name" => "Everyone"]) as $q) {
-            $parents[] = $q->parent;
-        }
-        $this->rbac->addRole("Users", $parents);
-        
-        $parents = ["Users"];
-        foreach (Role::Query(["name" => "Everyone"]) as $q) {
-            $parents[] = $q->parent;
-        }
-        $this->rbac->addRole("Everyone", $parents);
-
-        //permissions
-
+        /** Permissions */
         $permissions = Yaml::parseFile(dirname(__DIR__) . '/permissions.yml');
         foreach ($permissions as $role => $permission) {
             foreach ($permission as $p) {

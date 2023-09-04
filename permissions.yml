@@ -8,10 +8,9 @@ Power Users:
   - user.role.remove
 
 Administrators:
+  - role.list
   - role.create
   - role.delete
   - role.update
   - role.permission.add
   - role.permission.remove
-
-  

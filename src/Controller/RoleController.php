@@ -33,12 +33,17 @@ class RoleController
     #[Mutation]
     #[Logged]
     #[Right("role.create")]
-    public function addRole(\Light\Input\Role $data, #[InjectUser] \Light\Model\User $user): int
+    public function addRole(\Light\Input\Role $data, #[InjectUser] \Light\Model\User $user): bool
     {
-        $obj = Role::Create();
-        $obj->bind($data);
-        $obj->save();
-        return $obj->role_id;
+        foreach ($data->parents as $parent) {
+            $obj = Role::Create([
+                'name' => $data->name,
+                'parent' => $parent
+            ]);
+            $obj->save();
+        }
+
+        return true;
     }
 
     #[Mutation]
@@ -55,9 +60,10 @@ class RoleController
     #[Mutation]
     #[Logged]
     #[Right("role.delete")]
-    public function removeRole(int $id, #[InjectUser] \Light\Model\User $user): bool
+    public function removeRole(string $name, #[InjectUser] \Light\Model\User $user): bool
     {
-        if (!$obj = Role::Get($id)) return false;
+
+        if (!$obj = Role::Get(["name" => $name])) return false;
         $obj->delete();
         return true;
     }

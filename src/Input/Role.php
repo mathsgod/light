@@ -12,5 +12,8 @@ class Role
     public string $name;
 
     #[Field]
-    public string $child;
+    /**
+     * @var string[]
+     */
+    public array $parents;
 }

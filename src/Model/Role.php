@@ -2,14 +2,58 @@
 
 namespace Light\Model;
 
+use Laminas\Permissions\Rbac\Role as RbacRole;
 use R\DB\Model;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type]
-#[MagicField(name: "role_id", outputType: "Int")]
-#[MagicField(name: "name", outputType: "String")]
 class Role extends Model
 {
+
+    /**
+     * @var RbacRole
+     */
+    protected $_role;
+
+    public function setRole(RbacRole $role)
+    {
+        $this->_role = $role;
+    }
+
+    public static function LoadByRole(RbacRole $role): ?Role
+    {
+        $r = new Role();
+        $r->setRole($role);
+        return $r;
+    }
+
+    #[Field]
+    public function getName(): string
+    {
+        return $this->_role->getName();
+    }
+
+    #[Field]
+    /**
+     * @return Role[]
+     */
+    public function getParents(): array
+    {
+        $ps = [];
+        foreach ($this->_role->getParents() as $p) {
+            $ps[] = Role::LoadByRole($p);
+        }
+        return $ps;
+    }
+
+    #[Field]
+    /**
+     * @return string[]
+     */
+    public function getPermissions(bool $children = true): array
+    {
+        return $this->_role->getPermissions($children);
+    }
 }

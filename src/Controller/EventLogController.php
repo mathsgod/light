@@ -14,7 +14,7 @@ class EventLogController
 {
     #[Query]
     #[Logged]
-    #[Right("ADMIN")]
+    #[Right("event_log.list")]
     /**
      * @return EventLog[]
      * @param ?mixed $filters

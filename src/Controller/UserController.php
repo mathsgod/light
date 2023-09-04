@@ -24,7 +24,7 @@ class UserController
      * @return User[]
      * @param ?mixed $filters
      */
-    #[Right("ADMIN")]
+    #[Right("user.list")]
     public function listUser($filters = [], ?string $sort = ""): DBQuery
     {
         return User::Query()->filters($filters)->sort($sort);
@@ -32,7 +32,7 @@ class UserController
 
     #[Mutation]
     #[Logged]
-    #[Right("ADMIN")]
+    #[Right("user.update")]
     public function updateUser(int $id, UpdateUser $data): bool
     {
         $user = User::Get($id);
@@ -41,7 +41,7 @@ class UserController
     }
 
     #[Mutation]
-    #[Right("ADMIN")]
+    #[Right("user.update_password")]
     public function updateUserPassword(int $id, string $password): bool
     {
         if ($user = User::Get($id)) {
@@ -66,7 +66,7 @@ class UserController
     }
 
     #[Mutation]
-    #[Security("is_granted('ADMIN') or (is_granted('POWER_USER'))")]
+    #[Security("user.create")]
     public function addUser(InputUser $data): int
     {
         $user = new User();

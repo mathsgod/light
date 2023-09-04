@@ -40,13 +40,14 @@ class App implements MiddlewareInterface
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
 
+        $this->rbac = new Rbac();
         $this->loadRbac();
     }
 
     public function loadRbac()
     {
 
-        $this->rbac = new Rbac();
+
         $this->rbac->setCreateMissingRoles(true);
 
         /** Roles */

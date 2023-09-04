@@ -30,9 +30,9 @@ class RequestHandler implements RequestHandlerInterface
         $app = $request->getAttribute(Light\App::class);
 
         $factory = $app->getSchemaFactory();
-        $as = new Light\Auth\AuthenticationService($request);
+        $as = new Light\Auth\Service($request);
         $factory->setAuthenticationService($as);
-        $factory->setAuthorizationService(new Light\Auth\AuthorizationService($as));
+        $factory->setAuthorizationService($as);
 
         $result = $app->execute($request);
 

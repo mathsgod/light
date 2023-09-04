@@ -8,13 +8,19 @@ use Firebase\JWT\Key;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use Light\Model\User;
 use Psr\Http\Message\ServerRequestInterface;
+use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 
-class AuthenticationService implements AuthenticationServiceInterface
+class Service implements AuthenticationServiceInterface, AuthorizationServiceInterface
 {
     protected $is_logged = false;
     protected $user = null;
+    protected $app;
     public function __construct(ServerRequestInterface $request)
     {
+
+        /** @var \Light\App $app */
+        $this->app = $request->getAttribute(\Light\App::class);
+
         $cookies = $request->getCookieParams();
         if ($access_token = $cookies["access_token"]) {
             try {
@@ -35,5 +41,25 @@ class AuthenticationService implements AuthenticationServiceInterface
     public function getUser(): ?object
     {
         return $this->user;
+    }
+
+    public function isAllowed(string $right, $subject = null): bool
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return false;
+        }
+
+        if ($user instanceof User) {
+            $rbac = $this->app->getRbac();
+
+            foreach ($user->getRoles() as $role) {
+                if ($rbac->isGranted($role, $right)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

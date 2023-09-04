@@ -33,6 +33,7 @@ class User extends \Light\Model
         return $roles;
     }
 
+
     #[Field]
     public function canDelete(): bool
     {
@@ -47,5 +48,12 @@ class User extends \Light\Model
     public function is(string $role): bool
     {
         return in_array($role, $this->getRoles());
+    }
+
+
+    #[Field]
+    public function getName(): string
+    {
+        return trim($this->first_name . " " . $this->last_name);
     }
 }

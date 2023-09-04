@@ -23,16 +23,11 @@ class RoleController
     #[Right("role.list")]
     public function listRole(#[Autowire] Rbac $rbac, #[InjectUser] \Light\Model\User $user): array
     {
-
         $rs = [];
         foreach ($rbac->getRoles() as $role) {
-            $r = new Role();
-            $r->setRole($role);
-            $rs[] = $role;
+            $rs[] = Role::LoadByRole($role);
         }
         return $rs;
-
-        //return Role::Query()->filters($filters)->sort($sort);
     }
 
     #[Mutation]

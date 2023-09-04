@@ -1,3 +1,6 @@
 Users:
   - user.list
+  - user.create
+  - user.delete
+  - user.update
   

@@ -54,6 +54,13 @@ class Role extends Model
      */
     public function getPermissions(bool $children = true): array
     {
+
         return $this->_role->getPermissions($children);
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        
+        return $this->_role->hasPermission($permission);
     }
 }

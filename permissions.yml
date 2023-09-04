@@ -3,4 +3,5 @@ Users:
   - user.create
   - user.delete
   - user.update
+  - role.list
   

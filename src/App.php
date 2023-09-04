@@ -35,6 +35,7 @@ class App implements MiddlewareInterface
         $this->container->add(Controller\UserController::class);
         $this->container->add(Controller\RoleController::class);
         $this->container->add(Controller\EventLogController::class);
+        $this->container->add(Controller\UserRoleController::class);
 
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);

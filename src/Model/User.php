@@ -43,4 +43,9 @@ class User extends \Light\Model
 
         return true;
     }
+
+    public function is(string $role): bool
+    {
+        return in_array($role, $this->getRoles());
+    }
 }

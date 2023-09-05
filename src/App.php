@@ -40,6 +40,7 @@ class App implements MiddlewareInterface
         $this->container->add(Controller\PermissionController::class);
         $this->container->add(Controller\ConfigController::class);
         $this->container->add(Controller\UserLogController::class);
+        $this->container->add(Controller\MailLogController::class);
 
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);

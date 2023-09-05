@@ -2,7 +2,7 @@
 
 namespace Light\Controller;
 
-use Light\Model\EventLog;
+use Light\Model\UserLog;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -10,17 +10,17 @@ use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 
 
-class EventLogController
+class UserLogController
 {
     #[Query]
     #[Logged]
     /**
-     * @return EventLog[]
+     * @return UserLog[]
      * @param ?mixed $filters
      */
-    #[Right("eventlog.list")]
-    public function listEventLog($filters = [],  ?string $sort = '', #[InjectUser] \Light\Model\User $user): \R\DB\Query
+    #[Right("userlog.list")]
+    public function listUserLog($filters = [],  ?string $sort = '', #[InjectUser] \Light\Model\User $user): \R\DB\Query
     {
-        return EventLog::Query()->filters($filters)->sort($sort);
+        return UserLog::Query()->filters($filters)->sort($sort);
     }
 }

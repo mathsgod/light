@@ -20,4 +20,11 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "different", outputType: "mixed")]
 class EventLog extends \Light\Model
 {
+    #[Field]
+    public function getUsername(): ?string
+    {
+        if ($u = User::Get($this->user)) {
+            return $u->username;
+        }
+    }
 }

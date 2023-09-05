@@ -40,6 +40,7 @@ class SystemController
 
     #[Mutation]
     #[Logged]
+    #[Right("system.view_as")]
     public function viewAs(#[InjectUser] $user, int $user_id): bool
     {
         $payload = [

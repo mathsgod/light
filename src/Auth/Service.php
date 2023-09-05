@@ -52,7 +52,9 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
 
     public function getOrginalUser(): ?object
     {
-        return $this->org_user;
+        if ($this->org_user)
+            return $this->org_user;
+        return $this->user;
     }
 
     public function isAllowed(string $right, $subject = null): bool

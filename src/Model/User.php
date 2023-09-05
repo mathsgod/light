@@ -14,6 +14,11 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "last_name", outputType: "String")]
 #[MagicField(name: "email", outputType: "String")]
 #[MagicField(name: "phone", outputType: "String")]
+#[MagicField(name: "addr1", outputType: "String")]
+#[MagicField(name: "addr2", outputType: "String")]
+#[MagicField(name: "addr3", outputType: "String")]
+#[MagicField(name: "join_date", outputType: "String")]
+
 class User extends \Light\Model
 {
 

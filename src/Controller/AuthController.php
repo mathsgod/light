@@ -2,8 +2,9 @@
 
 namespace Light\Controller;
 
-use Error;
+
 use Firebase\JWT\JWT;
+use GraphQL\Error\Error;
 use Light\Model\User;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
@@ -24,6 +25,9 @@ class AuthController
     public function login(string $username, string $password): bool
     {
         $user = User::Get(["username" => $username]);
+        if (!$user) {
+            throw new Error("user not found or password error");
+        }
         if (self::PasswordVerify($password, $user->password)) {
             $payload = [
                 "iss" => "light server",
@@ -40,7 +44,7 @@ class AuthController
             setcookie("access_token", $token, time() + 3600 * 8, "/", "", true, true);
             return true;
         }
-        throw new Error("password error");
+        throw new Error("user not found or password error");
     }
 
     private static function PasswordVerify(string $password, string $hash)

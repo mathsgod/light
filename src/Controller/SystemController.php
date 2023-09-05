@@ -20,15 +20,15 @@ class SystemController
 
     #[Mutation]
     #[Logged]
-    public function cancelViewAs(#[InjectUser] $user,#[Autowire] ): bool
+    public function cancelViewAs(#[Autowire] \Light\Auth\Service $service): bool
     {
         $payload = [
             "iss" => "light server",
             "jti" => Uuid::uuid4()->toString(),
             "iat" => time(),
             "exp" => time() + 3600 * 8,
-            "role" => "Users",
-            "id" => $user->user_id,
+            "role" =>  $service->getOrginalUser()->getRoles(),
+            "id" => $service->getOrginalUser()->user_id,
             "type" => "access_token"
         ];
         $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");

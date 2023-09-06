@@ -25,11 +25,17 @@ if ($command == "make:controller") {
         echo "Please provide a name for the controller\n";
         exit;
     }
-    $name = ucfirst($name);
-    $path = $cwd . "/src/Controller/{$name}Controller.php";
-    if (file_exists($path)) {
-        echo "Controller $name already exists\n";
-        exit;
+
+    $display = isset($argv[3]) ? $argv[3] : null;
+
+    if (!$display == "console") {
+
+        $name = ucfirst($name);
+        $path = $cwd . "/src/Controller/{$name}Controller.php";
+        if (file_exists($path)) {
+            echo "Controller $name already exists\n";
+            exit;
+        }
     }
 
     $class = new ClassGenerator($name . "Controller", "Controller");
@@ -98,6 +104,7 @@ EOT
     $method->setBody(
         <<<EOT
 if(!\$obj={$name}::Get(\$id)) return false;
+if(!\$obj->canDelete(\$user)) return false;
 \$obj->bind(\$data);
 \$obj->save();
 return true;
@@ -118,13 +125,24 @@ EOT
     $method->setBody(
         <<<EOT
 if(!\$obj={$name}::Get(\$id)) return false;
+if(!\$obj->canDelete(\$user)) return false;
 \$obj->delete();
 return true;
 EOT
     );
     $class->addMethodFromGenerator($method);
 
-    file_put_contents($path, "<?php\n\n" . $class->generate());
+
+    $content = "<?php\n\n" . $class->generate();
+
+    if ($display == "console") {
+        echo $content;
+        exit;
+    }
+
+
+
+    file_put_contents($path, $content);
 
     echo "Controller $name created\n";
     exit;

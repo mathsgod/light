@@ -14,6 +14,19 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 
 class PermissionController
 {
+    #[Query]
+    #[Logged]
+    /**
+     * @return Permission[]
+     * @param ?mixed $filters
+     */
+    #[Right("permission.list")]
+    public function listPermission($filters = [],  ?string $sort = '', #[InjectUser] \Light\Model\User $user): \R\DB\Query
+    {
+        return Permission::Query()->filters($filters)->sort($sort);
+    }
+
+
     #[Mutation]
     #[Right("role.permission.add")]
     public function addPermission(string $role, string $value): bool
@@ -23,6 +36,24 @@ class PermissionController
             'value' => $value
         ]);
         $permission->save();
+        return true;
+    }
+
+    #[Mutation]
+    #[Right("role.permission.add")]
+    /**
+     * @param string[] $roles
+     */
+    public function addPermissionRoles(string $value, array $roles): bool
+    {
+        foreach ($roles as $role) {
+            $permission = Permission::Create([
+                'role' => $role,
+                'value' => $value
+            ]);
+            $permission->save();
+        }
+
         return true;
     }
 

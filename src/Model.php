@@ -2,24 +2,26 @@
 
 namespace Light;
 
+use Light\Model\User;
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 
 abstract class Model extends \R\DB\Model
 {
     #[Field]
-    public function canDelete(): bool
+    public function canDelete(#[InjectUser] ?User $by): bool
     {
         return true;
     }
 
     #[Field]
-    public function canUpdate(): bool
+    public function canUpdate(#[InjectUser] ?User $by): bool
     {
         return true;
     }
 
     #[Field]
-    public function canRead(): bool
+    public function canRead(#[InjectUser] ?User $by): bool
     {
         return true;
     }

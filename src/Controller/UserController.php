@@ -6,8 +6,10 @@ use Light\Input\AddUser;
 use Light\Input\UpdateUser;
 use Light\Input\User as InputUser;
 use Light\Model\User;
+use Light\Model\UserRole;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use R\DB\Query as DBQuery;
+use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
@@ -25,31 +27,41 @@ class UserController
      * @param ?mixed $filters
      */
     #[Right("user.list")]
-    public function listUser($filters = [], ?string $sort = ""): DBQuery
+    public function listUser($filters = [], ?string $sort = "", #[InjectUser] \Light\Model\User $user): DBQuery
     {
-        return User::Query()->filters($filters)->sort($sort);
+        //only administrators can list administrators
+        $q = User::Query()->filters($filters)->sort($sort);
+        if (!$user->is("Administrators")) {
+
+            //filter out administrators
+            $q->where("user_id NOT IN (SELECT user_id FROM UserRole WHERE role = 'Administrators')");
+        }
+
+        return $q;
     }
 
     #[Mutation]
     #[Logged]
     #[Right("user.update")]
-    public function updateUser(int $id, UpdateUser $data): bool
+    public function updateUser(int $id, UpdateUser $data, #[InjectUser] \Light\Model\User $user): bool
     {
-        $user = User::Get($id);
-        $user->bind($data);
-        return $user->save();
+        $obj = User::Get($id);
+
+        if ($obj->canUpdate($user)) return false;
+
+        $obj->bind($data);
+        $obj->save();
+        return true;
     }
 
     #[Mutation]
     #[Right("user.update_password")]
-    public function updateUserPassword(int $id, string $password): bool
+    public function updateUserPassword(int $id, string $password, #[InjectUser] \Light\Model\User $user): bool
     {
-        if ($user = User::Get($id)) {
-            $user->password = password_hash($password, PASSWORD_DEFAULT);
-            $user->save();
-            return true;
-        }
-        return false;
+        if (!$obj = $this->listUser(["user_id" => $id], "", $user)->first()) return false;
+        $obj->password = password_hash($password, PASSWORD_DEFAULT);
+        $obj->save();
+        return true;
     }
 
     #[Mutation]
@@ -67,15 +79,35 @@ class UserController
 
     #[Mutation]
     #[Security("user.create")]
-    public function addUser(InputUser $data): int
+    public function addUser(InputUser $data, #[InjectUser] \Light\Model\User $user): int
     {
         $user = new User();
         $user->bind($data);
         $user->save();
 
         foreach ($data->roles as $role) {
-            $user->addRole($role);
+
+            //only administrators can add administrators
+            if ($role == "Administrators" && !$user->is("Administrators")) {
+                continue;
+            }
+
+            UserRole::Create([
+                "user_id" => $user->user_id,
+                "role" => $role
+            ])->save();
         }
         return $user->user_id;
+    }
+
+    #[Mutation]
+    #[Logged]
+    #[Right("user.delete")]
+    public function removeUser(int $id, #[InjectUser] \Light\Model\User $user): bool
+    {
+        if (!$obj = User::Get($id)) return false;
+        if (!$obj->canDelete($user)) return false;
+        $obj->delete();
+        return true;
     }
 }

@@ -2,9 +2,13 @@
 
 namespace Light\Model;
 
+use Light\Input\User as InputUser;
 use R\DB\Model;
+use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
+use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type]
@@ -35,7 +39,7 @@ class User extends \Light\Model
             $roles[] = $r->role;
         }
 
-        if(empty($roles)){
+        if (empty($roles)) {
             $roles[] = "Everyone";
         }
 
@@ -44,14 +48,21 @@ class User extends \Light\Model
 
 
     #[Field]
-    public function canDelete(): bool
+    #[Right("user.delete")]
+    #[FailWith(value: false)]
+    public function canDelete(#[InjectUser] ?User $by): bool
     {
-        $roles = $this->getRoles();
-        if (in_array("Administrators", $roles)) {
+        //user cannot delete himself
+        if ($by && $by->user_id == $this->user_id) {
             return false;
         }
 
-        return true;
+        //only administrators can delete administrators
+        if (in_array("Administrators", $this->getRoles()) && !in_array("Administrators", $by->getRoles())) {
+            return false;
+        }
+
+        return parent::canDelete($by);
     }
 
     public function is(string $role): bool
@@ -64,5 +75,15 @@ class User extends \Light\Model
     public function getName(): string
     {
         return trim($this->first_name . " " . $this->last_name);
+    }
+
+    #[Field]
+    public function canUpdate(#[InjectUser] ?User $by): bool
+    {
+        //only administrators can update administrators
+        if ($this->is("Administrators") && !$by->is("Administrators")) {
+            return false;
+        }
+        return true;
     }
 }

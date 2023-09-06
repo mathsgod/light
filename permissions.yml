@@ -1,5 +1,6 @@
 Power Users:
   - user.list
+  - user.read
   - user.create
   - user.delete
   - user.update
@@ -17,3 +18,5 @@ Administrators:
   - userlog.list
   - eventlog.list
   - system.view_as
+  - permission.list
+  - user.update_password

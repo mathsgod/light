@@ -47,7 +47,8 @@ class UserController
     {
         $obj = User::Get($id);
 
-        if ($obj->canUpdate($user)) return false;
+        if (!$obj->canUpdate($user)) return false;
+
 
         $obj->bind($data);
         $obj->save();

@@ -37,6 +37,7 @@ class User
 
     #[Field]
     public string $join_date;
+    
 
     #[Field]
     /**

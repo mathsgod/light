@@ -5,6 +5,7 @@ namespace Light\Model;
 use Laminas\Permissions\Rbac\Role as RbacRole;
 use R\DB\Model;
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
@@ -16,6 +17,18 @@ class Role extends Model
      * @var RbacRole
      */
     protected $_role;
+
+    #[Field]
+    public function canDelete(#[InjectUser] ?User $by): bool
+    {
+        if ($this->getName() == "Administrators") return false;
+        if ($this->getName() == "Users") return false;
+        if ($this->getName() == "Power Users") return false;
+        if ($this->getName() == "Everyone") return false;
+        return true;
+    }
+
+
 
     public function setRole(RbacRole $role)
     {
@@ -60,7 +73,7 @@ class Role extends Model
 
     public function hasPermission(string $permission): bool
     {
-        
+
         return $this->_role->hasPermission($permission);
     }
 }

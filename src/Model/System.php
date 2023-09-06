@@ -6,12 +6,30 @@ use Laminas\Permissions\Rbac\Role as RbacRole;
 use R\DB\Model;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
+use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type]
 class System
 {
+
+    #[Field]
+    #[Logged]
+    /**
+     * @return string[]
+     */
+    public function getPasswordPolicy(): array
+    {
+        return [
+            "required",
+            "containUpper",
+            "containLower",
+            "containNumber",
+            "containSpecial",
+            "minLength:8"
+        ];
+    }
 
     #[Field]
     public function getCompany(): string

@@ -35,4 +35,16 @@ class UpdateUser
 
     #[Field]
     public ?string $join_date;
+
+    #[Field]
+    public ?string $expiry_date;
+
+    #[Field]
+    public ?int $status;
+
+    #[Field]
+    public ?string $language;
+
+    #[Field]
+    public ?string $default_page;
 }

@@ -18,6 +18,7 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 class SystemController
 {
 
+
     #[Mutation]
     #[Logged]
     public function cancelViewAs(#[Autowire] \Light\Auth\Service $service): bool

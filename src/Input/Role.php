@@ -15,5 +15,5 @@ class Role
     /**
      * @var string[]
      */
-    public array $parents;
+    public array $childs;
 }

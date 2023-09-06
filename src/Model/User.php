@@ -22,6 +22,10 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "addr2", outputType: "String")]
 #[MagicField(name: "addr3", outputType: "String")]
 #[MagicField(name: "join_date", outputType: "String")]
+#[MagicField(name: "expiry_date", outputType: "String")]
+#[MagicField(name: "status", outputType: "Int")]
+#[MagicField(name: "language", outputType: "String")]
+#[MagicField(name: "default_page", outputType: "String")]
 
 class User extends \Light\Model
 {

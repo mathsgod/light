@@ -35,10 +35,10 @@ class RoleController
     #[Right("role.create")]
     public function addRole(\Light\Input\Role $data, #[InjectUser] \Light\Model\User $user): bool
     {
-        foreach ($data->parents as $parent) {
+        foreach ($data->childs as $child) {
             $obj = Role::Create([
                 'name' => $data->name,
-                'parent' => $parent
+                'child' => $child
             ]);
             $obj->save();
         }
@@ -65,6 +65,11 @@ class RoleController
 
         if (!$obj = Role::Get(["name" => $name])) return false;
         $obj->delete();
+
+        if (!$obj = Role::Get(["child" => $name])) return false;
+        $obj->delete();
+
+
         return true;
     }
 }

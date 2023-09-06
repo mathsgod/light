@@ -30,6 +30,7 @@ class App implements MiddlewareInterface
         $this->factory->addControllerNamespace("\\Light\\Controller\\");
         $this->factory->addTypeNamespace("\\Light\\Model\\");
         $this->factory->addTypeNamespace("\\Light\\Input\\");
+        $this->factory->addTypeNamespace("\\Light\\Type\\");
 
         $this->container->add(App::class, $this);
 
@@ -43,6 +44,7 @@ class App implements MiddlewareInterface
         $this->container->add(Controller\ConfigController::class);
         $this->container->add(Controller\UserLogController::class);
         $this->container->add(Controller\MailLogController::class);
+        $this->container->add(Controller\FileSystemController::class);
 
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);

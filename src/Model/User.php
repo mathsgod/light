@@ -86,4 +86,24 @@ class User extends \Light\Model
         }
         return true;
     }
+
+    #[Field]
+    /**
+     * @return UserLog[]
+     * @param ?mixed $filters
+     */
+    public function getUserLog($filters = [],  ?string $sort = ''): \R\DB\Query
+    {
+        return UserLog::Query(["user_id" => $this->user_id])->filters($filters)->sort($sort);
+    }
+
+    #[Field]
+    /**
+     * @return EventLog[]
+     * @param ?mixed $filters
+     */
+    public function getEventLog($filters = [],  ?string $sort = ''): \R\DB\Query
+    {
+        return EventLog::Query(["user_id" => $this->user_id])->filters($filters)->sort($sort);
+    }
 }

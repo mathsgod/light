@@ -20,3 +20,5 @@ Administrators:
   - system.view_as
   - permission.list
   - user.update_password
+  - maillog.list
+  - userlog.list

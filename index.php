@@ -29,6 +29,9 @@ class RequestHandler implements RequestHandlerInterface
         /** @var Light\App $app */
         $app = $request->getAttribute(Light\App::class);
 
+        \Light\Model::GetSchema()->setContainer($app->getContainer());
+
+
         $factory = $app->getSchemaFactory();
         $as = new Light\Auth\Service($request);
         $factory->setAuthenticationService($as);

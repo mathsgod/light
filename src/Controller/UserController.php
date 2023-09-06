@@ -79,7 +79,7 @@ class UserController
     }
 
     #[Mutation]
-    #[Security("user.create")]
+    #[Security("user.add")]
     public function addUser(InputUser $data, #[InjectUser] \Light\Model\User $user): int
     {
         $user = new User();
@@ -103,7 +103,7 @@ class UserController
 
     #[Mutation]
     #[Logged]
-    #[Right("user.delete")]
+    #[Right("user.remove")]
     public function removeUser(int $id, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = User::Get($id)) return false;

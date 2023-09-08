@@ -22,3 +22,13 @@ Administrators:
   - user.update_password
   - maillog.list
   - userlog.list
+  - fs.listFiles
+  - fs.listFolders
+  - fs.createFolder
+  - fs.deleteFile
+  - fs.deleteFolder
+  - fs.renameFile
+  - fs.renameFolder
+  - fs.uploadFile
+
+

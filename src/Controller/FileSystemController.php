@@ -42,6 +42,7 @@ class FileSystemController
     /**
      * @return \Light\Type\FS\File[]
      */
+    #[Right('fs.listFiles')]
     public function fsListFiles(?string $path = "", ?string $type = null, ?string $search = null): array
     {
 
@@ -85,6 +86,7 @@ class FileSystemController
     /**
      * @return \Light\Type\FS\Folder[]
      */
+    #[Right('fs.listFolders')]
     public function fsListFolders(?string $path = ""): array
     {
         $files = [];
@@ -96,6 +98,7 @@ class FileSystemController
     }
 
     #[Mutation]
+    #[Right('fs.moveFile')]
     public function fsMoveFile(string $source, string $target): bool
     {
         $basename = basename($source);

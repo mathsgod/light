@@ -30,5 +30,6 @@ Administrators:
   - fs.renameFile
   - fs.renameFolder
   - fs.uploadFile
+  - permission.all
 
 

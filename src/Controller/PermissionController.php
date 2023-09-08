@@ -14,6 +14,18 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 
 class PermissionController
 {
+
+    #[Query()]
+    #[Logged]
+    #[Right("permission.all")]
+    /**
+     * @return string[]
+     */
+    public function allPermission(): array
+    {
+        return [];
+    }
+
     #[Query]
     #[Logged]
     /**

@@ -10,7 +10,13 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 require_once __DIR__ . "/vendor/autoload.php";
-Dotenv\Dotenv::createImmutable(__DIR__)->load();
+try {
+    Dotenv\Dotenv::createImmutable(__DIR__)->load();
+} catch (Exception $e) {
+    echo $e->getMessage();
+    die();
+}
+
 
 $request = ServerRequestFactory::fromGlobals();
 if (!$request->getParsedBody()) {
@@ -29,7 +35,12 @@ class RequestHandler implements RequestHandlerInterface
         /** @var Light\App $app */
         $app = $request->getAttribute(Light\App::class);
 
-        \Light\Model::GetSchema()->setContainer($app->getContainer());
+        try{
+            \Light\Model::GetSchema()->setContainer($app->getContainer()); 
+        }catch(Exception $e){
+            //db may not be ready yet
+        }
+       
 
 
         $factory = $app->getSchemaFactory();

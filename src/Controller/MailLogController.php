@@ -19,7 +19,7 @@ class MailLogController
      * @param ?mixed $filters
      */
     #[Right("maillog.list")]
-    public function listMailLog($filters = [],  ?string $sort = '', #[InjectUser] \Light\Model\User $user): \R\DB\Query
+    public function listMailLog(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
     {
         return MailLog::Query()->filters($filters)->sort($sort);
     }

@@ -1511,16 +1511,16 @@
         },
         {
             "name": "mathsgod/r-db",
-            "version": "5.0.2",
+            "version": "5.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mathsgod/r-db.git",
-                "reference": "f5de6e9dc2e29e2a689503dea6357d2436b7625b"
+                "reference": "f99094a5659f10d46cf8c6cb91401955f333e531"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mathsgod/r-db/zipball/f5de6e9dc2e29e2a689503dea6357d2436b7625b",
-                "reference": "f5de6e9dc2e29e2a689503dea6357d2436b7625b",
+                "url": "https://api.github.com/repos/mathsgod/r-db/zipball/f99094a5659f10d46cf8c6cb91401955f333e531",
+                "reference": "f99094a5659f10d46cf8c6cb91401955f333e531",
                 "shasum": ""
             },
             "require": {
@@ -1566,9 +1566,9 @@
             "description": "A lightweight orm library for mysql",
             "support": {
                 "issues": "https://github.com/mathsgod/r-db/issues",
-                "source": "https://github.com/mathsgod/r-db/tree/5.0.2"
+                "source": "https://github.com/mathsgod/r-db/tree/5.0.3"
             },
-            "time": "2023-08-29T03:17:50+00:00"
+            "time": "2023-09-08T03:58:58+00:00"
         },
         {
             "name": "mouf/classname-mapper",
@@ -4172,5 +4172,5 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }

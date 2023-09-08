@@ -2,6 +2,7 @@
 
 namespace Light;
 
+use Exception;
 use GQL\Type\MixedTypeMapperFactory;
 use GraphQL\GraphQL;
 use Laminas\Diactoros\Response\EmptyResponse;
@@ -66,20 +67,28 @@ class App implements MiddlewareInterface
         $this->rbac->addRole("Users", ["Power Users"]);
         $this->rbac->addRole("Everyone", ["Users"]);
 
+        //check if table exists
 
-        foreach (Role::Query() as $q) {
+    
+        try {
 
-            if (!$this->rbac->hasRole($q->name)) {
-                $this->rbac->addRole($q->name);
+
+            foreach (Role::Query() as $q) {
+
+                if (!$this->rbac->hasRole($q->name)) {
+                    $this->rbac->addRole($q->name);
+                }
+
+                if (!$this->rbac->hasRole($q->child)) {
+                    $this->rbac->addRole($q->child);
+                }
+
+                $this->rbac->getRole($q->name)->addChild($this->rbac->getRole($q->child));
             }
-
-            if (!$this->rbac->hasRole($q->child)) {
-                $this->rbac->addRole($q->child);
-            }
-
-            $this->rbac->getRole($q->name)->addChild($this->rbac->getRole($q->child));
+        } catch (Exception $e) {
+            // may be mysql not ready
+            
         }
-
         /** Permissions */
         $permissions = Yaml::parseFile(dirname(__DIR__) . '/permissions.yml');
         foreach ($permissions as $role => $permission) {

@@ -21,7 +21,7 @@ class PermissionController
      * @param ?mixed $filters
      */
     #[Right("permission.list")]
-    public function listPermission($filters = [],  ?string $sort = '', #[InjectUser] \Light\Model\User $user): \R\DB\Query
+    public function listPermission(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
     {
         return Permission::Query()->filters($filters)->sort($sort);
     }

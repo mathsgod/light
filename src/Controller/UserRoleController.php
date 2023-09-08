@@ -16,7 +16,7 @@ class UserRoleController
     #[Mutation]
     #[Logged]
     #[Right("user.role.add")]
-    public function addUserRole(#[Autowire] Rbac $rbac, int $user_id, string $role, #[InjectUser] \Light\Model\User $user): bool
+    public function addUserRole(#[InjectUser] \Light\Model\User $user, #[Autowire] Rbac $rbac, int $user_id, string $role): bool
     {
         if ($role == "Administrators") { // Only administrators can add administrators
             if (!$user->is("Administrators")) {

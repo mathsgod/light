@@ -53,30 +53,29 @@ class FileSystemController
             "other" => ["zip", "rar", "tar", "gz", "7z", "bz2", "iso", "dmg", "exe", "apk", "torrent"]
         ];
 
+        $deep = false;
+        if ($search !== null || $type !== null) $deep = true;
 
         if ($type !== null) {
             if (!isset($TYPES[$type])) throw new \Exception("Invalid type: $type");
-
-            $files = [];
-            foreach ($this->fs->listContents($path, true) as $file) {
-                if (!$file->isFile()) continue;
-                $path = $file->path();
-                $ext = pathinfo($path, PATHINFO_EXTENSION);
-                if (!in_array($ext, $TYPES[$type])) continue;
-
-                if ($search !== null) {
-                    $filename = basename($path);
-                    if (strpos($filename, $search) === false) continue;
-                }
-
-                $files[] = new \Light\Type\FS\File($this->fs, $file);
-            }
-            return $files;
         }
 
         $files = [];
-        foreach ($this->fs->listContents($path, false) as $file) {
+        foreach ($this->fs->listContents($path, $deep) as $file) {
             if (!$file->isFile()) continue;
+            $path = $file->path();
+            $ext = pathinfo($path, PATHINFO_EXTENSION);
+
+            if ($type !== null) {
+                if (!in_array($ext, $TYPES[$type])) continue;
+            }
+
+
+            if ($search !== null) {
+                $filename = basename($path);
+                if (strpos($filename, $search) === false) continue;
+            }
+
             $files[] = new \Light\Type\FS\File($this->fs, $file);
         }
         return $files;

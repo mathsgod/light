@@ -42,7 +42,7 @@ class FileSystemController
     /**
      * @return \Light\Type\FS\File[]
      */
-    public function fsListFiles(?string $path = "", ?string $type = null): array
+    public function fsListFiles(?string $path = "", ?string $type = null, ?string $search = null): array
     {
 
         $TYPES = [
@@ -63,6 +63,12 @@ class FileSystemController
                 $path = $file->path();
                 $ext = pathinfo($path, PATHINFO_EXTENSION);
                 if (!in_array($ext, $TYPES[$type])) continue;
+
+                if ($search !== null) {
+                    $filename = basename($path);
+                    if (strpos($filename, $search) === false) continue;
+                }
+
                 $files[] = new \Light\Type\FS\File($this->fs, $file);
             }
             return $files;

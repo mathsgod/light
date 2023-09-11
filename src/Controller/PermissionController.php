@@ -3,6 +3,7 @@
 namespace Light\Controller;
 
 use Laminas\Permissions\Rbac\Rbac;
+use Light\App;
 use Light\Model\Permission;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -21,8 +22,14 @@ class PermissionController
     /**
      * @return string[]
      */
-    public function allPermission(): array
+    public function allPermission(#[Autowire] App $app): array
     {
+        //read permissions.yml
+
+        return $app->getPermissions();
+
+
+
         return [];
     }
 

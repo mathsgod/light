@@ -8,6 +8,7 @@ use GraphQL\GraphQL;
 use GraphQL\Upload\UploadMiddleware;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Permissions\Rbac\Rbac;
+use Light\Model\Permission;
 use Light\Model\Role;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -24,6 +25,8 @@ class App implements MiddlewareInterface
     protected $factory;
 
     protected $rbac;
+    protected $permissions = [];
+
     public function __construct()
     {
         $this->container = new \League\Container\Container();
@@ -70,7 +73,7 @@ class App implements MiddlewareInterface
 
         //check if table exists
 
-    
+
         try {
 
 
@@ -88,20 +91,43 @@ class App implements MiddlewareInterface
             }
         } catch (Exception $e) {
             // may be mysql not ready
-            
+
         }
         /** Permissions */
         $permissions = Yaml::parseFile(dirname(__DIR__) . '/permissions.yml');
         foreach ($permissions as $role => $permission) {
             foreach ($permission as $p) {
                 $this->rbac->getRole($role)->addPermission($p);
+
+                $this->permissions[] = $p;
             }
         }
 
 
 
+        //unique
+        $this->permissions = array_unique($this->permissions);
+
+
         $this->container->add(Rbac::class, $this->rbac);
     }
+
+    public function getPermissions()
+    {
+        $permissions = $this->permissions;
+
+
+        try {
+            foreach (Permission::Query() as $p) {
+                $permissions[] = $p->value;
+            }
+        } catch (Exception $e) {
+        }
+
+        return array_unique($permissions);
+    }
+
+
 
 
 

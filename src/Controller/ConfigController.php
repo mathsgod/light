@@ -18,7 +18,7 @@ class ConfigController
      * @return Config[]
      * @param ?mixed $filters
      */
-    public function listConfig($filters = [],  ?string $sort = '', #[InjectUser] \Light\Model\User $user): \R\DB\Query
+    public function listConfig(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = '',): \R\DB\Query
     {
         return Config::Query()->filters($filters)->sort($sort);
     }

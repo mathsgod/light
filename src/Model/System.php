@@ -31,6 +31,42 @@ class System
         ];
     }
 
+    /**
+     * Check if the given password is valid.
+     *
+     * @param string $password The password to validate.
+     * @return bool Returns true if the password is valid, false otherwise.
+     */
+    public function isValidPassword(string $password)
+    {
+        foreach ($this->getPasswordPolicy() as $rule) {
+            if ($rule === "required") {
+                if (empty($password)) return false;
+            }
+            if ($rule === "containUpper") {
+                if (!preg_match("/[A-Z]/", $password)) return false;
+            }
+            if ($rule === "containLower") {
+                if (!preg_match("/[a-z]/", $password)) return false;
+            }
+
+            if ($rule === "containNumber") {
+                if (!preg_match("/[0-9]/", $password)) return false;
+            }
+
+            if ($rule === "containSpecial") {
+                if (!preg_match("/[!@#$%^&*()\-_=+{};:,<.>]/", $password)) return false;
+            }
+
+            if (strpos($rule, "minLength:") === 0) {
+                $minLength = (int) str_replace("minLength:", "", $rule);
+                if (strlen($password) < $minLength) return false;
+            }
+        }
+        return true;
+    }
+
+
     #[Field]
     public function getCompany(): string
     {

@@ -23,3 +23,14 @@ Administrators:
   - maillog.list
   - userlog.list
   - fs.folder.create
+  - fs.listFiles
+  - fs.listFolders
+  - fs.createFolder
+  - fs.deleteFile
+  - fs.deleteFolder
+  - fs.renameFile
+  - fs.renameFolder
+  - fs.uploadFile
+  - permission.all
+
+

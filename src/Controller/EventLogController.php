@@ -19,7 +19,7 @@ class EventLogController
      * @param ?mixed $filters
      */
     #[Right("eventlog.list")]
-    public function listEventLog($filters = [],  ?string $sort = '', #[InjectUser] \Light\Model\User $user): \R\DB\Query
+    public function listEventLog(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
     {
         return EventLog::Query()->filters($filters)->sort($sort);
     }

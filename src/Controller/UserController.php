@@ -27,7 +27,7 @@ class UserController
      * @param ?mixed $filters
      */
     #[Right("user.list")]
-    public function listUser($filters = [], ?string $sort = "", #[InjectUser] \Light\Model\User $user): DBQuery
+    public function listUser(#[InjectUser] \Light\Model\User $user, $filters = [], ?string $sort = ""): DBQuery
     {
         //only administrators can list administrators
         $q = User::Query()->filters($filters)->sort($sort);

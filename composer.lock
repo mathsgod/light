@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "57da0e9332c77037705016034d71cb71",
+    "content-hash": "e7b19dbcd398d654d3382486bb307eca",
     "packages": [
         {
             "name": "brick/math",
@@ -334,6 +334,56 @@
                 }
             ],
             "time": "2022-12-14T08:49:07+00:00"
+        },
+        {
+            "name": "ecodev/graphql-upload",
+            "version": "6.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Ecodev/graphql-upload.git",
+                "reference": "6904d41365e5fc4a087b24450daae7961fca26c0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Ecodev/graphql-upload/zipball/6904d41365e5fc4a087b24450daae7961fca26c0",
+                "reference": "6904d41365e5fc4a087b24450daae7961fca26c0",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": "^7.4 || ^8.0",
+                "psr/http-server-middleware": "^1.0",
+                "webonyx/graphql-php": "^14.11"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "@stable",
+                "laminas/laminas-diactoros": "@stable",
+                "phpstan/phpstan": "@stable",
+                "phpunit/phpunit": "@stable"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "GraphQL\\Upload\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A middleware to support file uploads in GraphQL",
+            "keywords": [
+                "api",
+                "graphql",
+                "middleware",
+                "multipart",
+                "upload"
+            ],
+            "support": {
+                "issues": "https://github.com/Ecodev/graphql-upload/issues",
+                "source": "https://github.com/Ecodev/graphql-upload/tree/6.1.2"
+            },
+            "time": "2022-02-15T14:21:47+00:00"
         },
         {
             "name": "firebase/php-jwt",

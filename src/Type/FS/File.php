@@ -13,6 +13,10 @@ class File
     #[Field]
     public string $name;
 
+    #[Field]
+    public string $path;
+
+
     protected $file = null;
     protected $fs = null;
 
@@ -20,7 +24,8 @@ class File
     {
         $this->fs = $fs;
         $this->file = $file;
-        $this->name = $file->path();
+        $this->path = $file->path();
+        $this->name = basename($file->path());
     }
 
     #[Field]
@@ -32,6 +37,6 @@ class File
     #[Field]
     public function getMime(): string
     {
-        return $this->fs->mimeType($this->name);
+        return $this->fs->mimeType($this->path);
     }
 }

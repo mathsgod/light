@@ -22,3 +22,4 @@ Administrators:
   - user.update_password
   - maillog.list
   - userlog.list
+  - fs.folder.create

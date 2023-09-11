@@ -4,6 +4,7 @@ namespace Light\Controller;
 
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\Model\EventLog;
+use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -64,5 +65,49 @@ class FileSystemController
             $files[] = new \Light\Type\FS\Folder($this->fs, $dir);
         }
         return $files;
+    }
+
+    #[Mutation]
+    #[Right("fs.folder.create")]
+    public function fsCreateFolder(string $path): bool
+    {
+        $this->fs->createDirectory($path);
+        return true;
+    }
+
+    #[Mutation]
+    public function fsDeleteFolder(string $path): bool
+    {
+        $this->fs->deleteDirectory($path);
+        return true;
+    }
+
+    #[Mutation]
+    public function fsDeleteFile(string $path): bool
+    {
+        $this->fs->delete($path);
+        return true;
+    }
+
+    #[Mutation]
+    public function fsRenameFile(string $path, string $name): bool
+    {
+        $this->fs->move($path, dirname($path) . "/" . $name);
+        return true;
+    }
+
+    #[Mutation]
+    public function fsRenameFolder(string $path, string $name): bool
+    {
+        $this->fs->move($path, dirname($path) . "/" . $name);
+        return true;
+    }
+
+    #[Mutation]
+    public function fsUploadFile(string $path, UploadedFileInterface $file): bool
+    {
+        $this->fs->write($path, $file->getStream()->getContents());
+
+        return true;
     }
 }

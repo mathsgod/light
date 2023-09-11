@@ -4,6 +4,7 @@ namespace Light;
 
 use GQL\Type\MixedTypeMapperFactory;
 use GraphQL\GraphQL;
+use GraphQL\Upload\UploadMiddleware;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Permissions\Rbac\Rbac;
 use Light\Model\Role;
@@ -115,6 +116,9 @@ class App implements MiddlewareInterface
         if ($request->getMethod() == "OPTIONS") {
             return new EmptyResponse(200);
         }
+
+        $uploadMiddleware = new UploadMiddleware();
+        $request = $uploadMiddleware->processRequest($request);
 
         $request = $request->withAttribute(self::class, $this);
 

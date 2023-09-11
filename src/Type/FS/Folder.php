@@ -14,6 +14,10 @@ class Folder
     #[Field]
     public string $name;
 
+    #[Field]
+    public string $path;
+
+
     protected $dir = null;
     protected $fs = null;
 
@@ -21,6 +25,21 @@ class Folder
     {
         $this->fs = $fs;
         $this->dir = $dir;
-        $this->name = $dir->path();
+        $this->path =  $dir->path();
+        $this->name = basename($dir->path());
+    }
+
+    #[Field]
+    /**
+     * @return File[]
+     */
+    public function getFiles(): array
+    {
+        $files = [];
+        foreach ($this->fs->listContents($this->path, false) as $file) {
+            if (!$file->isFile()) continue;
+            $files[] = new File($this->fs, $file);
+        }
+        return $files;
     }
 }

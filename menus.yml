@@ -1,0 +1,18 @@
+System:
+  - label: '系統管理'
+    icon: 'sym_o_settings'
+    menus:
+      - label: 'Users'
+        icon: 'sym_o_person'
+        to: '/User'
+        permission: 'users'
+      
+      - label: 'Roles'
+        icon: 'sym_o_group'
+        to: '/Role'
+        permission: 'roles'
+        
+
+        
+
+

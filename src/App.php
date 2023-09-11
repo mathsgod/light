@@ -38,7 +38,7 @@ class App implements MiddlewareInterface
         $this->factory->addTypeNamespace("\\Light\\Type\\");
 
         $this->container->add(App::class, $this);
-
+        $this->container->add(Controller\AppController::class);
         $this->container->add(Controller\SystemController::class);
         $this->container->add(Controller\AuthController::class);
         $this->container->add(Controller\UserController::class);

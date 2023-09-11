@@ -4,6 +4,7 @@ namespace Light\Model;
 
 use Laminas\Permissions\Rbac\Role as RbacRole;
 use R\DB\Model;
+use Symfony\Component\Yaml\Yaml;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;

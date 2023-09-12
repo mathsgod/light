@@ -4,9 +4,10 @@ namespace Light\Controller;
 
 use Firebase\JWT\JWT;
 use Laminas\Permissions\Rbac\Rbac;
-
+use Light\Model\Config;
 use Light\Model\Role;
 use Light\Model\System;
+use Light\Model\User;
 use Light\Type\App;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
@@ -23,5 +24,17 @@ class AppController
     public function getApp(): App
     {
         return new App();
+    }
+
+    #[Mutation]
+    function updateAppConfig(#[InjectUser()] User $user, string $name, string $value): bool
+    {
+        if (!$config = Config::Get(["name" => $name])) {
+            $config = new Config();
+            $config->name = $config;
+        }
+        $config->value = $value;
+        $config->save();
+        return true;
     }
 }

@@ -8,6 +8,7 @@ use GraphQL\GraphQL;
 use GraphQL\Upload\UploadMiddleware;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Permissions\Rbac\Rbac;
+use Light\Model\Config;
 use Light\Model\Permission;
 use Light\Model\Role;
 use Psr\Http\Message\ServerRequestInterface;
@@ -26,6 +27,8 @@ class App implements MiddlewareInterface
 
     protected $rbac;
     protected $permissions = [];
+
+    protected $dev_mode = true;
 
     public function __construct()
     {
@@ -55,9 +58,15 @@ class App implements MiddlewareInterface
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
 
 
-
         $this->rbac = new Rbac();
         $this->loadRbac();
+
+        try {
+            if ($config = Config::Get(["name" => "dev_mode"])) {
+                $this->dev_mode = (bool)$config->value;
+            }
+        } catch (Exception $e) {
+        }
     }
 
     public function loadRbac()
@@ -101,6 +110,12 @@ class App implements MiddlewareInterface
 
                 $this->permissions[] = $p;
             }
+        }
+
+        foreach(Permission::Query() as $p){
+
+            $this->rbac->getRole($p->role)->addPermission($p->value);
+         
         }
 
 
@@ -162,6 +177,11 @@ class App implements MiddlewareInterface
         $this->factory->setAuthenticationService($auth_service);
         $this->factory->setAuthorizationService($auth_service);
 
+
+        if (!$this->isDevMode()) {
+            $this->factory->prodMode();
+        }
+
         $this->container->add(Auth\Service::class, $auth_service);
 
         return $handler->handle($request);
@@ -175,5 +195,10 @@ class App implements MiddlewareInterface
 
         $schema = $this->factory->createSchema();
         return  GraphQL::executeQuery($schema, $query, null, null, $variableValues);
+    }
+
+    public function isDevMode(): bool
+    {
+        return $this->dev_mode;
     }
 }

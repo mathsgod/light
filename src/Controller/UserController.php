@@ -56,10 +56,10 @@ class UserController
     }
 
     #[Mutation]
-    #[Right("user.update_password")]
+    #[Right("user.changePassword")]
     public function updateUserPassword(int $id, string $password, #[InjectUser] \Light\Model\User $user): bool
     {
-        if (!$obj = $this->listUser(["user_id" => $id], "", $user)->first()) return false;
+        if (!$obj = $this->listUser($user, ["user_id" => $id], "")->first()) return false;
         $obj->password = password_hash($password, PASSWORD_DEFAULT);
         $obj->save();
         return true;

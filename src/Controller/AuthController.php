@@ -67,4 +67,11 @@ class AuthController
     {
         return $user;
     }
+
+    #[Mutation]
+    public function resetPassword(string $email): bool
+    {
+
+        return true;
+    }
 }

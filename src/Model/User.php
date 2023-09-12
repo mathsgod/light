@@ -2,8 +2,10 @@
 
 namespace Light\Model;
 
+use Light\App;
 use Light\Input\User as InputUser;
 use R\DB\Model;
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -29,6 +31,19 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 class User extends \Light\Model
 {
+
+    #[Field]
+    public function isGranted(#[Autowire] App $app, string $right): bool
+    {
+        $rbac = $app->getRbac();
+
+        foreach ($this->getRoles() as $role) {
+            if ($rbac->isGranted($role, $right)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     #[Field]
     /**

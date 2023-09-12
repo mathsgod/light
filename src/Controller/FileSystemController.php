@@ -135,6 +135,22 @@ class FileSystemController
     }
 
     #[Mutation]
+    public function fsMove(string $path, string $target): bool
+    {
+        if ($this->fs->fileExists($path)) {
+            $this->fs->move($path, $target . "/" . basename($path));
+            return true;
+        }
+
+        if ($this->fs->directoryExists($path)) {
+            $this->fs->move($path, $target . "/" . basename($path));
+            return true;
+        }
+
+        return false;
+    }
+
+    #[Mutation]
     public function fsUploadFile(string $path, UploadedFileInterface $file): bool
     {
         $this->fs->write($path, $file->getStream()->getContents());

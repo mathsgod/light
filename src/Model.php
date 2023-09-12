@@ -2,6 +2,8 @@
 
 namespace Light;
 
+use Exception;
+use Light\Model\Config;
 use Light\Model\EventLog;
 use Light\Model\User;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -54,4 +56,6 @@ abstract class Model extends \R\DB\Model
 
         return parent::save();
     }
+
+  
 }

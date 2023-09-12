@@ -1,17 +1,63 @@
-System:
-  - label: '系統管理'
-    icon: 'sym_o_settings'
-    menus:
-      - label: 'Users'
-        icon: 'sym_o_person'
-        to: '/User'
-        permission: 'users'
-      
-      - label: 'Roles'
-        icon: 'sym_o_group'
-        to: '/Role'
-        permission: 'roles'
+- label: System
+  icon: sym_o_settings
+  menus:
+    - label: User
+      icon: sym_o_person
+      menus:
+        - label: List
+          icon: sym_o_list
+          to: /User
+          permission: user.list
         
+        - label: Add
+          icon: sym_o_add
+          to: /User/add
+          permission: user.add
+            
+    
+    - label: Role
+      icon: sym_o_group
+      menus:
+        - label: List
+          icon: sym_o_list
+          to: /Role
+          permission: role.list
+          
+        - label: Add
+          icon: sym_o_add
+          to: /Role/add
+          permission: role.add
+
+
+    - label: Permission
+      icon: sym_o_lock
+      to: /Permission
+      permission: permission.list
+    
+    - label: Setting
+      icon: sym_o_settings
+      to: /Setting
+      
+    
+    - label: User log
+      icon: sym_o_description
+      to: /UserLog
+      permission: userlog.list
+
+    - label: Mail log
+      icon: sym_o_description
+      to: /MailLog
+      permission: maillog.list
+
+    - label: Event log
+      icon: sym_o_description
+      to: /EventLog
+      permission: eventlog.list
+
+- label: File Manager
+  icon: sym_o_folder
+  permission: fs
+  to: /FileManager
 
         
 

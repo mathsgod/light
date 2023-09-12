@@ -5,6 +5,7 @@ namespace Light\Controller;
 use GraphQL\Error\Error;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\Model\EventLog;
+use Light\Type\FS\File;
 use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -14,6 +15,7 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 
 class FileSystemController
 {
+    const DISALLOW_EXT = ['zip', 'js', 'jsp', 'jsb', 'mhtml', 'mht', 'xhtml', 'xht', 'php', 'phtml', 'php3', 'php4', 'php5', 'phps', 'shtml', 'jhtml', 'pl', 'sh', 'py', 'cgi', 'exe', 'application', 'gadget', 'hta', 'cpl', 'msc', 'jar', 'vb', 'jse', 'ws', 'wsf', 'wsc', 'wsh', 'ps1', 'ps2', 'psc1', 'psc2', 'msh', 'msh1', 'msh2', 'inf', 'reg', 'scf', 'msp', 'scr', 'dll', 'msi', 'vbs', 'bat', 'com', 'pif', 'cmd', 'vxd', 'cpl', 'htpasswd', 'htaccess'];
 
     protected $fs;
 
@@ -39,7 +41,18 @@ class FileSystemController
     {
     } */
 
-    const DISALLOW_EXT = ['zip', 'js', 'jsp', 'jsb', 'mhtml', 'mht', 'xhtml', 'xht', 'php', 'phtml', 'php3', 'php4', 'php5', 'phps', 'shtml', 'jhtml', 'pl', 'sh', 'py', 'cgi', 'exe', 'application', 'gadget', 'hta', 'cpl', 'msc', 'jar', 'vb', 'jse', 'ws', 'wsf', 'wsc', 'wsh', 'ps1', 'ps2', 'psc1', 'psc2', 'msh', 'msh1', 'msh2', 'inf', 'reg', 'scf', 'msp', 'scr', 'dll', 'msi', 'vbs', 'bat', 'com', 'pif', 'cmd', 'vxd', 'cpl', 'htpasswd', 'htaccess'];
+    #[Query]
+    public function fsFile(string $path): File
+    {
+
+        $list = $this->fs->listContents(dirname($path), false);
+        foreach ($list as $file) {
+            if ($file->path() === $path) {
+                return new \Light\Type\FS\File($this->fs, $file);
+            }
+        }
+        return null;
+    }
 
 
 

@@ -11,6 +11,7 @@ use Laminas\Permissions\Rbac\Rbac;
 use Light\Model\Config;
 use Light\Model\Permission;
 use Light\Model\Role;
+use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -73,6 +74,16 @@ class App implements MiddlewareInterface
     public function getDatabase()
     {
         return Schema::Create();
+    }
+
+    public function getMailer()
+    {
+        $mailer = new Mailer();
+        $mailer->isSMTP();
+        $mailer->SMTPAuth = true;
+
+
+        return $mailer;
     }
 
 

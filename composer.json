@@ -19,7 +19,8 @@
         "symfony/yaml": "^6.0",
         "ramsey/uuid": "^4.7",
         "league/flysystem": "^3.15",
-        "ecodev/graphql-upload": "^6.1"
+        "ecodev/graphql-upload": "^6.1",
+        "phpmailer/phpmailer": "^6.8"
     },
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*"

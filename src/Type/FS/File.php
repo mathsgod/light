@@ -4,7 +4,9 @@ namespace Light\Type\FS;
 
 use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
+use Light\Model\User;
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type(name: "FSFile")]
@@ -38,5 +40,14 @@ class File
     public function getMime(): string
     {
         return $this->fs->mimeType($this->path);
+    }
+
+    #[Field]
+    public function canPreview(): bool
+    {
+        if ($this->getMime() != "image/jpeg") {
+            return false;
+        }
+        return true;
     }
 }

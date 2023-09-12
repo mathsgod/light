@@ -4,6 +4,7 @@ namespace Light\Controller;
 
 use Firebase\JWT\JWT;
 use Laminas\Permissions\Rbac\Rbac;
+use Light\App;
 use Light\Model\Role;
 use Light\Model\System;
 use Ramsey\Uuid\Uuid;
@@ -17,6 +18,17 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 
 class SystemController
 {
+    #[Mutation]
+    #[Right("system.mailTest")]
+    public function mailTest(#[Autowire] App $app, string $email, string $subject, string $content): bool
+    {
+        $mailer = $app->getMailer();
+        $mailer->addAddress($email);
+        $mailer->Subject = $subject;
+        $mailer->msgHTML($content);
+        $mailer->send();
+        return true;
+    }
 
     #[Mutation]
     #[Logged]

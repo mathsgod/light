@@ -23,6 +23,7 @@ Administrators:
   - maillog.list
   - userlog.list
   - fs
+  - fs.file.upload
   - fs.folder.create
   - fs.listFiles
   - fs.listFolders
@@ -33,6 +34,13 @@ Administrators:
   - fs.renameFolder
   - fs.uploadFile
   - permission.all
-  
+  - system.server
+  - system.setting
+  - system.mailtest
+  - system.phpinfo  
+  - system.package
+  - system.database
+  - system.database.table
+  - system.database.backup
 
 

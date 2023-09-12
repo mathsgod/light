@@ -3,17 +3,71 @@
 namespace Light\Model;
 
 use Laminas\Permissions\Rbac\Role as RbacRole;
+use Light\Type\Database;
 use R\DB\Model;
 use Symfony\Component\Yaml\Yaml;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
+use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type]
 class System
 {
+    #[Field]
+    #[Right("system.database")]
+    public function getDatabase(): Database
+    {
+        return new Database;
+    }
+
+    #[Field]
+    /**
+     * @return mixed
+     */
+    #[Right("system.package")]
+    public function getPackage(): array
+    {
+        $data = [];
+        foreach (\Composer\InstalledVersions::getInstalledPackages() as $package) {
+            $data[] = [
+                "name" => $package,
+                "version" => \Composer\InstalledVersions::getVersion($package)
+            ];
+        }
+        return $data;
+    }
+
+    #[Field]
+    /**
+     * @return mixed
+     */
+    #[Right("system.server")]
+    public function getServer(): array
+    {
+        //map $_SERVER to name value
+        $server = [];
+        foreach ($_SERVER as $key => $value) {
+            $server[] = ["name" => $key, "value" => $value];
+        }
+        return $server;
+    }
+
+    #[Field]
+    #[Right("system.phpinfo")]
+    public function getPhpInfo(): string
+    {
+        ob_start();
+        phpinfo();
+        $phpinfo = ob_get_contents();
+        ob_end_clean();
+        $phpinfo = str_replace("module_Zend Optimizer", "module_Zend_Optimizer", preg_replace('%^.*<body>(.*)</body>.*$%ms', '$1', $phpinfo));
+        return $phpinfo;
+    }
+
+
 
     #[Field]
     #[Logged]

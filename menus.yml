@@ -32,13 +32,62 @@
     - label: Permission
       icon: sym_o_lock
       to: /Permission
-      permission: permission.list
-    
-    - label: Setting
-      icon: sym_o_settings
-      to: /Setting
+      menus:
+        - label: List
+          icon: sym_o_list
+          to: /Permission
+          permission: permission.list
+          
+        - label: All
+          icon: sym_o_add
+          to: /Permission/all
+          permission: [permission.list, permission.add, permission.remove]
       
+
     
+    
+    
+    - label: System
+      icon: sym_o_settings
+      menus:
+        - label: Server
+          icon: sym_o_dns
+          to: /System
+          permission: system.server
+
+        - label: Setting
+          icon: sym_o_settings
+          to: /System/setting
+          permission: system.setting
+
+        - label: Mail test
+          icon: sym_o_mail
+          to: /System/mailtest
+          permission: system.mailtest
+        
+        - label: PHPInfo
+          icon: sym_o_php
+          to: /System/phpinfo
+          permission: system.phpinfo
+
+        - label: Package
+          icon: sym_o_package
+          to: /System/package
+          permission: system.package
+
+        - label: Database
+          icon: sym_o_database
+          menus:
+            - label: Table
+              icon: sym_o_table
+              to: /System/database/table
+              permission: system.database.table
+
+            - label: Backup
+              icon: sym_o_database
+              to: /System/database/backup
+              permission: system.database.backup
+          
     - label: User log
       icon: sym_o_description
       to: /UserLog

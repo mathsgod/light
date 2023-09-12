@@ -15,6 +15,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use R\DB\Schema;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Yaml\Yaml;
@@ -69,6 +70,12 @@ class App implements MiddlewareInterface
         }
     }
 
+    public function getDatabase()
+    {
+        return Schema::Create();
+    }
+
+
     public function loadRbac()
     {
         $this->rbac->setCreateMissingRoles(true);
@@ -112,10 +119,9 @@ class App implements MiddlewareInterface
             }
         }
 
-        foreach(Permission::Query() as $p){
+        foreach (Permission::Query() as $p) {
 
             $this->rbac->getRole($p->role)->addPermission($p->value);
-         
         }
 
 

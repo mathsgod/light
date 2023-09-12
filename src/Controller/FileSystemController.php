@@ -2,6 +2,7 @@
 
 namespace Light\Controller;
 
+use GraphQL\Error\Error;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\Model\EventLog;
 use Psr\Http\Message\UploadedFileInterface;
@@ -37,6 +38,10 @@ class FileSystemController
     public function fsMoveFile(string $source, string $target)
     {
     } */
+
+    const DISALLOW_EXT = ['zip', 'js', 'jsp', 'jsb', 'mhtml', 'mht', 'xhtml', 'xht', 'php', 'phtml', 'php3', 'php4', 'php5', 'phps', 'shtml', 'jhtml', 'pl', 'sh', 'py', 'cgi', 'exe', 'application', 'gadget', 'hta', 'cpl', 'msc', 'jar', 'vb', 'jse', 'ws', 'wsf', 'wsc', 'wsh', 'ps1', 'ps2', 'psc1', 'psc2', 'msh', 'msh1', 'msh2', 'inf', 'reg', 'scf', 'msp', 'scr', 'dll', 'msi', 'vbs', 'bat', 'com', 'pif', 'cmd', 'vxd', 'cpl', 'htpasswd', 'htaccess'];
+
+
 
 
     #[Query]
@@ -123,6 +128,11 @@ class FileSystemController
     #[Mutation]
     public function fsRenameFile(string $path, string $name): bool
     {
+
+        //check extension
+        $ext = pathinfo($name, PATHINFO_EXTENSION);
+        if (in_array($ext, self::DISALLOW_EXT)) throw new Error("File type not allowed");
+
         $this->fs->move($path, dirname($path) . "/" . $name);
         return true;
     }
@@ -151,9 +161,21 @@ class FileSystemController
     }
 
     #[Mutation]
+    #[Right("fs.file.upload")]
     public function fsUploadFile(string $path, UploadedFileInterface $file): bool
     {
-        $this->fs->write($path, $file->getStream()->getContents());
+        //get path extension
+        $filename = $file->getClientFilename();
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+
+        //check if extension is allowed
+        if (in_array($ext, self::DISALLOW_EXT)) throw new Error("File type not allowed");
+
+        //check if file already exists
+        if ($this->fs->fileExists($path . "/" . $filename)) throw new Error("File already exists");
+
+        //move file
+        $this->fs->write($path . "/" . $filename, $file->getStream()->getContents());
         return true;
     }
 

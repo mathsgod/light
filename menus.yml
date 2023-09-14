@@ -43,13 +43,15 @@
           to: /Permission/all
           permission: [permission.list, permission.add, permission.remove]
       
-
-    
-    
     
     - label: System
       icon: sym_o_settings
       menus:
+        - label: Menu
+          icon: sym_o_menu
+          to: /System/menu
+          permission: system.menu
+    
         - label: Server
           icon: sym_o_dns
           to: /System

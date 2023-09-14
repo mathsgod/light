@@ -36,6 +36,7 @@ class App
         return $app->getPermissions();
     }
 
+
     #[Field]
     #[Logged]
     /**

@@ -50,12 +50,10 @@ abstract class Model extends \R\DB\Model
             "id" => $this->$key,
             "action" => $this->$key ? "Update" : "Insert",
             "source" => ["a"],
-            "user_id" => $service->getUser()->user_id,
+            "user_id" => $service->getUser()?->user_id,
             "created_time" => date("Y-m-d H:i:s"),
         ]);
 
         return parent::save();
     }
-
-  
 }

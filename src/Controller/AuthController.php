@@ -5,7 +5,9 @@ namespace Light\Controller;
 
 use Firebase\JWT\JWT;
 use GraphQL\Error\Error;
+use Light\App;
 use Light\Model\User;
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -69,8 +71,63 @@ class AuthController
     }
 
     #[Mutation]
-    public function resetPassword(string $email): bool
+    public function verifyCode(#[Autowire] App $app, string $email, string $code): bool
     {
+        $cache = $app->getCache();
+        if ($cache->has("forget_password_" . $email)) {
+            $cache_code = $cache->get("forget_password_" . $email);
+            if ($cache_code == $code) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    #[Mutation]
+    public function resetPassword(#[Autowire] App $app, string $email, string $password, string $code): bool
+    {
+        $user = User::Get(["email" => $email]);
+        if (!$user) {
+            return false;
+        }
+
+        $cache = $app->getCache();
+        if ($cache->has("forget_password_" . $email)) {
+            $cache_code = $cache->get("forget_password_" . $email);
+            if ($cache_code == $code) {
+                $user->password = password_hash($password, PASSWORD_DEFAULT);
+                $user->save();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    #[Mutation]
+    public function forgetPassword(#[Autowire] App $app, string $email): bool
+    {
+
+        //check if email exists
+        if (!User::Get(["email" => $email])) {
+            return "";
+        }
+
+        $code = rand(100000, 999999);
+
+
+        //generate a email to send code to user
+        $mailer = $app->getMailer();
+        $mailer->addAddress($email);
+        $mailer->Subject = "Forget Password";
+        $mailer->msgHTML("Your code is " . $code);
+        $mailer->send();
+
+
+        $cache = $app->getCache();
+        //5 minutes
+        $cache->set("forget_password_" . $email, $code, 300);
 
         return true;
     }

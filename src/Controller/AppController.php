@@ -27,7 +27,8 @@ class AppController
     }
 
     #[Mutation]
-    function updateAppConfig(#[InjectUser()] User $user, string $name, string $value): bool
+    #[Logged]
+    function updateAppConfig(string $name, string $value): bool
     {
         if (!$config = Config::Get(["name" => $name])) {
             $config = new Config();
@@ -36,5 +37,35 @@ class AppController
         $config->value = $value;
         $config->save();
         return true;
+    }
+
+    #[Mutation]
+    /**
+     * @param mixed $data
+     */
+
+    function updateAppMenus(array $data): bool
+    {
+        if (!$menus = Config::Get(["name" => "menus"])) {
+            $menus = Config::Create([
+                "name" => "menus"
+            ]);
+        }
+        $menus->value = json_encode($data);
+        $menus->save();
+
+        return true;
+    }
+
+    #[Query()]
+    /**
+     * @return mixed
+     */
+    function getAppMenus(): array
+    {
+        if (!$menus = Config::Get(["name" => "menus"])) {
+            return [];
+        }
+        return json_decode($menus->value, true);
     }
 }

@@ -42,5 +42,5 @@ Administrators:
   - system.database
   - system.database.table
   - system.database.backup
-
+  - system.menu
 

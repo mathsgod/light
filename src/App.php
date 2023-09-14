@@ -32,6 +32,8 @@ class App implements MiddlewareInterface
 
     protected $dev_mode = true;
 
+    protected $cache;
+
     public function __construct()
     {
         $this->container = new \League\Container\Container();
@@ -60,6 +62,8 @@ class App implements MiddlewareInterface
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
 
 
+        $this->cache = new Psr16Cache(new FilesystemAdapter());
+
         $this->rbac = new Rbac();
         $this->loadRbac();
 
@@ -76,11 +80,18 @@ class App implements MiddlewareInterface
         return Schema::Create();
     }
 
+    public function getCache()
+    {
+        return $this->cache;
+    }
+
     public function getMailer()
     {
         $mailer = new Mailer();
         $mailer->isSMTP();
         $mailer->SMTPAuth = true;
+
+        
 
 
         return $mailer;

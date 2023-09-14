@@ -46,6 +46,10 @@ class App
     {
         $menus = Yaml::parseFile(dirname(__DIR__, 2) . '/menus.yml');
 
+        foreach($app->getAppMenus() as $m){
+            $menus[] = $m;
+        }
+
         $rbac = $app->getRbac();
 
         return $this->filterMenus($menus, $rbac, $user->getRoles());

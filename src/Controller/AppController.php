@@ -4,6 +4,7 @@ namespace Light\Controller;
 
 use Firebase\JWT\JWT;
 use Laminas\Permissions\Rbac\Rbac;
+use Light\App as LightApp;
 use Light\Model\Config;
 use Light\Model\Role;
 use Light\Model\System;
@@ -61,11 +62,8 @@ class AppController
     /**
      * @return mixed
      */
-    function getAppMenus(): array
+    function getAppMenus(#[Autowire] LightApp $app): array
     {
-        if (!$menus = Config::Get(["name" => "menus"])) {
-            return [];
-        }
-        return json_decode($menus->value, true);
+        return $app->getAppMenus();
     }
 }

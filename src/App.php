@@ -91,7 +91,7 @@ class App implements MiddlewareInterface
         $mailer->isSMTP();
         $mailer->SMTPAuth = true;
 
-        
+
 
 
         return $mailer;
@@ -228,5 +228,13 @@ class App implements MiddlewareInterface
     public function isDevMode(): bool
     {
         return $this->dev_mode;
+    }
+
+    public function getAppMenus(): array
+    {
+        if (!$menus = Config::Get(["name" => "menus"])) {
+            return [];
+        }
+        return json_decode($menus->value, true) ?? [];
     }
 }

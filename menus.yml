@@ -1,9 +1,9 @@
 - label: System
   icon: sym_o_settings
-  menus:
+  children:
     - label: User
       icon: sym_o_person
-      menus:
+      children:
         - label: List
           icon: sym_o_list
           to: /User
@@ -17,7 +17,7 @@
     
     - label: Role
       icon: sym_o_group
-      menus:
+      children:
         - label: List
           icon: sym_o_list
           to: /Role
@@ -32,7 +32,7 @@
     - label: Permission
       icon: sym_o_lock
       to: /Permission
-      menus:
+      children:
         - label: List
           icon: sym_o_list
           to: /Permission
@@ -46,7 +46,7 @@
     
     - label: System
       icon: sym_o_settings
-      menus:
+      children:
         - label: Menu
           icon: sym_o_menu
           to: /System/menu
@@ -79,7 +79,7 @@
 
         - label: Database
           icon: sym_o_database
-          menus:
+          children:
             - label: Table
               icon: sym_o_table
               to: /System/database/table

@@ -155,10 +155,32 @@ class App implements MiddlewareInterface
         $this->container->add(Rbac::class, $this->rbac);
     }
 
+    private function getMenusPermission(array $menus)
+    {
+        $p = [];
+        foreach ($menus as $m) {
+            if ($m["permission"]) {
+                $p[] = $m["permission"];
+            }
+
+            if ($m["children"]) {
+                $p = array_merge($p, $this->getMenusPermission($m["children"]));
+            }
+        }
+
+        return $p;
+    }
+
     public function getPermissions()
     {
         $permissions = $this->permissions;
+        //permissions from menus
 
+        foreach ($this->getMenusPermission($this->getAppMenus()) as $p) {
+            $permissions[] = $p;
+        }
+
+        //permissions from db
 
         try {
             foreach (Permission::Query() as $p) {

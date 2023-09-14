@@ -59,11 +59,11 @@ class App
     {
         $result = [];
         foreach ($menus as $menu) {
-            if ($menu["menus"]) {
-                $menu["menus"] = $this->filterMenus($menu["menus"], $rbac, $roles);
+            if ($menu["children"]) {
+                $menu["children"] = $this->filterMenus($menu["children"], $rbac, $roles);
 
 
-                if (!$menu["to"] && empty($menu["menus"])) {
+                if (!$menu["to"] && empty($menu["children"])) {
                     continue;
                 }
             }

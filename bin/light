@@ -155,11 +155,16 @@ if ($command == "make:model") {
         echo "Please provide a name for the model\n";
         exit;
     }
-    $name = ucfirst($name);
-    $path = $cwd . "/src/Model/$name.php";
-    if (file_exists($path)) {
-        echo "Model $name already exists\n";
-        exit;
+
+    $display = isset($argv[3]) ? $argv[3] : null;
+
+    if (!$display == "console") {
+        $name = ucfirst($name);
+        $path = $cwd . "/src/Model/$name.php";
+        if (file_exists($path)) {
+            echo "Model $name already exists\n";
+            exit;
+        }
     }
 
     $class = new ClassGenerator($name, "Model");
@@ -200,7 +205,14 @@ if ($command == "make:model") {
         $class->addAttribute("#[MagicField(name: \"{$field->getName()}\", outputType: \"$gql_type\")]");
     }
 
-    file_put_contents($path, "<?php\n\n" . $class->generate());
+    $content = "<?php\n\n" . $class->generate();
+
+    if ($display == "console") {
+        echo $content;
+        exit;
+    }
+
+    file_put_contents($path, $content);
 
     echo "Model $name created\n";
 

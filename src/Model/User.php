@@ -38,6 +38,9 @@ class User extends \Light\Model
      */
     public function getStyles(): array
     {
+        if (is_string($this->style)) {
+            return json_decode($this->style, true);
+        }
         return $this->style;
     }
 

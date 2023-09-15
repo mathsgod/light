@@ -33,6 +33,15 @@ class User extends \Light\Model
 {
 
     #[Field]
+    /**
+     * @return mixed
+     */
+    public function getStyles(): array
+    {
+        return $this->style;
+    }
+
+    #[Field]
     public function isTwoFactorEnabled(): bool
     {
         if ($this->secret) {

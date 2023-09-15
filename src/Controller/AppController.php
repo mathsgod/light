@@ -66,4 +66,24 @@ class AppController
     {
         return $app->getAppMenus();
     }
+
+
+    #[Mutation]
+    #[Logged]
+    /**
+     * @param mixed $value
+     */
+    public function updateMyStyle(string $name, #[InjectUser] User $user, $value): bool
+    {
+        if (is_string($user->style)) {
+            $style = json_decode($user->style, true);
+            $style[$name] = $value;
+            $user->style = json_encode($style, JSON_PRETTY_PRINT);
+        } else {
+            $user->style[$name] = $value;
+        }
+
+        $user->save();
+        return true;
+    }
 }

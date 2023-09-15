@@ -2,7 +2,6 @@
 
 namespace Light\Controller;
 
-use Light\Input\AddUser;
 use Light\Input\UpdateUser;
 use Light\Input\User as InputUser;
 use Light\Model\User;

@@ -193,6 +193,14 @@ class App implements MiddlewareInterface
     }
 
 
+    public function isTwoFactorAuthentication(): bool
+    {
+        if (!$config = Config::Get(["name" => "two_factor_authentication"])) {
+            return false;
+        }
+        return $config->value;
+    }
+
 
 
 

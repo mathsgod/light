@@ -2,11 +2,15 @@
 
 namespace Light\Controller;
 
-
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 use Firebase\JWT\JWT;
 use GraphQL\Error\Error;
 use Light\App;
+use Light\Input\UpdateUser;
+use Light\Input\User as InputUser;
 use Light\Model\User;
+use Light\Security\TwoFactorAuthentication;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
@@ -24,29 +28,39 @@ class AuthController
 
 
     #[Mutation]
-    public function login(string $username, string $password): bool
+    public function login(#[Autowire] App $app, string $username, string $password, ?string $code = null): bool
     {
         $user = User::Get(["username" => $username]);
         if (!$user) {
             throw new Error("user not found or password error");
         }
-        if (self::PasswordVerify($password, $user->password)) {
-            $payload = [
-                "iss" => "light server",
-                "iat" => time(),
-                "exp" => time() + 3600 * 8,
-                "role" => "Users",
-                "id" => $user->user_id,
-                "type" => "access_token"
-            ];
 
-            $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
-
-            //set cookie
-            setcookie("access_token", $token, time() + 3600 * 8, "/", "", true, true);
-            return true;
+        if (!self::PasswordVerify($password, $user->password)) {
+            throw new Error("user not found or password error");
         }
-        throw new Error("user not found or password error");
+
+
+        //check two factor authentication
+        if ($app->isTwoFactorAuthentication()) {
+            if (!(new TwoFactorAuthentication)->checkCode($user->secret, $code)) {
+                throw new Error("two factor authentication error");
+            }
+        }
+
+        $payload = [
+            "iss" => "light server",
+            "iat" => time(),
+            "exp" => time() + 3600 * 8,
+            "role" => "Users",
+            "id" => $user->user_id,
+            "type" => "access_token"
+        ];
+
+        $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
+
+        //set cookie
+        setcookie("access_token", $token, time() + 3600 * 8, "/", "", true, true);
+        return true;
     }
 
     private static function PasswordVerify(string $password, string $hash)
@@ -68,6 +82,63 @@ class AuthController
     public function getMy(#[InjectUser] User $user): User
     {
         return $user;
+    }
+
+    #[Mutation]
+    #[Logged]
+    public function updateMy(#[InjectUser] User $user, UpdateUser $data): bool
+    {
+        //filter out all null values
+        $d = [];
+        foreach ($data as $k => $v) {
+            if ($v !== null) {
+                $d[$k] = $v;
+            }
+        }
+
+
+        $user->bind($d);
+        $user->save();
+        return true;
+    }
+
+
+
+    /**
+     * Updates the two-factor authentication secret for the authenticated user.
+     */
+    #[Mutation]
+    public function updateMy2FA(#[InjectUser] User $user, string $secret, string $code): bool
+    {
+        if (!(new TwoFactorAuthentication)->checkCode($secret, $code)) {
+            throw new Error("two factor authentication error");
+        }
+
+        $user->secret = $secret;
+        $user->save();
+        return true;
+    }
+
+
+    #[Mutation]
+    /**
+     * @return mixed
+     */
+    #[Logged]
+    public function getMy2FA(#[InjectUser] User $user)
+    {
+        $secret = (new TwoFactorAuthentication())->generateSecret();
+
+        $host = $_SERVER["HTTP_HOST"];
+        $url = sprintf("otpauth://totp/%s@%s?secret=%s", $user->username, $host, $secret);
+
+        $writer = new PngWriter();
+        $png = $writer->write(QrCode::create($url));
+        return [
+            "secret" => $secret,
+            "host" => $host,
+            "image" => $png->getDataUri()
+        ];
     }
 
     #[Mutation]

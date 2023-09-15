@@ -33,6 +33,15 @@ class User extends \Light\Model
 {
 
     #[Field]
+    public function isTwoFactorEnabled(): bool
+    {
+        if ($this->secret) {
+            return true;
+        }
+        return false;
+    }
+
+    #[Field]
     public function isGranted(#[Autowire] App $app, string $right): bool
     {
         $rbac = $app->getRbac();

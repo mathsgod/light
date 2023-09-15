@@ -12,14 +12,23 @@ use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
-use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type]
 class App
 {
+    #[Field]
+    public function hasBioAuth(): bool
+    {
+        //check if webauthn is enabled
+        return \Composer\InstalledVersions::isInstalled("web-auth/webauthn-lib");
+    }
 
-
+    #[Field]
+    public function isTwoFactorAuthentication(#[Autowire] LightApp $app): bool
+    {
+        return $app->isTwoFactorAuthentication();
+    }
 
     #[Field]
     public function isDevMode(#[Autowire] LightApp $app): bool
@@ -46,7 +55,7 @@ class App
     {
         $menus = Yaml::parseFile(dirname(__DIR__, 2) . '/menus.yml');
 
-        foreach($app->getAppMenus() as $m){
+        foreach ($app->getAppMenus() as $m) {
             $menus[] = $m;
         }
 

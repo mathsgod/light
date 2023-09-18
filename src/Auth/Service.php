@@ -16,6 +16,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
     protected $user = null;
     protected $org_user = null;
     protected $app;
+    protected $view_as = false;
     public function __construct(ServerRequestInterface $request)
     {
 
@@ -28,6 +29,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                 $payload = JWT::decode($access_token, new Key($_ENV["JWT_SECRET"], "HS256"));
 
                 if ($payload->view_as) {
+                    $this->view_as = true;
                     $this->user = User::Get($payload->view_as);
                     $this->org_user = User::Get($payload->id);
                 } else {
@@ -38,6 +40,11 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                 $this->is_logged = false;
             }
         }
+    }
+
+    public function isViewAsMode(): bool
+    {
+        return $this->view_as;
     }
 
     public function isLogged(): bool

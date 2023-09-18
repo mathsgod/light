@@ -25,7 +25,7 @@ abstract class Model extends \R\DB\Model
     }
 
     #[Field]
-    public function canRead(#[InjectUser] ?User $by): bool
+    public function canView(#[InjectUser] ?User $by): bool
     {
         return true;
     }

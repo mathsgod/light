@@ -18,6 +18,12 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class App
 {
     #[Field]
+    public function isViewAsMode(#[Autowire] \Light\Auth\Service $service): bool
+    {
+        return $service->isViewAsMode();
+    }
+
+    #[Field]
     public function hasBioAuth(): bool
     {
         //check if webauthn is enabled

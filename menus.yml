@@ -32,6 +32,7 @@
     - label: Permission
       icon: sym_o_lock
       to: /Permission
+      permission: permission.list
       children:
         - label: List
           icon: sym_o_list

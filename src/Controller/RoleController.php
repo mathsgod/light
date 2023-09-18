@@ -60,7 +60,7 @@ class RoleController
     #[Mutation]
     #[Logged]
     #[Right("role.delete")]
-    public function removeRole(string $name, #[InjectUser] \Light\Model\User $user): bool
+    public function deleteRole(string $name, #[InjectUser] \Light\Model\User $user): bool
     {
 
         if (!$obj = Role::Get(["name" => $name])) return false;

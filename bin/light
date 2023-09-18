@@ -113,8 +113,8 @@ EOT
     $class->addMethodFromGenerator($method);
 
 
-    //remove 
-    $method = new MethodGenerator("remove$name");
+    //delete
+    $method = new MethodGenerator("delete$name");
     $method->setReturnType("bool");
     $method->addAttribute("#[Mutation]");
     $method->addAttribute("#[Logged]");

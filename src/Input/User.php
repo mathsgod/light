@@ -12,7 +12,11 @@ class User
     public string $username;
 
     #[Field]
+    public string $password;
+
+    #[Field]
     public string $first_name;
+    
 
     #[Field]
     public ?string $last_name;
@@ -37,7 +41,13 @@ class User
 
     #[Field]
     public string $join_date;
-    
+
+    #[Field]
+    public int $status;
+
+    #[Field]
+    public string $language;
+
 
     #[Field]
     /**

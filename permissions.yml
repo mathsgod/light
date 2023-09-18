@@ -2,7 +2,7 @@ Power Users:
   - user.list
   - user.read
   - user.add
-  - user.remove
+  - user.delete
   - user.update
   - role.list
   - user.role.add

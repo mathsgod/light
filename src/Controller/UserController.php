@@ -78,11 +78,14 @@ class UserController
     }
 
     #[Mutation]
-    #[Security("user.add")]
+    #[Right("user.add")]
     public function addUser(InputUser $data, #[InjectUser] \Light\Model\User $user): int
     {
         $user = new User();
         $user->bind($data);
+
+        $user->password = password_hash($data->password, PASSWORD_DEFAULT);
+
         $user->save();
 
         foreach ($data->roles as $role) {
@@ -102,8 +105,8 @@ class UserController
 
     #[Mutation]
     #[Logged]
-    #[Right("user.remove")]
-    public function removeUser(int $id, #[InjectUser] \Light\Model\User $user): bool
+    #[Right("user.delete")]
+    public function deleteUser(int $id, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = User::Get($id)) return false;
         if (!$obj->canDelete($user)) return false;

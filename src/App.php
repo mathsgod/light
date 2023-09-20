@@ -57,6 +57,7 @@ class App implements MiddlewareInterface
         $this->container->add(Controller\UserLogController::class);
         $this->container->add(Controller\MailLogController::class);
         $this->container->add(Controller\FileSystemController::class);
+        $this->container->add(Controller\TranslateController::class);
 
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
@@ -74,6 +75,8 @@ class App implements MiddlewareInterface
         } catch (Exception $e) {
         }
     }
+
+    
 
     public function getDatabase()
     {

@@ -6,6 +6,7 @@ use Exception;
 use Laminas\Permissions\Rbac\Rbac;
 use Light\App as LightApp;
 use Light\Model\Config;
+use Light\Model\Translate;
 use Light\Model\User;
 use Symfony\Component\Yaml\Yaml;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
@@ -19,9 +20,20 @@ class App
 {
     #[Field]
     /**
+     * @return Translate[]
+     */
+    public function getTranslates(): array
+    {
+        return Translate::Query()->toArray();
+    }
+
+
+
+    #[Field]
+    /**
      * @return mixed
      */
-    public function languages()
+    public function getLanguages()
     {
         return [
             ["name" => "English", "value" => "en"],

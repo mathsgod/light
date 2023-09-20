@@ -86,4 +86,13 @@ class AppController
         $user->save();
         return true;
     }
+
+    #[Mutation]
+    #[Logged]
+    public function updateMyLanguage(string $name, #[InjectUser] User $user): bool
+    {
+        $user->language = $name;
+        $user->save();
+        return true;
+    }
 }

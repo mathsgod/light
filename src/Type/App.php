@@ -18,6 +18,18 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class App
 {
     #[Field]
+    /**
+     * @return mixed
+     */
+    public function languages()
+    {
+        return [
+            ["name" => "English", "value" => "en"],
+            ["name" => "中文", "value" => "zh-hk"]
+        ];
+    }
+
+    #[Field]
     public function isViewAsMode(#[Autowire] \Light\Auth\Service $service): bool
     {
         return $service->isViewAsMode();

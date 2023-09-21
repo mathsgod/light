@@ -43,8 +43,12 @@
           icon: sym_o_add
           to: /Permission/all
           permission: [permission.list, permission.add, permission.remove]
-      
-    
+
+    - label: Translate
+      icon: sym_o_translate
+      to: /Translate
+      permission: translate          
+          
     - label: System
       icon: sym_o_settings
       children:
@@ -52,6 +56,7 @@
           icon: sym_o_menu
           to: /System/menu
           permission: system.menu
+
     
         - label: Server
           icon: sym_o_dns

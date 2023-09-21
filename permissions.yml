@@ -44,4 +44,6 @@ Administrators:
   - system.database.table
   - system.database.backup
   - system.menu
+  - translate
+  - translate.add
 

@@ -22,7 +22,7 @@ class AuthController
     #[Mutation]
     public function logout(): bool
     {
-        setcookie("access_token", "", time() - 3600 * 8, "/", "", true, true);
+        setcookie("access_token", "", time() - 3600 * 8, "", "", false, true);
         return true;
     }
 
@@ -59,7 +59,7 @@ class AuthController
         $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
 
         //set cookie
-        setcookie("access_token", $token, time() + 3600 * 8, "/", "", true, true);
+        setcookie("access_token", $token, time() + 3600 * 8, "", "", false, true);
         return true;
     }
 

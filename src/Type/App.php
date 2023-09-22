@@ -85,6 +85,17 @@ class App
     {
         $menus = Yaml::parseFile(dirname(__DIR__, 2) . '/menus.yml');
 
+        //if file manager is enabled, add to menus
+        if ($app->isFileManagerEnabled()) {
+            $menus[] = [
+                "label" => "File Manager",
+                "to" => "/FileManager",
+                "icon" => "sym_o_folder",
+                "permission" => "fs"
+            ];
+        }
+
+
         foreach ($app->getAppMenus() as $m) {
             $menus[] = $m;
         }

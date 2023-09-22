@@ -76,7 +76,7 @@ class App implements MiddlewareInterface
         }
     }
 
-    
+
 
     public function getDatabase()
     {
@@ -269,5 +269,13 @@ class App implements MiddlewareInterface
             return [];
         }
         return json_decode($menus->value, true) ?? [];
+    }
+
+    public function isFileManagerEnabled(): bool
+    {
+        if (!$config = Config::Get(["name" => "file_manager"])) {
+            return false;
+        }
+        return $config->value;
     }
 }

@@ -111,11 +111,6 @@
       to: /EventLog
       permission: eventlog.list
 
-- label: File Manager
-  icon: sym_o_folder
-  permission: fs
-  to: /FileManager
 
-        
 
 

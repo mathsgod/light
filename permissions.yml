@@ -46,4 +46,5 @@ Administrators:
   - system.menu
   - translate
   - translate.add
-
+  - config.update
+  - menu.update

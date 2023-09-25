@@ -19,6 +19,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
     protected $view_as = false;
 
     protected $token = null;
+    protected $jti = null;
 
 
     public function __construct(ServerRequestInterface $request)
@@ -31,12 +32,15 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
         $cookies = $request->getCookieParams();
         if ($this->token = $cookies["access_token"]) {
 
-            if ($cache->get("logout_" . $this->token)) {
-                return;
-            }
 
             try {
                 $payload = JWT::decode($this->token, new Key($_ENV["JWT_SECRET"], "HS256"));
+                $this->jti = $payload->jti;
+
+                if ($cache->get("logout_" . $payload->jti)) {
+                    return;
+                }
+
 
                 if ($payload->view_as) {
                     $this->view_as = true;
@@ -55,6 +59,11 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
     public function getToken()
     {
         return $this->token;
+    }
+
+    public function getJti()
+    {
+        return $this->jti;
     }
 
     public function isViewAsMode(): bool

@@ -23,9 +23,9 @@ class AuthController
     #[Mutation]
     public function logout(#[Autowire] Service $service, #[Autowire] App $app): bool
     {
-        if ($service->getToken()) {
+        if ($jti = $service->getJti()) {
             $cache = $app->getCache();
-            $cache->set("logout_" . $service->getToken(), true, 3600 * 8);
+            $cache->set("logout_" . $jti, true, 3600 * 8);
         }
 
         setcookie("access_token", "", time() - 3600 * 8, "", "", false, true);

@@ -17,16 +17,26 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
     protected $org_user = null;
     protected $app;
     protected $view_as = false;
+
+    protected $token = null;
+
+
     public function __construct(ServerRequestInterface $request)
     {
 
         /** @var \Light\App $app */
         $this->app = $request->getAttribute(\Light\App::class);
+        $cache = $this->app->getCache();
 
         $cookies = $request->getCookieParams();
-        if ($access_token = $cookies["access_token"]) {
+        if ($this->token = $cookies["access_token"]) {
+
+            if ($cache->get("logout_" . $this->token)) {
+                return;
+            }
+
             try {
-                $payload = JWT::decode($access_token, new Key($_ENV["JWT_SECRET"], "HS256"));
+                $payload = JWT::decode($this->token, new Key($_ENV["JWT_SECRET"], "HS256"));
 
                 if ($payload->view_as) {
                     $this->view_as = true;
@@ -40,6 +50,11 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                 $this->is_logged = false;
             }
         }
+    }
+
+    public function getToken()
+    {
+        return $this->token;
     }
 
     public function isViewAsMode(): bool

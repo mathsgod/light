@@ -7,8 +7,8 @@ use Endroid\QrCode\Writer\PngWriter;
 use Firebase\JWT\JWT;
 use GraphQL\Error\Error;
 use Light\App;
+use Light\Auth\Service;
 use Light\Input\UpdateUser;
-use Light\Input\User as InputUser;
 use Light\Model\User;
 use Light\Model\UserLog;
 use Light\Security\TwoFactorAuthentication;
@@ -21,8 +21,13 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 class AuthController
 {
     #[Mutation]
-    public function logout(): bool
+    public function logout(#[Autowire] Service $service, #[Autowire] App $app): bool
     {
+        if ($service->getToken()) {
+            $cache = $app->getCache();
+            $cache->set("logout_" . $service->getToken(), true, 3600 * 8);
+        }
+
         setcookie("access_token", "", time() - 3600 * 8, "", "", false, true);
         return true;
     }
@@ -37,7 +42,7 @@ class AuthController
         }
 
 
-        if($user->isAuthLocked()){
+        if ($user->isAuthLocked()) {
             throw new Error("user is locked for 3 minutes");
         }
 
@@ -65,6 +70,7 @@ class AuthController
 
         $payload = [
             "iss" => "light server",
+            "jti" => uniqid(),
             "iat" => time(),
             "exp" => time() + 3600 * 8,
             "role" => "Users",

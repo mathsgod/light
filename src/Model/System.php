@@ -13,13 +13,23 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class System
 {
+
     #[Field]
+    #[Right("system")]
+    public function getDiskFreeSpacePercent(): float
+    {
+        return round(disk_free_space(getcwd()) / disk_total_space(getcwd()) * 100, 2);
+    }
+
+    #[Field]
+    #[Right("system")]
     public function getDiskFreeSpace(): string
     {
         return Util::Size(disk_free_space(getcwd()));
     }
 
     #[Field]
+    #[Right("system")]
     public function getDiskTotalSpace(): string
     {
         return Util::Size(disk_total_space(getcwd()));

@@ -13,6 +13,13 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class System
 {
+    #[Field]
+    #[Right("system.storage")]
+    public function getDiskUsageSpace(): string
+    {
+        return Util::Size(disk_total_space(getcwd()) - disk_free_space(getcwd()));
+    }
+
 
     #[Field]
     #[Right("system.storage")]

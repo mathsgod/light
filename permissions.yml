@@ -12,7 +12,7 @@ Power Users:
 Administrators:
   - role.list
   - role.add
-  - role.remove
+  - role.delete
   - role.update
   - role.permission.add
   - role.permission.remove

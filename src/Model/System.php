@@ -2,20 +2,29 @@
 
 namespace Light\Model;
 
-use Laminas\Permissions\Rbac\Role as RbacRole;
 use Light\Type\Database;
-use R\DB\Model;
-use Symfony\Component\Yaml\Yaml;
+use Light\Util;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
-use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type]
 class System
 {
+    #[Field]
+    public function getDiskFreeSpace(): string
+    {
+        return Util::Size(disk_free_space(getcwd()));
+    }
+
+    #[Field]
+    public function getDiskTotalSpace(): string
+    {
+        return Util::Size(disk_total_space(getcwd()));
+    }
+
     #[Field]
     #[Right("system.database")]
     public function getDatabase(): Database

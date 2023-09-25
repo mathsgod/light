@@ -61,7 +61,7 @@ class User extends \Light\Model
         return $this->style;
     }
 
-    public function updateStyle(string $name, string $value): void
+    public function updateStyle(string $name, $value): void
     {
         $styles = $this->getStyles();
         $styles[$name] = $value;

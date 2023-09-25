@@ -49,3 +49,4 @@ Administrators:
   - config.update
   - menu.update
   - system
+  - system.storage

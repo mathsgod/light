@@ -25,4 +25,6 @@ class UserLog extends \Light\Model
             return $u->username;
         }
     }
+
+    
 }

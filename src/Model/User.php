@@ -31,6 +31,23 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 class User extends \Light\Model
 {
+    public function isAuthLocked()
+    {
+        $ip = $_SERVER["REMOTE_ADDR"];
+        $total = 0;
+        $q = UserLog::Query(["user_id" => $this->user_id, "ip" => $ip]);
+        // within 180 seconds 
+        $q->where->greaterThan("login_dt", date("Y-m-d H:i:s", time() - 180));
+        foreach ($q->order("userlog_id")->limit(3) as $ul) {
+            if ($ul->result == "FAIL") {
+                $total++;
+            }
+        }
+        if ($total >= 3) {
+            return true;
+        }
+        return false;
+    }
 
     #[Field]
     /**
@@ -42,6 +59,19 @@ class User extends \Light\Model
             return json_decode($this->style, true);
         }
         return $this->style;
+    }
+
+    public function updateStyle(string $name, string $value): void
+    {
+        $styles = $this->getStyles();
+        $styles[$name] = $value;
+        if (is_string($this->style)) {
+            $this->style = json_encode($styles);
+        } else {
+            $this->style = $styles;
+        }
+
+        $this->save();
     }
 
     #[Field]

@@ -10,6 +10,7 @@ use Light\App;
 use Light\Input\UpdateUser;
 use Light\Input\User as InputUser;
 use Light\Model\User;
+use Light\Model\UserLog;
 use Light\Security\TwoFactorAuthentication;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -35,7 +36,22 @@ class AuthController
             throw new Error("user not found or password error");
         }
 
+
+        if($user->isAuthLocked()){
+            throw new Error("user is locked for 3 minutes");
+        }
+
+
         if (!self::PasswordVerify($password, $user->password)) {
+            //save to UserLog
+            UserLog::Create([
+                "user_id" => $user->user_id,
+                "login_dt" => date("Y-m-d H:i:s"),
+                "result" => "FAIL",
+                "ip" => $_SERVER["REMOTE_ADDR"],
+                "user_agent" => $_SERVER["HTTP_USER_AGENT"],
+            ])->save();
+
             throw new Error("user not found or password error");
         }
 
@@ -57,6 +73,16 @@ class AuthController
         ];
 
         $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
+
+
+        //save UserLog
+        UserLog::Create([
+            "user_id" => $user->user_id,
+            "login_dt" => date("Y-m-d H:i:s"),
+            "result" => "SUCCESS",
+            "ip" => $_SERVER["REMOTE_ADDR"],
+            "user_agent" => $_SERVER["HTTP_USER_AGENT"],
+        ])->save();
 
         //set cookie
         setcookie("access_token", $token, time() + 3600 * 8, "", "", false, true);

@@ -2,15 +2,10 @@
 
 namespace Light\Controller;
 
-use Firebase\JWT\JWT;
-use Laminas\Permissions\Rbac\Rbac;
 use Light\App as LightApp;
 use Light\Model\Config;
-use Light\Model\Role;
-use Light\Model\System;
 use Light\Model\User;
 use Light\Type\App;
-use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -81,6 +76,20 @@ class AppController
         $user->updateStyle($name, $value);
         return true;
     }
+    #[Mutation]
+    #[Logged]
+    /**
+     * @param mixed $value
+     */
+    public function updateMyStyles(#[InjectUser] User $user, array $value): bool
+    {
+        foreach ($value as $key => $val) {
+            $user->updateStyle($key, $val);
+        }
+        return true;
+    }
+
+
 
     #[Mutation]
     #[Logged]

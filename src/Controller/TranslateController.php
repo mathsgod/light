@@ -16,6 +16,7 @@ class TranslateController
 
     #[Mutation]
     #[Logged]
+    #[Right('translate.add')]
     public function addTranslate(InputTranslate $data, #[InjectUser] \Light\Model\User $user): int
     {
         $obj = Translate::Create();
@@ -26,6 +27,7 @@ class TranslateController
 
     #[Mutation]
     #[Logged]
+    #[Right('translate.edit')]
     public function deleteTranslate(int $id, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = Translate::Get($id)) return false;

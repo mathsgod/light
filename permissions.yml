@@ -29,11 +29,12 @@ Administrators:
   - fs.listFiles
   - fs.listFolders
   - fs.createFolder
-  - fs.deleteFile
-  - fs.deleteFolder
-  - fs.renameFile
-  - fs.renameFolder
-  - fs.uploadFile
+  - fs.folder.delete
+  - fs.file.delete
+  - fs.file.rename
+  - fs.folder.rename
+  - fs.file.move
+  - fs.move
   - permission.all
   - system.server
   - system.setting

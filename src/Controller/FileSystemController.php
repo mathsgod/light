@@ -125,6 +125,7 @@ class FileSystemController
     }
 
     #[Mutation]
+    #[Right("fs.folder.delete")]
     public function fsDeleteFolder(string $path): bool
     {
         $this->fs->deleteDirectory($path);
@@ -132,6 +133,7 @@ class FileSystemController
     }
 
     #[Mutation]
+    #[Right("fs.file.delete")]
     public function fsDeleteFile(string $path): bool
     {
         $this->fs->delete($path);
@@ -139,6 +141,7 @@ class FileSystemController
     }
 
     #[Mutation]
+    #[Right("fs.file.rename")]
     public function fsRenameFile(string $path, string $name): bool
     {
 
@@ -151,6 +154,7 @@ class FileSystemController
     }
 
     #[Mutation]
+    #[Right("fs.folder.rename")]
     public function fsRenameFolder(string $path, string $name): bool
     {
         $this->fs->move($path, dirname($path) . "/" . $name);
@@ -158,6 +162,7 @@ class FileSystemController
     }
 
     #[Mutation]
+    #[Right("fs.move")]
     public function fsMove(string $path, string $target): bool
     {
         if ($this->fs->fileExists($path)) {
@@ -192,7 +197,7 @@ class FileSystemController
         return true;
     }
 
-    #[Right('fs.moveFile')]
+    #[Right('fs.file.move')]
     public function fsMoveFile(string $source, string $target): bool
     {
         $basename = basename($source);

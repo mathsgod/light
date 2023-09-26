@@ -13,6 +13,7 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 class ConfigController
 {
     #[Query]
+    #[Right('config.list')]
     #[Logged]
     /**
      * @return Config[]

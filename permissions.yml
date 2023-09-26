@@ -50,3 +50,4 @@ Administrators:
   - menu.update
   - system
   - system.storage
+  - config.list

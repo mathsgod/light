@@ -110,8 +110,7 @@ class AuthController
 
 
     #[Query]
-    #[Logged]
-    public function getMy(#[InjectUser] User $user): User
+    public function getMy(#[InjectUser] ?User $user): ?User
     {
         return $user;
     }
@@ -140,6 +139,7 @@ class AuthController
      * Updates the two-factor authentication secret for the authenticated user.
      */
     #[Mutation]
+    #[Logged]
     public function updateMy2FA(#[InjectUser] User $user, string $secret, string $code): bool
     {
         if (!(new TwoFactorAuthentication)->checkCode($secret, $code)) {

@@ -19,10 +19,11 @@ class TranslateController
     #[Right('translate.add')]
     public function addTranslate(InputTranslate $data, #[InjectUser] \Light\Model\User $user): int
     {
-        $obj = Translate::Create();
+    /*     $obj = Translate::Create();
         $obj->bind($data);
         $obj->save();
-        return $obj->translate_id;
+        return $obj->translate_id; */
+        return 1;
     }
 
     #[Mutation]

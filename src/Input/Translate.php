@@ -8,12 +8,13 @@ use TheCodingMachine\GraphQLite\Annotations\Input;
 #[Input]
 class Translate
 {
-    #[Field]
-    public string $language;
 
     #[Field]
     public string $name;
 
     #[Field]
-    public string $value;
+    /**
+     * @var mixed[]
+     */
+    public array $values;
 }

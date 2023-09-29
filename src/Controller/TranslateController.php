@@ -19,7 +19,21 @@ class TranslateController
     #[Right('translate.add')]
     public function addTranslate(InputTranslate $data, #[InjectUser] \Light\Model\User $user): int
     {
-    /*     $obj = Translate::Create();
+        foreach ($data->values as $value) {
+
+            if (!$t = Translate::Get(["name" => $data->name, "language" => $value["language"]])) {
+                $t = Translate::Create([
+                    "name" => $data->name,
+                    "value" => $value["value"],
+                    "language" => $value["language"]
+                ]);
+            }
+            $t->value = $value["value"];
+
+            $t->save();
+        }
+
+        /*     $obj = Translate::Create();
         $obj->bind($data);
         $obj->save();
         return $obj->translate_id; */

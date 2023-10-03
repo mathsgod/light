@@ -14,6 +14,45 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 class TranslateController
 {
 
+
+    #[Mutation]
+    #[Right('translate.update')]
+    public function updateTranslate(string $name, string $value, string $language): bool
+    {
+        if (!$t = Translate::Get(["name" => $name, "language" => $language])) {
+            $t = Translate::Create([
+                "name" => $name,
+                "value" => $value,
+                "language" => $language
+            ]);
+        }
+        $t->value = $value;
+        $t->save();
+        return true;
+    }
+
+
+    #[Logged]
+    #[Query]
+    /**
+     * @return mixed[]
+     */
+    public function allTranslate(): array
+    {
+        $data = [];
+        foreach (Translate::Query() as $translate) {
+            $data[$translate->name] = $data[$translate->name] ?? [
+                "name" => $translate->name,
+            ];
+            $data[$translate->name][$translate->language] = $translate->value;
+        }
+
+        //order by name
+        ksort($data);
+
+        return array_values($data);
+    }
+
     #[Mutation]
     #[Logged]
     #[Right('translate.add')]
@@ -42,12 +81,12 @@ class TranslateController
 
     #[Mutation]
     #[Logged]
-    #[Right('translate.edit')]
-    public function deleteTranslate(int $id, #[InjectUser] \Light\Model\User $user): bool
+    #[Right('translate.delete')]
+    public function deleteTranslate(string $name): bool
     {
-        if (!$obj = Translate::Get($id)) return false;
-        if (!$obj->canDelete($user)) return false;
-        $obj->delete();
+        foreach (Translate::Query(["name" => $name]) as $obj) {
+            $obj->delete();
+        }
         return true;
     }
 }

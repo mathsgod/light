@@ -52,3 +52,5 @@ Administrators:
   - system
   - system.storage
   - config.list
+  - translate.update
+  - translate.delete

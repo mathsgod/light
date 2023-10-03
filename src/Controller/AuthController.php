@@ -91,7 +91,14 @@ class AuthController
         ])->save();
 
         //set cookie
-        setcookie("access_token", $token, time() + 3600 * 8, "", "", false, true);
+        setcookie("access_token", $token, [
+            "expires" => time() + 3600 * 8,
+            "path" => "/",
+            "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
+            "secure" => $_ENV["COOKIE_SECURE"] ?? false,
+            "httponly" => true,
+            "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax"
+        ]);
         return true;
     }
 

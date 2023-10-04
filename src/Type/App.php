@@ -28,6 +28,18 @@ class App
     }
 
 
+    #[Field]
+    #[Logged]
+    /**
+     * @return Translate[]
+     */
+    public function getI18nMessages(#[InjectUser] User $user): array
+    {
+        $language = $user->language ?? 'en';
+
+        return Translate::Query(["language" => $language])->toArray();
+    }
+
 
     #[Field]
     /**

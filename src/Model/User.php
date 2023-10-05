@@ -58,7 +58,7 @@ class User extends \Light\Model
         if (is_string($this->style)) {
             return json_decode($this->style, true);
         }
-        return $this->style;
+        return $this->style ?? [];
     }
 
     public function updateStyle(string $name, $value): void

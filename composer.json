@@ -29,6 +29,9 @@
     },
     "autoload": {
         "psr-4": {
+            "Light\\Controller\\": "src/Controller/",
+            "Light\\Model\\": "src/Model/",
+            "Light\\Type\\": "src/Type/",
             "Light\\": "src/"
         }
     },

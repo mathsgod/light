@@ -276,6 +276,6 @@ class App implements MiddlewareInterface
         if (!$config = Config::Get(["name" => "file_manager"])) {
             return false;
         }
-        return $config->value;
+        return $config->value ?? false;
     }
 }

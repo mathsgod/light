@@ -50,4 +50,10 @@ class File
         }
         return true;
     }
+
+    #[Field]
+    public function getImagePath(): string
+    {
+        return "/api/uploads/$this->path";
+    }
 }

@@ -25,11 +25,34 @@ class AppController
     #[Mutation]
     #[Logged]
     #[Right('config.update')]
+    /**
+     * @param mixed $data
+     */
+    function updateAppConfigs(array $data): bool
+    {
+        foreach ($data as $d) {
+            if (!$config = Config::Get(["name" => $d['name']])) {
+                $config = Config::Create([
+                    "name" => $d['name']
+                ]);
+            }
+            $config->value = $d['value'];
+            $config->save();
+        }
+        return true;
+    }
+
+
+
+    #[Mutation]
+    #[Logged]
+    #[Right('config.update')]
     function updateAppConfig(string $name, string $value): bool
     {
         if (!$config = Config::Get(["name" => $name])) {
-            $config = new Config();
-            $config->name = $config;
+            $config = Config::Create([
+                "name" => $name
+            ]);
         }
         $config->value = $value;
         $config->save();

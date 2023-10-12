@@ -54,3 +54,4 @@ Administrators:
   - config.list
   - translate.update
   - translate.delete
+  - mail.send

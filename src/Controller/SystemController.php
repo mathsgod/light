@@ -2,6 +2,8 @@
 
 namespace Light\Controller;
 
+use Error;
+use Exception;
 use Firebase\JWT\JWT;
 use Laminas\Permissions\Rbac\Rbac;
 use Light\App;
@@ -18,6 +20,18 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 
 class SystemController
 {
+    #[Mutation]
+    #[Right("mail.send")]
+    public function sendMail(#[Autowire] App $app, string $email, string $subject, string $message): bool
+    {
+        $mailer = $app->getMailer();
+        $mailer->addAddress($email);
+        $mailer->Subject = $subject;
+        $mailer->msgHTML($message);
+        $mailer->send();
+        return true;
+    }
+
     #[Mutation]
     #[Right("system.mailTest")]
     public function mailTest(#[Autowire] App $app, string $email, string $subject, string $content): bool

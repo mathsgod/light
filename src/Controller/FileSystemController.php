@@ -7,6 +7,7 @@ use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\Model\EventLog;
 use Light\Type\FS\File;
 use Psr\Http\Message\UploadedFileInterface;
+use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -49,7 +50,7 @@ class FileSystemController
         if (in_array($ext, self::DISALLOW_EXT)) throw new Error("File type not allowed");
 
         //random name
-        $filename = uniqid() . "." . $ext;
+        $filename = UUID::uuid4()->toString() . "." . $ext;
 
         //move file
         $this->fs->write("temp/" . $filename, $file->getStream()->getContents());

@@ -25,7 +25,8 @@
         "endroid/qr-code": "^4.8"
     },
     "require-dev": {
-        "laminas/laminas-httphandlerrunner": "*"
+        "laminas/laminas-httphandlerrunner": "*",
+        "web-auth/webauthn-lib": "^3.3"
     },
     "autoload": {
         "psr-4": {

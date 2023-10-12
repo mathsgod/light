@@ -11,7 +11,6 @@ use Laminas\Permissions\Rbac\Rbac;
 use Light\Model\Config;
 use Light\Model\Permission;
 use Light\Model\Role;
-use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -37,7 +36,8 @@ class App implements MiddlewareInterface
     public function __construct()
     {
         $this->container = new \League\Container\Container();
-        $this->factory = new SchemaFactory(new Psr16Cache(new FilesystemAdapter()), $this->container);
+        $this->cache = new Psr16Cache(new FilesystemAdapter());
+        $this->factory = new SchemaFactory($this->cache, $this->container);
 
         $this->factory->addControllerNamespace("\\Light\\Controller\\");
         $this->factory->addTypeNamespace("\\Light\\Model\\");
@@ -58,12 +58,14 @@ class App implements MiddlewareInterface
         $this->container->add(Controller\MailLogController::class);
         $this->container->add(Controller\FileSystemController::class);
         $this->container->add(Controller\TranslateController::class);
+        $this->container->add(Controller\WebAuthnController::class);
+
 
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
 
 
-        $this->cache = new Psr16Cache(new FilesystemAdapter());
+
 
         $this->rbac = new Rbac();
         $this->loadRbac();
@@ -243,6 +245,7 @@ class App implements MiddlewareInterface
             $this->factory->prodMode();
         }
 
+        $this->container->add(ServerRequestInterface::class, $request);
         $this->container->add(Auth\Service::class, $auth_service);
 
         return $handler->handle($request);

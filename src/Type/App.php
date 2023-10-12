@@ -19,6 +19,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class App
 {
     #[Field]
+    #[Logged]
     /**
      * @return Translate[]
      */
@@ -79,6 +80,7 @@ class App
     }
 
     #[Field]
+    #[Logged]
     /**
      * @return string[]
      */
@@ -186,6 +188,7 @@ class App
 
 
     #[Field]
+    #[Logged]
     /**
      * @return Config[]
      */

@@ -36,6 +36,34 @@ class FileSystemController
         $this->fs = new \League\Flysystem\Filesystem($adapter);
     }
 
+
+    #[Mutation]
+    #[Right("fs.file.upload")]
+    public function fsUploadTempFile(UploadedFileInterface $file): File
+    {
+        //get path extension
+        $filename = $file->getClientFilename();
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+
+        //check if extension is allowed
+        if (in_array($ext, self::DISALLOW_EXT)) throw new Error("File type not allowed");
+
+        //random name
+        $filename = uniqid() . "." . $ext;
+
+        //move file
+        $this->fs->write("temp/" . $filename, $file->getStream()->getContents());
+
+        $list = $this->fs->listContents("temp", false);
+        foreach ($list as $file) {
+            if ($file->path() === "temp/" . $filename) {
+                return new File($this->fs, $file);
+            }
+        }
+
+        throw new Error("File not found");
+    }
+
     /*  #[Mutation]
     public function fsMoveFile(string $source, string $target)
     {

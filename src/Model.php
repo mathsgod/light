@@ -32,7 +32,6 @@ abstract class Model extends \R\DB\Model
 
     public function save()
     {
-        $service = self::GetSchema()->getContainer()->get(Auth\Service::class);
 
         $key = $this->_key();
         if (!$this->$key) {
@@ -45,12 +44,20 @@ abstract class Model extends \R\DB\Model
             }
         }
 
+
+        $user_id = null;
+        if ($container = self::GetSchema()->getContainer()) {
+            if ($service = $container->get(Auth\Service::class)) {
+                $user_id = $service->getUser()?->user_id;
+            }
+        }
+
         EventLog::_table()->insert([
             "class" => static::class,
             "id" => $this->$key,
             "action" => $this->$key ? "Update" : "Insert",
-            "source" => ["a"],
-            "user_id" => $service->getUser()?->user_id,
+            "source" => $this->jsonSerialize(),
+            "user_id" => $user_id,
             "created_time" => date("Y-m-d H:i:s"),
         ]);
 

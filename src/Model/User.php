@@ -31,11 +31,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 class User extends \Light\Model
 {
-    #[Field]
-    public function test(string $a): string
-    {
-        return "test";
-    }
 
     public function isAuthLocked()
     {

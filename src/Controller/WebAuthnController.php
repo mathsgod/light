@@ -7,6 +7,7 @@ use Light\App;
 use Light\Model\User;
 use Light\Model\UserLog;
 use Light\WebAuthn\PublicKeyCredentialSourceRepository;
+use Light\Type\WebAuthn;
 use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
@@ -22,6 +23,34 @@ use Webauthn\PublicKeyCredentialUserEntity;
 
 class WebAuthnController
 {
+    #[Mutation]
+    #[Logged]
+    public function deleteWebAuthn(#[InjectUser] User $user, string $uuid): bool
+    {
+        $data = [];
+        foreach ($user->credential as $credential) {
+            if ($credential["uuid"] != $uuid) {
+                $data[] = $credential;
+            }
+        }
+        $user->credential = $data;
+        $user->save();
+        return true;
+    }
+
+    #[Query]
+    #[Logged]
+    /**
+     * @return WebAuthn[]
+     */
+    public function listWebAuthn(#[InjectUser] User $user): array
+    {
+        $data = [];
+        foreach ($user->credential as $credential) {
+            $data[] = new WebAuthn($credential);
+        }
+        return $data;
+    }
 
     public function getWebAuthnServer()
     {

@@ -30,6 +30,29 @@ abstract class Model extends \R\DB\Model
         return true;
     }
 
+    public function delete()
+    {
+        $key = $this->_key();
+
+        $user_id = null;
+        if ($container = self::GetSchema()->getContainer()) {
+            if ($service = $container->get(Auth\Service::class)) {
+                $user_id = $service->getUser()?->user_id;
+            }
+        }
+
+        EventLog::_table()->insert([
+            "class" => static::class,
+            "id" => $this->$key,
+            "action" => "Delete",
+            "source" => null,
+            "target" => json_encode($this->jsonSerialize()),
+            "user_id" => $user_id,
+            "created_time" => date("Y-m-d H:i:s"),
+        ]);
+        return parent::delete();
+    }
+
     public function save()
     {
 
@@ -52,11 +75,27 @@ abstract class Model extends \R\DB\Model
             }
         }
 
+        $action = $this->$key ? "Update" : "Insert";
+
+        if ($action == "Update") {
+            $source = static::get($this->$key);
+            if ($source) {
+                $source = json_encode($source->jsonSerialize());
+            }
+            $target = json_encode($this->jsonSerialize());
+        }
+
+        if ($action == "Insert") {
+            $source = null;
+            $target = json_encode($this->jsonSerialize());
+        }
+
         EventLog::_table()->insert([
             "class" => static::class,
             "id" => $this->$key,
             "action" => $this->$key ? "Update" : "Insert",
-            "source" => $this->jsonSerialize(),
+            "source" => $source,
+            "target" => $target,
             "user_id" => $user_id,
             "created_time" => date("Y-m-d H:i:s"),
         ]);

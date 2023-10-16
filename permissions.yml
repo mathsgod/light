@@ -55,3 +55,4 @@ Administrators:
   - translate.update
   - translate.delete
   - mail.send
+  - fs.file.write

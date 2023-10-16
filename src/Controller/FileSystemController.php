@@ -37,6 +37,13 @@ class FileSystemController
         $this->fs = new \League\Flysystem\Filesystem($adapter);
     }
 
+    #[Mutation]
+    #[Right("fs.file.write")]
+    public function fsWriteFileBase64(string $path, string $content): bool
+    {
+        $this->fs->write($path, base64_decode($content));
+        return true;
+    }
 
     #[Mutation]
     #[Right("fs.file.upload")]

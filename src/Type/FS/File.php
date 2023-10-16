@@ -56,4 +56,10 @@ class File
     {
         return "/api/uploads/$this->path";
     }
+
+    #[Field]
+    public function getContent(): string
+    {
+        return base64_encode($this->fs->read($this->path));
+    }
 }

@@ -18,6 +18,8 @@ try {
 }
 
 
+
+
 $request = ServerRequestFactory::fromGlobals();
 if (!$request->getParsedBody()) {
     $body = json_decode(file_get_contents('php://input'), true);
@@ -35,12 +37,12 @@ class RequestHandler implements RequestHandlerInterface
         /** @var Light\App $app */
         $app = $request->getAttribute(Light\App::class);
 
-        try{
-            \Light\Model::GetSchema()->setContainer($app->getContainer()); 
-        }catch(Exception $e){
+        try {
+            \Light\Model::GetSchema()->setContainer($app->getContainer());
+        } catch (Exception $e) {
             //db may not be ready yet
         }
-       
+
 
 
         $factory = $app->getSchemaFactory();

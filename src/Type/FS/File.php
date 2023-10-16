@@ -58,7 +58,7 @@ class File
     }
 
     #[Field]
-    public function getContent(): string
+    public function getBase64Content(): string
     {
         return base64_encode($this->fs->read($this->path));
     }

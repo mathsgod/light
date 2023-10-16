@@ -72,10 +72,6 @@ class FileSystemController
         throw new Error("File not found");
     }
 
-    /*  #[Mutation]
-    public function fsMoveFile(string $source, string $target)
-    {
-    } */
 
     #[Query]
     public function fsFile(string $path): File
@@ -213,6 +209,7 @@ class FileSystemController
 
         return false;
     }
+
 
     #[Mutation]
     #[Right("fs.file.upload")]

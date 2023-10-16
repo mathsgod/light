@@ -5,6 +5,7 @@ namespace Light\Controller;
 use Laminas\Permissions\Rbac\Rbac;
 use Light\App;
 use Light\Model\Permission;
+use Light\Model\User;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -16,6 +17,27 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 class PermissionController
 {
 
+    #[Query]
+    /**
+     * @param string[] $rights
+     * @return string[]
+     */
+    public function granted(#[Autowire] App $app, #[InjectUser] ?User $user, array $rights): array
+    {
+        if (!$user) {
+            return [];
+        }
+
+        $data = [];
+        foreach ($rights as $right) {
+            if ($user->isGranted($app, $right)) {
+                $data[] = $right;
+            }
+        }
+        return $data;
+    }
+
+
     #[Query()]
     #[Logged]
     #[Right("permission.all")]
@@ -24,13 +46,7 @@ class PermissionController
      */
     public function allPermission(#[Autowire] App $app): array
     {
-        //read permissions.yml
-
         return $app->getPermissions();
-
-
-
-        return [];
     }
 
     #[Query]

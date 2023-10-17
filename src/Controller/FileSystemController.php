@@ -45,6 +45,15 @@ class FileSystemController
         return true;
     }
 
+    
+    #[Mutation]
+    #[Right("fs.file.write")]
+    public function fsWriteFile(string $path, string $content): bool
+    {
+        $this->fs->write($path,$content);
+        return true;
+    }
+
     #[Mutation]
     #[Right("fs.file.upload")]
     public function fsUploadTempFile(UploadedFileInterface $file): File

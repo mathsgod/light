@@ -44,6 +44,16 @@
           to: /Permission/all
           permission: [permission.list, permission.add, permission.remove]
 
+        - label: Add
+          icon: sym_o_add
+          to: /Permission/add
+          permission: permission.add
+        
+        - label: Export
+          icon: sym_o_download
+          to: /Permission/export
+          permission: permission.all
+
     - label: Translate
       icon: sym_o_translate
       to: /Translate

@@ -105,4 +105,15 @@ class PermissionController
 
         return true;
     }
+
+    #[Mutation]
+    #[Right("permission.delete")]
+    public function deletePermission(int $id): bool
+    {
+        if ($permission = Permission::Get($id)) {
+            $permission->delete();
+        }
+
+        return true;
+    }
 }

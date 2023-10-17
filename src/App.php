@@ -194,7 +194,10 @@ class App implements MiddlewareInterface
         } catch (Exception $e) {
         }
 
-        return array_unique($permissions);
+        $permissions = array_unique($permissions);
+        //sort
+        sort($permissions);
+        return  $permissions;
     }
 
 

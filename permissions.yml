@@ -20,19 +20,20 @@ Administrators:
   - eventlog.list
   - system.view_as
   - permission.list
+  - permission.delete
+  - permission.add
   - user.changePassword
   - maillog.list
   - userlog.list
   - fs
-  - fs.file.upload
   - fs.folder.create
-  - fs.listFiles
-  - fs.listFolders
-  - fs.createFolder
   - fs.folder.delete
+  - fs.folder.rename
   - fs.file.delete
   - fs.file.rename
-  - fs.folder.rename
+  - fs.file.upload
+  - fs.listFiles
+  - fs.listFolders
   - fs.file.move
   - fs.move
   - permission.all

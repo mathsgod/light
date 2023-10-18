@@ -34,6 +34,8 @@ class App implements MiddlewareInterface
 
     protected $cache;
 
+    protected $menus;
+
     public function __construct()
     {
         $this->container = new \League\Container\Container();
@@ -66,8 +68,6 @@ class App implements MiddlewareInterface
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
 
 
-
-
         $this->rbac = new Rbac();
         $this->loadRbac();
 
@@ -77,9 +77,38 @@ class App implements MiddlewareInterface
             }
         } catch (Exception $e) {
         }
+
+        $this->loadMenu();
     }
 
+    private function loadMenu()
+    {
+        $this->menus = Yaml::parseFile(dirname(__DIR__) . '/menus.yml'); //system default
 
+        foreach ($this->getCustomMenus() as $menus) {
+            $this->menus[] = $menus;
+        }
+
+        //if file manager is enabled, add to menus
+        if ($this->isFileManagerEnabled()) {
+            $this->menus[] = [
+                "label" => "File Manager",
+                "to" => "/FileManager",
+                "icon" => "sym_o_folder",
+                "permission" => "fs"
+            ];
+        }
+    }
+
+    public function getMenus()
+    {
+        return $this->menus;
+    }
+
+    public function addMenus(array $menus)
+    {
+        $this->menus[] = $menus;
+    }
 
     public function getDatabase()
     {
@@ -201,7 +230,7 @@ class App implements MiddlewareInterface
         $permissions = $this->permissions;
         //permissions from menus
 
-        foreach ($this->getMenusPermission($this->getAppMenus()) as $p) {
+        foreach ($this->getMenusPermission($this->menus) as $p) {
             $permissions[] = $p;
         }
 
@@ -289,7 +318,7 @@ class App implements MiddlewareInterface
         return $this->dev_mode;
     }
 
-    public function getAppMenus(): array
+    public function getCustomMenus(): array
     {
         if (!$menus = Config::Get(["name" => "menus"])) {
             return [];

@@ -97,26 +97,7 @@ class App
      */
     public function getMenus(#[InjectUser()] User $user, #[Autowire] LightApp $app)
     {
-        $menus = Yaml::parseFile(dirname(__DIR__, 2) . '/menus.yml');
-
-        //if file manager is enabled, add to menus
-        if ($app->isFileManagerEnabled()) {
-            $menus[] = [
-                "label" => "File Manager",
-                "to" => "/FileManager",
-                "icon" => "sym_o_folder",
-                "permission" => "fs"
-            ];
-        }
-
-
-        foreach ($app->getAppMenus() as $m) {
-            $menus[] = $m;
-        }
-
-        $rbac = $app->getRbac();
-
-        return $this->filterMenus($menus, $rbac, $user->getRoles());
+        return $this->filterMenus($app->getMenus(), $app->getRbac(), $user->getRoles());
     }
 
     private function filterMenus(array $menus, Rbac $rbac, array $roles)

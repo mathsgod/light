@@ -85,7 +85,7 @@ class AppController
      */
     function getAppMenus(#[Autowire] LightApp $app): array
     {
-        return $app->getAppMenus();
+        return $app->getCustomMenus();
     }
 
 

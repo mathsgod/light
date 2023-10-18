@@ -34,7 +34,7 @@ class App implements MiddlewareInterface
 
     protected $cache;
 
-    protected $menus;
+    protected $menus = [];
 
     public function __construct()
     {
@@ -83,20 +83,20 @@ class App implements MiddlewareInterface
 
     private function loadMenu()
     {
-        $this->menus = Yaml::parseFile(dirname(__DIR__) . '/menus.yml'); //system default
+        $this->addMenus(Yaml::parseFile(dirname(__DIR__) . '/menus.yml')); //system default
 
-        foreach ($this->getCustomMenus() as $menus) {
-            $this->menus[] = $menus;
-        }
+        $this->addMenus($this->getCustomMenus());
 
         //if file manager is enabled, add to menus
         if ($this->isFileManagerEnabled()) {
-            $this->menus[] = [
-                "label" => "File Manager",
-                "to" => "/FileManager",
-                "icon" => "sym_o_folder",
-                "permission" => "fs"
-            ];
+            $this->addMenus([
+                [
+                    "label" => "File Manager",
+                    "to" => "/FileManager",
+                    "icon" => "sym_o_folder",
+                    "permission" => "fs"
+                ]
+            ]);
         }
     }
 
@@ -107,7 +107,9 @@ class App implements MiddlewareInterface
 
     public function addMenus(array $menus)
     {
-        $this->menus[] = $menus;
+        foreach ($menus as $m) {
+            $this->menus[] = $m;
+        }
     }
 
     public function getDatabase()

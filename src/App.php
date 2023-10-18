@@ -8,6 +8,7 @@ use GraphQL\GraphQL;
 use GraphQL\Upload\UploadMiddleware;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Permissions\Rbac\Rbac;
+use Laminas\Permissions\Rbac\RoleInterface;
 use Light\Model\Config;
 use Light\Model\Permission;
 use Light\Model\Role;
@@ -102,6 +103,28 @@ class App implements MiddlewareInterface
         return $mailer;
     }
 
+    /**
+     * Adds permissions to a given role.
+     *
+     * @param RoleInterface|string $role The role to add permissions to.
+     * @param string[] $permissions An array of permissions to add to the role.
+     * @return void
+     */
+    public function addRolePermissions(RoleInterface|string $role, array $permissions)
+    {
+        if (!$this->rbac->hasRole($role)) {
+            $this->rbac->addRole($role);
+        }
+
+        $r = $this->rbac->getRole($role);
+        foreach ($permissions as $p) {
+            $r->addPermission($p);
+            $this->permissions[] = $p;
+        }
+
+        //unique
+        $this->permissions = array_unique($this->permissions);
+    }
 
     public function loadRbac()
     {
@@ -137,13 +160,10 @@ class App implements MiddlewareInterface
 
         }
         /** Permissions */
-        $permissions = Yaml::parseFile(dirname(__DIR__) . '/permissions.yml');
-        foreach ($permissions as $role => $permission) {
-            foreach ($permission as $p) {
-                $this->rbac->getRole($role)->addPermission($p);
+        $all = Yaml::parseFile(dirname(__DIR__) . '/permissions.yml');
 
-                $this->permissions[] = $p;
-            }
+        foreach ($all as $role => $permissions) {
+            $this->addRolePermissions($role, $permissions);
         }
 
         foreach (Permission::Query() as $p) {

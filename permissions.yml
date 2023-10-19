@@ -10,6 +10,7 @@ Power Users:
   - user.changePassword
 
 Administrators:
+  - administrators
   - role.list
   - role.add
   - role.delete

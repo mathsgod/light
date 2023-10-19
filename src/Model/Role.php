@@ -60,6 +60,19 @@ class Role extends Model
         }
         return $ps;
     }
+    
+    #[Field]
+    /**
+     * @return Role[]
+     */
+    public function getChilds(): array
+    {
+        $cs = [];
+        foreach ($this->_role->getChildren() as $c) {
+            $cs[] = Role::LoadByRole($c);
+        }
+        return $cs;
+    }
 
     #[Field]
     /**

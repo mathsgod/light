@@ -62,13 +62,34 @@ class RoleController
     #[Right("role.delete")]
     public function deleteRole(string $name, #[InjectUser] \Light\Model\User $user): bool
     {
-
         if (!$obj = Role::Get(["name" => $name])) return false;
         $obj->delete();
 
         if (!$obj = Role::Get(["child" => $name])) return false;
         $obj->delete();
 
+        return true;
+    }
+
+
+    #[Mutation]
+    #[Logged]
+    #[Right('administrators')]
+    public function updateRoleChild(string $name, array $childs, #[InjectUser] \Light\Model\User $user): bool
+    {
+        //remove all roles
+        foreach (Role::Query(['name' => $name]) as $role) {
+            $role->delete();
+        }
+
+        //add all roles
+        foreach ($childs as $child) {
+            $obj = Role::Create([
+                'name' => $name,
+                'child' => $child
+            ]);
+            $obj->save();
+        }
 
         return true;
     }

@@ -164,9 +164,16 @@ class App implements MiddlewareInterface
 
         /** Roles */
         $this->rbac->addRole("Administrators");
+        $this->rbac->getRole("Administrators")->addPermission("#administrators");
+
         $this->rbac->addRole("Power Users", ["Administrators"]);
+        $this->rbac->getRole("Power Users")->addPermission("#power users");
+
         $this->rbac->addRole("Users", ["Power Users"]);
+        $this->rbac->getRole("Users")->addPermission("#users");
+
         $this->rbac->addRole("Everyone", ["Users"]);
+        $this->rbac->getRole("Everyone")->addPermission("#everyone");
 
         //check if table exists
 

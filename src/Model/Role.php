@@ -28,6 +28,16 @@ class Role extends Model
         return true;
     }
 
+    #[Field]
+    public function canUpdate(#[InjectUser] ?User $by): bool
+    {
+        if ($this->getName() == "Administrators") return false;
+        if ($this->getName() == "Users") return false;
+        if ($this->getName() == "Power Users") return false;
+        if ($this->getName() == "Everyone") return false;
+        return true;
+    }
+
 
 
     public function setRole(RbacRole $role)
@@ -60,7 +70,7 @@ class Role extends Model
         }
         return $ps;
     }
-    
+
     #[Field]
     /**
      * @return Role[]

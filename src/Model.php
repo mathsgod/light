@@ -2,8 +2,6 @@
 
 namespace Light;
 
-use Exception;
-use Light\Model\Config;
 use Light\Model\EventLog;
 use Light\Model\User;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -11,6 +9,37 @@ use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 
 abstract class Model extends \R\DB\Model
 {
+
+    #[Field] public function createdTime(): string
+    {
+        return $this->created_time;
+    }
+
+    #[Field] public function createdBy(): string
+    {
+        if ($this->created_by) {
+            if ($user = User::Get($this->created_by)) {
+                return $user->getName();
+            }
+        }
+        return "";
+    }
+
+    #[Field] public function updatedTime(): string
+    {
+        return $this->updated_time;
+    }
+
+    #[Field] public function updatedBy(): string
+    {
+        if ($this->updated_by) {
+            if ($user = User::Get($this->updated_by)) {
+                return $user->getName();
+            }
+        }
+        return "";
+    }
+
 
     #[Field]
     public function canDelete(#[InjectUser] ?User $by): bool

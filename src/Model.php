@@ -12,7 +12,7 @@ abstract class Model extends \R\DB\Model
 
     #[Field] public function createdTime(): string
     {
-        return $this->created_time;
+        return $this->created_time ?? "";
     }
 
     #[Field] public function createdBy(): string
@@ -27,7 +27,7 @@ abstract class Model extends \R\DB\Model
 
     #[Field] public function updatedTime(): string
     {
-        return $this->updated_time;
+        return $this->updated_time ?? "";
     }
 
     #[Field] public function updatedBy(): string

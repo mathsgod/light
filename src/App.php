@@ -185,10 +185,12 @@ class App implements MiddlewareInterface
 
                 if (!$this->rbac->hasRole($q->name)) {
                     $this->rbac->addRole($q->name);
+                    $this->rbac->getRole($q->name)->addPermission("#" . strtolower($q->name));
                 }
 
                 if (!$this->rbac->hasRole($q->child)) {
                     $this->rbac->addRole($q->child);
+                    $this->rbac->getRole($q->child)->addPermission("#" . strtolower($q->child));
                 }
 
                 $this->rbac->getRole($q->name)->addChild($this->rbac->getRole($q->child));

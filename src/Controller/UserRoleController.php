@@ -38,13 +38,19 @@ class UserRoleController
      */
     public function updateUserRole(#[Autowire] Rbac $rbac, int $user_id, array $roles, #[InjectUser] \Light\Model\User $user): bool
     {
-        foreach ($roles as $role) {
-            if ($role == "Administrators") { // Only administrators can add administrators
-                if (!$user->is("Administrators")) {
-                    return false;
-                }
-            }
+        if ($user->is("Administrators")) {
+            //remove administrators from the list
+            $roles = array_filter($roles, function ($role) {
+                return $role != "Administrators";
+            });
+        }
 
+        //remove Everyone from the list
+        $roles = array_filter($roles, function ($role) {
+            return $role != "Everyone";
+        });
+
+        foreach ($roles as $role) {
             if (!UserRole::Get(["user_id" => $user_id, "role" => $role])) {
                 $ur = UserRole::Create(["user_id" => $user_id, "role" => $role]);
                 $ur->save();
@@ -54,15 +60,7 @@ class UserRoleController
         //remove all roles that are not in the list
         $user_roles = UserRole::Query(["user_id" => $user_id]);
         foreach ($user_roles as $user_role) {
-
             if (!in_array($user_role->role, $roles)) {
-
-                if ($role->role == "Administrators") { // Only administrators can remove administrators
-                    if (!$user->is("Administrators")) {
-                        return false;
-                    }
-                }
-
                 $user_role->delete();
             }
         }

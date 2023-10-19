@@ -16,6 +16,14 @@ class RoleController
 {
     #[Query]
     #[Logged]
+    public function getRole(#[Autowire] Rbac $rbac, string $name): ?Role
+    {
+        if (!$rbac->hasRole($name)) return null;
+        return Role::LoadByRole($rbac->getRole($name));
+    }
+
+    #[Query]
+    #[Logged]
     /**
      * @return Role[]
      * @param ?mixed $filters

@@ -75,6 +75,9 @@ class RoleController
     #[Mutation]
     #[Logged]
     #[Right('role.update')]
+    /**
+     * @param string[] $childs
+     */
     public function updateRoleChild(string $name, array $childs, #[InjectUser] \Light\Model\User $user): bool
     {
         //remove all roles

@@ -70,11 +70,10 @@ class RoleController
     #[Right("role.delete")]
     public function deleteRole(string $name, #[InjectUser] \Light\Model\User $user): bool
     {
-        if (!$obj = Role::Get(["name" => $name])) return false;
-        $obj->delete();
 
-        if (!$obj = Role::Get(["child" => $name])) return false;
-        $obj->delete();
+        foreach (Role::Query(['name' => $name]) as $role) {
+            $role->delete();
+        }
 
         return true;
     }
@@ -102,6 +101,35 @@ class RoleController
             $obj->save();
         }
 
+        return true;
+    }
+
+    #[Mutation]
+    #[Logged]
+    #[Right('#administrators')]
+    public function removeRoleChild(string $name, string $child): bool
+    {
+        if ($role = Role::Get(['name' => $name, 'child' => $child])) {
+            $role->delete();
+        }
+        return true;
+    }
+
+    #[Mutation]
+    #[Logged]
+    #[Right('#administrators')]
+    public function addRoleChild(string $name, string $child): bool
+    {
+        if ($name == $child) return false;
+        if (Role::Get(['name' => $name, 'child' => $child])) {
+            return false;
+        }
+
+        $obj = Role::Create([
+            'name' => $name,
+            'child' => $child
+        ]);
+        $obj->save();
         return true;
     }
 }

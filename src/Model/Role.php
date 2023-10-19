@@ -73,13 +73,13 @@ class Role extends Model
 
     #[Field]
     /**
-     * @return Role[]
+     * @return string[]
      */
-    public function getChilds(): array
+    public function getChildren(): array
     {
         $cs = [];
         foreach ($this->_role->getChildren() as $c) {
-            $cs[] = Role::LoadByRole($c);
+            $cs[] = $c->getName();
         }
         return $cs;
     }

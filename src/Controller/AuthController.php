@@ -22,6 +22,49 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 class AuthController
 {
 
+    #[Mutation]
+    #[Logged]
+    public function unlinkGoogle(#[InjectUser] User $user): bool
+    {
+        if ($user->gmail) {
+            $user->gmail = "";
+            $user->save();
+        }
+        return true;
+    }
+
+    //google register
+    #[Mutation]
+    #[Logged]
+    function googleRegister(string $credential, #[InjectUser] User $user): bool
+    {
+        if (!\Composer\InstalledVersions::isInstalled("google/apiclient")) {
+            throw new Error("google/apiclient is not installed");
+        }
+
+        if (!$google_client_id = $_ENV["GOOGLE_CLIENT_ID"]) {
+            throw new Error("GOOGLE_CLIENT_ID is not set");
+        }
+
+        $client = new \Google_Client(["client_id" => $google_client_id]);
+        $client->setHttpClient(new \GuzzleHttp\Client(["verify" => false]));
+        $payload = $client->verifyIdToken($credential);
+
+        if (!$payload) {
+            throw new Error("Google login error");
+        }
+
+        // reset all gmail
+        foreach (User::Query(["gmail" => $payload["email"]]) as $u) {
+            $u->gmail = "";
+            $u->save();
+        }
+
+        $user->gmail = $payload["email"];
+        $user->save();
+
+        return true;
+    }
 
     // google login
     #[Mutation] function googleLogin(string $credential, #[Autowire] App $app): bool

@@ -27,23 +27,24 @@ class AuthController
     #[Mutation] function googleLogin(string $credential, #[Autowire] App $app): bool
     {
         if (!\Composer\InstalledVersions::isInstalled("google/apiclient")) {
-            return false;
+            throw new Error("google/apiclient is not installed");
         }
 
         if (!$google_client_id = $_ENV["GOOGLE_CLIENT_ID"]) {
-            return false;
+            throw new Error("GOOGLE_CLIENT_ID is not set");
         }
 
         $client = new \Google_Client(["client_id" => $google_client_id]);
+        $client->setHttpClient(new \GuzzleHttp\Client(["verify" => false]));
         $payload = $client->verifyIdToken($credential);
 
         if (!$payload) {
-            return false;
+            throw new Error("Google login error");
         }
 
         $user = User::Get(["gmail" => $payload["email"], "status" => 0]);
         if (!$user) {
-            return false;
+            throw new Error("Google login error");
         }
 
         $app->userLogin($user);

@@ -140,7 +140,7 @@ class App
         return $result;
     }
 
-    #[Field] function getGoogleClientID(): ?string
+    #[Field] function getGoogleClientId(): ?string
     {
         if (!\Composer\InstalledVersions::isInstalled("google/apiclient")) {
             return null;

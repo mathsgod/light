@@ -3,6 +3,7 @@
 namespace Light;
 
 use Exception;
+use Firebase\JWT\JWT;
 use GQL\Type\MixedTypeMapperFactory;
 use GraphQL\GraphQL;
 use GraphQL\Upload\UploadMiddleware;
@@ -12,6 +13,8 @@ use Laminas\Permissions\Rbac\RoleInterface;
 use Light\Model\Config;
 use Light\Model\Permission;
 use Light\Model\Role;
+use Light\Model\User;
+use Light\Model\UserLog;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -343,5 +346,39 @@ class App implements MiddlewareInterface
             return false;
         }
         return $config->value ?? false;
+    }
+
+    public function userLogin(User $user)
+    {
+        $payload = [
+            "iss" => "light server",
+            "jti" => uniqid(),
+            "iat" => time(),
+            "exp" => time() + 3600 * 8,
+            "role" => "Users",
+            "id" => $user->user_id,
+            "type" => "access_token"
+        ];
+
+        $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
+
+        //save UserLog
+        UserLog::Create([
+            "user_id" => $user->user_id,
+            "login_dt" => date("Y-m-d H:i:s"),
+            "result" => "SUCCESS",
+            "ip" => $_SERVER["REMOTE_ADDR"],
+            "user_agent" => $_SERVER["HTTP_USER_AGENT"],
+        ])->save();
+
+        //set cookie
+        setcookie("access_token", $token, [
+            "expires" => time() + 3600 * 8,
+            "path" => "/",
+            "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
+            "secure" => $_ENV["COOKIE_SECURE"] ?? false,
+            "httponly" => true,
+            "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax"
+        ]);
     }
 }

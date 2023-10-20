@@ -5,6 +5,7 @@ namespace Light\Controller;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use GraphQL\Error\Error;
 use Light\App;
 use Light\Auth\Service;
@@ -20,6 +21,37 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class AuthController
 {
+
+
+    // google login
+    #[Mutation] function googleLogin(string $credential, #[Autowire] App $app): bool
+    {
+        if (!\Composer\InstalledVersions::isInstalled("google/apiclient")) {
+            return false;
+        }
+
+        if (!$google_client_id = $_ENV["GOOGLE_CLIENT_ID"]) {
+            return false;
+        }
+
+        $client = new \Google_Client(["client_id" => $google_client_id]);
+        $payload = $client->verifyIdToken($credential);
+
+        if (!$payload) {
+            return false;
+        }
+
+        $user = User::Get(["gmail" => $payload["email"], "status" => 0]);
+        if (!$user) {
+            return false;
+        }
+
+        $app->userLogin($user);
+
+        return true;
+    }
+
+
     #[Mutation]
     public function logout(#[Autowire] Service $service, #[Autowire] App $app): bool
     {
@@ -68,37 +100,7 @@ class AuthController
             }
         }
 
-        $payload = [
-            "iss" => "light server",
-            "jti" => uniqid(),
-            "iat" => time(),
-            "exp" => time() + 3600 * 8,
-            "role" => "Users",
-            "id" => $user->user_id,
-            "type" => "access_token"
-        ];
-
-        $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
-
-
-        //save UserLog
-        UserLog::Create([
-            "user_id" => $user->user_id,
-            "login_dt" => date("Y-m-d H:i:s"),
-            "result" => "SUCCESS",
-            "ip" => $_SERVER["REMOTE_ADDR"],
-            "user_agent" => $_SERVER["HTTP_USER_AGENT"],
-        ])->save();
-
-        //set cookie
-        setcookie("access_token", $token, [
-            "expires" => time() + 3600 * 8,
-            "path" => "/",
-            "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
-            "secure" => $_ENV["COOKIE_SECURE"] ?? false,
-            "httponly" => true,
-            "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax"
-        ]);
+        $app->userLogin($user);
         return true;
     }
 

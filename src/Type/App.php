@@ -137,10 +137,20 @@ class App
             }
         }
 
-
-
-
         return $result;
+    }
+
+    #[Field] function getGoogleClientID(): ?string
+    {
+        if (!\Composer\InstalledVersions::isInstalled("google/apiclient")) {
+            return null;
+        }
+
+        if (!$google_client_id = $_ENV["GOOGLE_CLIENT_ID"]) {
+            return null;
+        }
+
+        return $google_client_id;
     }
 
     #[Field]

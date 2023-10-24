@@ -195,7 +195,7 @@ if ($command == "make:model") {
             case "varchar":
             case "text":
             case "datetime":
-            case "data":
+            case "date":
             case "time":
                 $gql_type = "String";
                 break;

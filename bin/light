@@ -3,7 +3,6 @@
 
 // cli tool for generating code
 
-use Google\Service\MyBusinessLodging\Property;
 use Laminas\Code\Generator\TypeGenerator;
 use Light\Code\PropertyGenerator;
 use Light\Code\ClassGenerator;

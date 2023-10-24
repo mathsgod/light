@@ -3,6 +3,7 @@
 
 // cli tool for generating code
 
+use Google\Service\MyBusinessLodging\Property;
 use Laminas\Code\Generator\TypeGenerator;
 use Light\Code\PropertyGenerator;
 use Light\Code\ClassGenerator;
@@ -150,8 +151,9 @@ EOT
 
 
 if ($command == "make:model") {
-    $name = isset($argv[2]) ? $argv[2] : null;
-    if (!$name) {
+    $org_name = isset($argv[2]) ? $argv[2] : null;
+
+    if (!$org_name) {
         echo "Please provide a name for the model\n";
         exit;
     }
@@ -159,13 +161,16 @@ if ($command == "make:model") {
     $display = isset($argv[3]) ? $argv[3] : null;
 
     if (!$display == "console") {
-        $name = ucfirst($name);
+        $name = ucfirst($org_name);
         $path = $cwd . "/src/Model/$name.php";
         if (file_exists($path)) {
             echo "Model $name already exists\n";
             exit;
         }
     }
+
+    
+
 
     $class = new ClassGenerator($name, "Model");
     $class->addUse("TheCodingMachine\GraphQLite\Annotations\Field");
@@ -174,7 +179,13 @@ if ($command == "make:model") {
     $class->setExtendedClass("Light\Model");
     $class->addAttribute("#[Type]");
 
-    foreach (Q($name)->getFields() as $field) {
+    if ($name != $org_name) {
+        $p = new PropertyGenerator("_table", $org_name);
+        $p->setStatic(true);
+        $class->addPropertyFromGenerator($p);
+    }
+
+    foreach (Q($org_name)->getFields() as $field) {
         $type = $field->getType();
         $type = explode("(", $type)[0];
         switch ($type) {
@@ -237,6 +248,7 @@ if ($command == "make:input") {
     $class->addUse("TheCodingMachine\GraphQLite\Annotations\Field");
     $class->addUse("TheCodingMachine\GraphQLite\Annotations\Input");
     $class->addAttribute("#[Input]");
+
 
 
     foreach (Q($name)->getFields() as $field) {

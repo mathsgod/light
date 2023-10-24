@@ -206,7 +206,7 @@ if ($command == "make:model") {
                 $gql_type = "Boolean";
                 break;
             default:
-                $gql_type = "mixed";
+                $gql_type = "String";
         }
         if (!$field->isNullable()) {
             $gql_type = "$gql_type!";

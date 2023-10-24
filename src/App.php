@@ -228,11 +228,19 @@ class App implements MiddlewareInterface
         $p = [];
         foreach ($menus as $m) {
             if ($m["permission"]) {
-                $p[] = $m["permission"];
+                if (is_array($m["permission"])) {
+                    foreach ($m["permission"] as $p_) {
+                        $p[] = $p_;
+                    }
+                } else {
+                    $p[] = $m["permission"];
+                }
             }
 
             if ($m["children"]) {
-                $p = array_merge($p, $this->getMenusPermission($m["children"]));
+                foreach ($this->getMenusPermission($m["children"]) as $c_p) {
+                    $p[] = $c_p;
+                }
             }
         }
 
@@ -244,9 +252,11 @@ class App implements MiddlewareInterface
         $permissions = $this->permissions;
         //permissions from menus
 
+
         foreach ($this->getMenusPermission($this->menus) as $p) {
             $permissions[] = $p;
         }
+
 
         //permissions from db
 

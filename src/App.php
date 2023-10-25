@@ -65,6 +65,7 @@ class App implements MiddlewareInterface
         $this->container->add(Controller\FileSystemController::class);
         $this->container->add(Controller\TranslateController::class);
         $this->container->add(Controller\WebAuthnController::class);
+        $this->container->add(Controller\SystemValueController::class);
 
 
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);

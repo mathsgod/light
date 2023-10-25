@@ -57,3 +57,7 @@ Administrators:
   - translate.delete
   - mail.send
   - fs.file.write
+  - systemvalue.list
+  - systemvalue.add
+  - systemvalue.delete
+  - systemvalue.update

@@ -120,7 +120,19 @@
       icon: sym_o_description
       to: /EventLog
       permission: eventlog.list
+      
+    - label: System Value
+      icon: sym_o_description
+      children:
+        - label: List
+          icon: sym_o_list
+          to: /SystemValue
+          permission: systemvalue.list
+        
+        - label: Add
+          icon: sym_o_add
+          to: /SystemValue/add
+          permission: systemvalue.add
 
-
-
-
+    
+      

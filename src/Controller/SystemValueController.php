@@ -18,6 +18,7 @@ class SystemValueController
      * @return SystemValue[]
      * @param ?mixed $filters
      */
+    #[Right('systemvalue.list')]
     public function listSystemValue($filters = [],  ?string $sort = '', #[InjectUser] \Light\Model\User $user): \R\DB\Query
     {
         return SystemValue::Query()->filters($filters)->sort($sort);
@@ -25,6 +26,7 @@ class SystemValueController
 
     #[Mutation]
     #[Logged]
+    #[Right('systemvalue.add')]
     public function addSystemValue(\Light\Input\SystemValue $data, #[InjectUser] \Light\Model\User $user): int
     {
         $obj = SystemValue::Create();
@@ -35,6 +37,7 @@ class SystemValueController
 
     #[Mutation]
     #[Logged]
+    #[Right('systemvalue.update')]
     public function updateSystemValue(int $id,  \Light\Input\SystemValue $data, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = SystemValue::Get($id)) return false;
@@ -46,11 +49,23 @@ class SystemValueController
 
     #[Mutation]
     #[Logged]
+    #[Right('systemvalue.delete')]
     public function deleteSystemValue(int $id, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = SystemValue::Get($id)) return false;
         if (!$obj->canDelete($user)) return false;
         $obj->delete();
         return true;
+    }
+
+    #[Query]
+    /**
+     * @return mixed
+     */
+    public function getSystemValue(string $name): array
+    {
+        $sv = SystemValue::Get(["name" => $name]);
+        if (!$sv) return [];
+        return $sv->getValues();
     }
 }

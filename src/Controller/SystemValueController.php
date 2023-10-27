@@ -19,7 +19,7 @@ class SystemValueController
      * @param ?mixed $filters
      */
     #[Right('systemvalue.list')]
-    public function listSystemValue($filters = [],  ?string $sort = '', #[InjectUser] \Light\Model\User $user): \R\DB\Query
+    public function listSystemValue(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
     {
         return SystemValue::Query()->filters($filters)->sort($sort);
     }

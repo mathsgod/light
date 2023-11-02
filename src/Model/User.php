@@ -49,7 +49,7 @@ class User extends \Light\Model
                 $total++;
             }
         }
-        if ($total >= 3) {
+        if ($total >= $auth_lock_max_attempts) {
             return true;
         }
         return false;

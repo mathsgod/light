@@ -105,7 +105,16 @@ class AuthController
             $cache->set("logout_" . $jti, true, 3600 * 8);
         }
 
-        setcookie("access_token", "", time() - 3600 * 8, "", "", false, true);
+
+        //set cookie
+        setcookie("access_token", "", [
+            "expires" => time() - 3600 * 8,
+            "path" => "/",
+            "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
+            "secure" => $_ENV["COOKIE_SECURE"] ?? false,
+            "httponly" => true,
+            "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax"
+        ]);
         return true;
     }
 

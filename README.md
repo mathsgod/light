@@ -35,3 +35,10 @@ composer require google/apiclient
 ```ini
 GOOGLE_CLIENT_ID=
 ```
+
+## Auth Lock Policy
+.env
+```ini
+AUTH_LOCK_TIME =  # in seconds, default: 180
+AUTH_LOCK_MAX_ATTEMPTS = # default: 5
+```

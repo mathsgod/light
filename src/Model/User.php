@@ -39,8 +39,12 @@ class User extends \Light\Model
         $total = 0;
         $q = UserLog::Query(["user_id" => $this->user_id, "ip" => $ip]);
         // within 180 seconds 
-        $q->where->greaterThan("login_dt", date("Y-m-d H:i:s", time() - 180));
-        foreach ($q->order("userlog_id")->limit(3) as $ul) {
+
+        $auth_lock_time = $_ENV["AUTH_LOCK_TIME"] ?? 180; // 3 minutes
+        $auth_lock_max_attempts = $_ENV["AUTH_LOCK_MAX_ATTEMPTS"] ?? 5; // 5 times
+
+        $q->where->greaterThan("login_dt", date("Y-m-d H:i:s", time() - $auth_lock_time));
+        foreach ($q->order("userlog_id")->limit($auth_lock_max_attempts) as $ul) {
             if ($ul->result == "FAIL") {
                 $total++;
             }

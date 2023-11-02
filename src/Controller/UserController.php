@@ -49,10 +49,18 @@ class UserController
     ): bool {
         $obj = User::Get($id);
 
+        if (!$obj) return false;
+
         if (!$obj->canUpdate($user)) return false;
 
+        //unset role
+        unset($data->roles);
+        
+        foreach ($data as $k => $v) {
+            if ($v === null) continue;
+            $obj->$k = $v;
+        }
 
-        $obj->bind($data);
         $obj->save();
         return true;
     }

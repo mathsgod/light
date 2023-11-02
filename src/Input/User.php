@@ -7,18 +7,18 @@ use TheCodingMachine\GraphQLite\Annotations\Input;
 
 #[Input(name: "CreateUserInput", default: true)]
 #[Input(name: "UpdateUserInput", update: true)]
-#[Input(name: "UpdateMyInput", update: true)]
+#[Input(name: "UpdateMyInput", update: true, default: false)]
 class User
 {
-    #[Field]
+    #[Field(for: "CreateUserInput")]
+    #[Field(for: "UpdateUserInput")]
     public string $username;
 
-    #[Field]
+    #[Field(for: "CreateUserInput")]
     public string $password;
 
     #[Field]
     public string $first_name;
-
 
     #[Field]
     public ?string $last_name;
@@ -44,6 +44,14 @@ class User
     #[Field(for: "CreateUserInput")]
     #[Field(for: "UpdateUserInput")]
     public string $join_date;
+
+    #[Field(for: "CreateUserInput")]
+    #[Field(for: "UpdateUserInput")]
+    public ?string $expiry_date;
+
+    #[Field]
+    public ?string $default_page;
+
 
     #[Field(for: "CreateUserInput")]
     #[Field(for: "UpdateUserInput")]

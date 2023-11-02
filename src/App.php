@@ -43,6 +43,7 @@ class App implements MiddlewareInterface
     {
         $this->container = new \League\Container\Container();
         $this->cache = new Psr16Cache(new FilesystemAdapter());
+        $this->cache->clear();
         $this->factory = new SchemaFactory($this->cache, $this->container);
 
         $this->factory->addControllerNamespace("\\Light\\Controller\\");

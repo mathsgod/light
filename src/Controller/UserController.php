@@ -2,7 +2,6 @@
 
 namespace Light\Controller;
 
-use Light\Input\UpdateUser;
 use Light\Input\User as InputUser;
 use Light\Model\User;
 use Light\Model\UserRole;
@@ -15,6 +14,7 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Security;
+use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 
 class UserController
 {
@@ -42,8 +42,11 @@ class UserController
     #[Mutation]
     #[Logged]
     #[Right("user.update")]
-    public function updateUser(int $id, UpdateUser $data, #[InjectUser] \Light\Model\User $user): bool
-    {
+    public function updateUser(
+        int $id,
+        #[UseInputType(inputType: "UpdateUserInput")] InputUser $data,
+        #[InjectUser] \Light\Model\User $user
+    ): bool {
         $obj = User::Get($id);
 
         if (!$obj->canUpdate($user)) return false;

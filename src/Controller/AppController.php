@@ -3,6 +3,7 @@
 namespace Light\Controller;
 
 use Light\App as LightApp;
+use Light\Input\TestInput;
 use Light\Model\Config;
 use Light\Model\User;
 use Light\Type\App;
@@ -12,10 +13,11 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
-
+use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 
 class AppController
 {
+
     #[Query]
     public function getApp(): App
     {

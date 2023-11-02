@@ -9,7 +9,7 @@ use Firebase\JWT\Key;
 use GraphQL\Error\Error;
 use Light\App;
 use Light\Auth\Service;
-use Light\Input\UpdateUser;
+use Light\Input\User as InputUser;
 use Light\Model\User;
 use Light\Model\UserLog;
 use Light\Security\TwoFactorAuthentication;
@@ -18,6 +18,7 @@ use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 
 class AuthController
 {
@@ -170,7 +171,7 @@ class AuthController
 
     #[Mutation]
     #[Logged]
-    public function updateMy(#[InjectUser] User $user, UpdateUser $data): bool
+    public function updateMy(#[InjectUser] User $user, #[UseInputType(inputType: "UpdateMyInput")] InputUser $data): bool
     {
         //filter out all null values
         $d = [];

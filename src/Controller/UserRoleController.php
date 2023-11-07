@@ -28,6 +28,24 @@ class UserRoleController
         $ur->save();
         return true;
     }
+    
+    #[Mutation]
+    #[Logged]
+    #[Right("user.role.add")]
+    public function removeUserRole(#[InjectUser] \Light\Model\User $user, #[Autowire] Rbac $rbac, int $user_id, string $role): bool
+    {
+        if ($role == "Administrators") { // Only administrators can remove administrators
+            if (!$user->is("Administrators")) {
+                return false;
+            }
+        }
+
+        $ur = UserRole::Get(["user_id" => $user_id, "role" => $role]);
+        if ($ur) {
+            $ur->delete();
+        }
+        return true;
+    }
 
 
     #[Mutation]
@@ -67,6 +85,4 @@ class UserRoleController
 
         return true;
     }
-
-    
 }

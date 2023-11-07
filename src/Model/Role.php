@@ -7,16 +7,38 @@ use R\DB\Model;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
+use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type]
 class Role extends Model
 {
 
+
     /**
      * @var RbacRole
      */
     protected $_role;
+
+
+    #[Field]
+    /**
+     * @return User[]
+     */
+    #[Right('Role.User.get')]
+    public function getUser(): array
+    {
+        $name = $this->getName();
+
+        $user_ids = UserRole::Query(["role" => $name])->map(function ($ur) {
+            return $ur->user_id;
+        })->toArray();
+
+        $q = User::Query();
+        $q->where->in("user_id", $user_ids);
+        return $q->toArray();
+    }
+
 
     #[Field]
     public function canDelete(#[InjectUser] ?User $by): bool

@@ -16,6 +16,7 @@ Administrators:
   - role.update
   - role.permission.add
   - role.permission.remove
+  - Role.User.get
   - userlog.list
   - eventlog.list
   - system.view_as

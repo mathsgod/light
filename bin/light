@@ -45,6 +45,7 @@ if ($command == "make:controller") {
     $class->addUse("TheCodingMachine\GraphQLite\Annotations\Mutation");
     $class->addUse("TheCodingMachine\GraphQLite\Annotations\Right");
     $class->addUse("TheCodingMachine\GraphQLite\Annotations\Logged");
+    $class->addUse("TheCodingMachine\GraphQLite\Annotations\UseInputType");
 
 
     // list
@@ -98,13 +99,14 @@ EOT
     $method->addAttribute("#[Logged]");
     $param1 = new ParameterGenerator("id", "int");
     $param2 = new ParameterGenerator("data", "Input\\{$name}");
+    $param2->addAttribute("#[UseInputType(inputType: \"Update{$name}Input\")]");
     $param3 = new ParameterGenerator("user", "Light\\Model\\User");
     $param3->addAttribute("#[InjectUser]");
     $method->setParameters([$param1, $param2, $param3]);
     $method->setBody(
         <<<EOT
 if(!\$obj={$name}::Get(\$id)) return false;
-if(!\$obj->canDelete(\$user)) return false;
+if(!\$obj->canUpdate(\$user)) return false;
 \$obj->bind(\$data);
 \$obj->save();
 return true;
@@ -168,7 +170,7 @@ if ($command == "make:model") {
         }
     }
 
-    
+
 
 
     $class = new ClassGenerator($name, "Model");
@@ -246,9 +248,8 @@ if ($command == "make:input") {
     $class = new ClassGenerator($name, "Input");
     $class->addUse("TheCodingMachine\GraphQLite\Annotations\Field");
     $class->addUse("TheCodingMachine\GraphQLite\Annotations\Input");
-    $class->addAttribute("#[Input]");
-
-
+    $class->addAttribute("#[Input(name: \"Create${name}Input\", default: true)]");
+    $class->addAttribute("#[Input(name: \"Update${name}Input\", update: true)]");
 
     foreach (Q($org_name)->getFields() as $field) {
         if ($field->isPrimary()) continue;

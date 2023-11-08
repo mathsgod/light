@@ -10,6 +10,20 @@ use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 abstract class Model extends \R\DB\Model
 {
 
+    public function bind($data)
+    {
+
+        $fields = $this->__fields();
+        foreach ($data as $k => $v) {
+            if ($v === null) continue;
+
+            if (!in_array($k, $fields)) continue;
+
+            $this->$k = $v;
+        }
+    }
+
+
     #[Field] public function createdTime(): string
     {
         return $this->created_time ?? "";

@@ -231,12 +231,12 @@ if ($command == "make:model") {
 }
 
 if ($command == "make:input") {
-    $name = isset($argv[2]) ? $argv[2] : null;
-    if (!$name) {
+    $org_name = isset($argv[2]) ? $argv[2] : null;
+    if (!$org_name) {
         echo "Please provide a name for the input\n";
         exit;
     }
-    $name = ucfirst($name);
+    $name = ucfirst($org_name);
     $path = $cwd . "/src/Input/$name.php";
     if (file_exists($path)) {
         echo "Input $name already exists\n";
@@ -250,7 +250,7 @@ if ($command == "make:input") {
 
 
 
-    foreach (Q($name)->getFields() as $field) {
+    foreach (Q($org_name)->getFields() as $field) {
         if ($field->isPrimary()) continue;
         $type = $field->getType();
         $type = explode("(", $type)[0];
@@ -269,7 +269,7 @@ if ($command == "make:input") {
                 $php_type = "bool";
                 break;
             default:
-                $php_type = "mixed";
+                $php_type = "string";
         }
 
         if (!$field->isNullable()) {
@@ -286,7 +286,7 @@ if ($command == "make:input") {
 
     file_put_contents($path, "<?php\n\n" . $class->generate());
 
-    echo "Input $name created\n";
+    echo "Input $org_name created\n";
     exit;
 }
 

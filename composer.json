@@ -35,7 +35,10 @@
             "Light\\Model\\": "src/Model/",
             "Light\\Type\\": "src/Type/",
             "Light\\": "src/"
-        }
+        },
+        "files": [
+            "function/base85.php"
+        ]
     },
     "bin": "bin\/light"
 }

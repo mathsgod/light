@@ -273,9 +273,7 @@ if ($command == "make:input") {
                 $php_type = "string";
         }
 
-        if (!$field->isNullable()) {
-            $php_type = "?$php_type";
-        }
+        $php_type = "?$php_type";
 
         $property = new PropertyGenerator($field->getName());
         $property->omitDefaultValue(true);
@@ -291,9 +289,46 @@ if ($command == "make:input") {
     exit;
 }
 
+if ($command == "make:ts") {
+    $org_name = isset($argv[2]) ? $argv[2] : null;
+    if (!$org_name) {
+        echo "Please provide a name for the input\n";
+        exit;
+    }
+
+    $str = "export default {\n";
+
+    foreach (Q($org_name)->getFields() as $field) {
+        $name = $field->getName();
+        $type = $field->getType();
+        $type = explode("(", $type)[0];
+
+        $str .= "\t{$name}:{\n";
+        $str .= "\t\tlabel: \"{$name}\",\n";
+        $str .= "\t\tsortable: true,\n";
+        $str .= "\t\tsearchable: true,\n";
+
+        if ($field->isPrimary()) {
+            $str .= "\t\tautoWidth: true,\n";
+        }
+
+        if ($type == "datetime" || $type == "date") {
+            $str .= "\t\tsearchType: \"date\",\n";
+        }
+
+        $str .= "\t},\n";
+    }
+
+    $str .= "}\n";
+
+    echo $str;
+    exit;
+}
+
 echo <<<EOT
 Usage: php light make:controller <name>
        php light make:model <name>
        php light make:input <name>
+       php light make:ts <name>
 
 EOT;

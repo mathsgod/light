@@ -306,8 +306,6 @@ if ($command == "make:ts") {
         //from snake_case to CamelCase
         $label = str_replace('_', ' ', $name);
         $label = ucwords($label);
-        $label = str_replace(' ', '', $label);
-
 
 
         $str .= "\t{$name}:{\n";
@@ -315,7 +313,7 @@ if ($command == "make:ts") {
         $str .= "\t\tsortable: true,\n";
         $str .= "\t\tsearchable: true,\n";
 
-        if ($field->isPrimary()) {
+        if ($type == "int") {
             $str .= "\t\tautoWidth: true,\n";
         }
 

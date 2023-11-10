@@ -303,8 +303,15 @@ if ($command == "make:ts") {
         $type = $field->getType();
         $type = explode("(", $type)[0];
 
+        //from snake_case to CamelCase
+        $label = str_replace('_', ' ', $name);
+        $label = ucwords($label);
+        $label = str_replace(' ', '', $label);
+
+
+
         $str .= "\t{$name}:{\n";
-        $str .= "\t\tlabel: \"{$name}\",\n";
+        $str .= "\t\tlabel: \"{$label}\",\n";
         $str .= "\t\tsortable: true,\n";
         $str .= "\t\tsearchable: true,\n";
 

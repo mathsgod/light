@@ -2,13 +2,11 @@
 
 namespace Light\Type;
 
-use Exception;
 use Laminas\Permissions\Rbac\Rbac;
 use Light\App as LightApp;
 use Light\Model\Config;
 use Light\Model\Translate;
 use Light\Model\User;
-use Symfony\Component\Yaml\Yaml;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -21,7 +19,7 @@ class App
     #[Field]
     #[Logged]
     /**
-     * @return Translate[]
+     * @return \Light\Model\Translate[]
      */
     public function getTranslates(): array
     {
@@ -32,7 +30,7 @@ class App
     #[Field]
     #[Logged]
     /**
-     * @return Translate[]
+     * @return \Light\Model\Translate[]
      */
     public function getI18nMessages(#[InjectUser] User $user): array
     {
@@ -181,7 +179,7 @@ class App
     #[Field]
     #[Logged]
     /**
-     * @return Config[]
+     * @return \Light\Model\Config[]
      */
     public function getConfig(): array
     {

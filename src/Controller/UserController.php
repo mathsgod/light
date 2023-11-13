@@ -3,6 +3,7 @@
 namespace Light\Controller;
 
 use Light\Input\User as InputUser;
+use Light\Model\System;
 use Light\Model\User;
 use Light\Model\UserRole;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -55,7 +56,7 @@ class UserController
 
         //unset role
         unset($data->roles);
-        
+
         foreach ($data as $k => $v) {
             if ($v === null) continue;
             $obj->$k = $v;
@@ -70,6 +71,13 @@ class UserController
     public function updateUserPassword(int $id, string $password, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = $this->listUser($user, ["user_id" => $id], "")->first()) return false;
+
+        //check is valid password
+        $system = new System();
+        if (!$system->isValidPassword($password)) {
+            throw new \Exception("Password is not valid to the password policy");
+        }
+
         $obj->password = password_hash($password, PASSWORD_DEFAULT);
         $obj->save();
         return true;
@@ -83,6 +91,13 @@ class UserController
             return false;
         }
 
+        //check is valid password
+        $system = new System();
+        if (!$system->isValidPassword($new_password)) {
+            throw new \Exception("Password is not valid to the password policy");
+        }
+
+
         $user->password = password_hash($new_password, PASSWORD_DEFAULT);
         $user->save();
         return true;
@@ -94,6 +109,12 @@ class UserController
     {
         $user = new User();
         $user->bind($data);
+
+        //check is valid password
+        $system = new System();
+        if (!$system->isValidPassword($data->password)) {
+            throw new \Exception("Password is not valid to the password policy");
+        }
 
         $user->password = password_hash($data->password, PASSWORD_DEFAULT);
 

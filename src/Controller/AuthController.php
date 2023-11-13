@@ -10,6 +10,7 @@ use GraphQL\Error\Error;
 use Light\App;
 use Light\Auth\Service;
 use Light\Input\User as InputUser;
+use Light\Model\System;
 use Light\Model\User;
 use Light\Model\UserLog;
 use Light\Security\TwoFactorAuthentication;
@@ -256,6 +257,11 @@ class AuthController
         $user = User::Get(["email" => $email]);
         if (!$user) {
             return false;
+        }
+
+        $system = new System();
+        if (!$system->isValidPassword($password)) {
+            throw new Error("Password is not valid to the password policy");
         }
 
         $cache = $app->getCache();

@@ -61,7 +61,7 @@ class WebAuthnController
             $id = "localhost";
         } else {
             $name = $_SERVER["SERVER_NAME"];
-            $id = $_SERVER["origin"];
+            $id = $_SERVER["ORIGIN"];
         }
 
         $rp = new PublicKeyCredentialRpEntity($name, $id);

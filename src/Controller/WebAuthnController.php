@@ -2,10 +2,8 @@
 
 namespace Light\Controller;
 
-use Firebase\JWT\JWT;
 use Light\App;
 use Light\Model\User;
-use Light\Model\UserLog;
 use Light\WebAuthn\PublicKeyCredentialSourceRepository;
 use Light\Type\WebAuthn;
 use Psr\Http\Message\ServerRequestInterface;
@@ -107,7 +105,7 @@ class WebAuthnController
 
         //login 
         $app->userLogin($user);
-        
+
         return true;
     }
 
@@ -185,9 +183,6 @@ class WebAuthnController
         }
 
         $creation_option = json_decode($creation_option, true);
-
-
-
 
         $server = $this->getWebAuthnServer();
 

@@ -59,7 +59,10 @@ class WebAuthnController
         if ($id == "0.0.0.0") {
             $id = "localhost";
             $name = "localhost";
+        }else{
+            $name = $_SERVER["SERVER_NAME"];
         }
+
 
         $rp = new PublicKeyCredentialRpEntity($name, $id);
         $source = new PublicKeyCredentialSourceRepository();

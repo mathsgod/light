@@ -54,15 +54,15 @@ class WebAuthnController
 
     public function getWebAuthnServer()
     {
-        $id = $_SERVER["SERVER_NAME"];
+        $name = $_SERVER["SERVER_NAME"];
 
-        if ($id == "0.0.0.0") {
-            $id = "localhost";
+        if ($name == "0.0.0.0") {
             $name = "localhost";
-        }else{
+            $id = "localhost";
+        } else {
             $name = $_SERVER["SERVER_NAME"];
+            $id = $_SERVER["origin"];
         }
-
 
         $rp = new PublicKeyCredentialRpEntity($name, $id);
         $source = new PublicKeyCredentialSourceRepository();
@@ -70,6 +70,7 @@ class WebAuthnController
         $server->setSecuredRelyingPartyId(["localhost"]);
         return $server;
     }
+
 
     #[Mutation]
     /**

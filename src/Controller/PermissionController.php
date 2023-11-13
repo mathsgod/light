@@ -52,7 +52,7 @@ class PermissionController
     #[Query]
     #[Logged]
     /**
-     * @return Permission[]
+     * @return \Light\Model\Permission[]
      * @param ?mixed $filters
      */
     #[Right("permission.list")]

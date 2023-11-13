@@ -41,7 +41,7 @@ class WebAuthnController
     #[Query]
     #[Logged]
     /**
-     * @return WebAuthn[]
+     * @return \Light\Type\WebAuthn[]
      */
     public function listWebAuthn(#[InjectUser] User $user): array
     {

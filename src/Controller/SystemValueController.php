@@ -15,7 +15,7 @@ class SystemValueController
     #[Query]
     #[Logged]
     /**
-     * @return SystemValue[]
+     * @return \Light\Model\SystemValue[]
      * @param ?mixed $filters
      */
     #[Right('systemvalue.list')]

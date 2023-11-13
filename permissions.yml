@@ -49,7 +49,7 @@ Administrators:
   - system.menu
   - translate
   - translate.add
-  - config.update
+  - Config.update
   - menu.update
   - system
   - system.storage

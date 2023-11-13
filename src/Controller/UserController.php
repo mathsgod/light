@@ -22,7 +22,7 @@ class UserController
     #[Query]
     #[Logged]
     /**
-     * @return User[]
+     * @return \Light\Model\User[]
      * @param ?mixed $filters
      */
     #[Right("user.list")]

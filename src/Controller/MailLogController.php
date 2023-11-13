@@ -15,7 +15,7 @@ class MailLogController
     #[Query]
     #[Logged]
     /**
-     * @return MailLog[]
+     * @return \Light\Model\MailLog[]
      * @param ?mixed $filters
      */
     #[Right("maillog.list")]

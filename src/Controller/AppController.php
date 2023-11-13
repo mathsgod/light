@@ -3,7 +3,6 @@
 namespace Light\Controller;
 
 use Light\App as LightApp;
-use Light\Input\Test;
 use Light\Model\Config;
 use Light\Model\User;
 use Light\Type\App;
@@ -13,25 +12,9 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
-use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 
 class AppController
 {
-/*     #[Mutation]
-    public function addTest(Test $data): string
-    {
-        return $data->file->getClientFilename();
-        return true;
-    }
-
-    #[Mutation]
-    public function updateTest(int $id, Test $data): string
-    {
-        return $data->file->getClientFilename();
-        return true;
-    }
- */
-
     #[Query]
     public function getApp(): App
     {
@@ -40,7 +23,7 @@ class AppController
 
     #[Mutation]
     #[Logged]
-    #[Right('config.update')]
+    #[Right('Config.update')]
     /**
      * @param mixed $data
      */
@@ -58,11 +41,9 @@ class AppController
         return true;
     }
 
-
-
     #[Mutation]
     #[Logged]
-    #[Right('config.update')]
+    #[Right('Config.update')]
     function updateAppConfig(string $name, string $value): bool
     {
         if (!$config = Config::Get(["name" => $name])) {

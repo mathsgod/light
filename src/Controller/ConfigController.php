@@ -29,7 +29,7 @@ class ConfigController
     #[Right('config.list')]
     #[Logged]
     /**
-     * @return Config[]
+     * @return \Light\Model\Config[]
      * @param ?mixed $filters
      */
     public function listConfig(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = '',): \R\DB\Query
@@ -39,7 +39,7 @@ class ConfigController
 
     #[Query]
     /**
-     * @return Config[]
+     * @return \Light\Model\Config[]
      */
     public function listConfigBasic(): array
     {

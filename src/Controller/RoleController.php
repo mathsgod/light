@@ -25,7 +25,7 @@ class RoleController
     #[Query]
     #[Logged]
     /**
-     * @return Role[]
+     * @return \Light\Model\Role[]
      * @param ?mixed $filters
      */
     #[Right("role.list")]

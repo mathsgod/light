@@ -15,7 +15,7 @@ class EventLogController
     #[Query]
     #[Logged]
     /**
-     * @return EventLog[]
+     * @return \Light\Model\EventLog[]
      * @param ?mixed $filters
      */
     #[Right("eventlog.list")]

@@ -15,7 +15,7 @@ class UserLogController
     #[Query]
     #[Logged]
     /**
-     * @return UserLog[]
+     * @return \Light\Model\UserLog[]
      * @param ?mixed $filters
      */
     #[Right("userlog.list")]

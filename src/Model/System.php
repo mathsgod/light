@@ -102,15 +102,25 @@ class System
      */
     public function getPasswordPolicy(): array
     {
-        return [
-            "required",
-            "containUpper",
-            "containLower",
-            "containNumber",
-            "containSpecial",
-            "minLength:8"
-        ];
+        $policy = ["required"];
+        if ($_ENV["PASSWORD_POLICY_CONTAIN_UPPER"]) {
+            $policy[] = "containUpper";
+        }
+        if ($_ENV["PASSWORD_POLICY_CONTAIN_LOWER"]) {
+            $policy[] = "containLower";
+        }
+        if ($_ENV["PASSWORD_POLICY_CONTAIN_NUMBER"]) {
+            $policy[] = "containNumber";
+        }
+        if ($_ENV["PASSWORD_POLICY_CONTAIN_SPECIAL"]) {
+            $policy[] = "containSpecial";
+        }
+        if ($_ENV["PASSWORD_POLICY_MIN_LENGTH"]) {
+            $policy[] = "minLength:" . $_ENV["PASSWORD_POLICY_MIN_LENGTH"];
+        }
+        return $policy;
     }
+
 
     /**
      * Check if the given password is valid.

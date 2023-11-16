@@ -2,6 +2,7 @@
 
 namespace Light\Controller;
 
+use GraphQL\Error\Error;
 use Light\App;
 use Light\Model\User;
 use Light\WebAuthn\PublicKeyCredentialSourceRepository;
@@ -53,14 +54,16 @@ class WebAuthnController
     public function getWebAuthnServer()
     {
         $name = $_SERVER["SERVER_NAME"];
-
         if ($name == "0.0.0.0") {
             $name = "localhost";
             $id = "localhost";
         } else {
             $name = $_SERVER["SERVER_NAME"];
-            $id = $_SERVER["ORIGIN"];
+            if (!$_ENV["RP_ID"]) {
+                throw new Error("RP_ID is not set in .env file");
+            }
         }
+
 
         $rp = new PublicKeyCredentialRpEntity($name, $id);
         $source = new PublicKeyCredentialSourceRepository();

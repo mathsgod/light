@@ -107,6 +107,12 @@ class AuthController
         }
 
 
+        UserLog::_table()->update([
+            "logout_dt" => date("Y-m-d H:i:s")
+        ], [
+            "jti" => $jti
+        ]);
+
         //set cookie
         setcookie("access_token", "", [
             "expires" => time() - 3600 * 8,

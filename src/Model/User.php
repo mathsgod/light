@@ -33,6 +33,11 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class User extends \Light\Model
 {
 
+    public function saveLastAccessTime(string $jti)
+    {
+        UserLog::_table()->update(["last_access_time" => date("Y-m-d H:i:s")], ["jti" => $jti]);
+    }
+
     public function isAuthLocked()
     {
         $ip = $_SERVER["REMOTE_ADDR"];

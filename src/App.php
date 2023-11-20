@@ -20,6 +20,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use R\DB\Schema;
+use Ramsey\Uuid\Uuid;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Yaml\Yaml;
@@ -362,9 +363,10 @@ class App implements MiddlewareInterface
 
     public function userLogin(User $user)
     {
+        $jti = Uuid::uuid4()->toString();
         $payload = [
             "iss" => "light server",
-            "jti" => uniqid(),
+            "jti" => $jti,
             "iat" => time(),
             "exp" => time() + 3600 * 8,
             "role" => "Users",
@@ -381,6 +383,7 @@ class App implements MiddlewareInterface
             "result" => "SUCCESS",
             "ip" => $_SERVER["REMOTE_ADDR"],
             "user_agent" => $_SERVER["HTTP_USER_AGENT"],
+            "jti" => $jti
         ])->save();
 
         //set cookie

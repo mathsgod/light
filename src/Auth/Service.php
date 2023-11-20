@@ -48,6 +48,8 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                     $this->org_user = User::Get($payload->id);
                 } else {
                     $this->user = User::Get($payload->id);
+
+                    $this->user->saveLastAccessTime($this->jti);
                 }
                 $this->is_logged = true;
             } catch (Exception $e) {

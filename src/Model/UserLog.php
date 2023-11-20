@@ -14,6 +14,8 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "ip", outputType: "String")]
 #[MagicField(name: "result", outputType: "mixed!")]
 #[MagicField(name: "user_agent", outputType: "String")]
+#[MagicField(name: "lass_access_time", outputType: "String")]
+
 class UserLog extends \Light\Model
 {
 

@@ -89,11 +89,25 @@ abstract class Model extends \R\DB\Model
             "id" => $this->$key,
             "action" => "Delete",
             "source" => null,
-            "target" => json_encode($this->jsonSerialize()),
+            "target" => json_encode($this->sanitize($this->jsonSerialize())),
             "user_id" => $user_id,
             "created_time" => date("Y-m-d H:i:s"),
         ]);
         return parent::delete();
+    }
+
+    private function sanitize(array $data)
+    {
+
+        $out = [];
+        foreach ($data as $k => $v) {
+            if (is_array($v)) {
+                $out[$k] = $this->sanitize($v);
+            } else {
+                $out[$k] = iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            }
+        }
+        return $out;
     }
 
     public function save()
@@ -123,14 +137,15 @@ abstract class Model extends \R\DB\Model
         if ($action == "Update") {
             $source = static::get($this->$key);
             if ($source) {
-                $source = json_encode($source->jsonSerialize());
+                $source = json_encode($this->sanitize($source->jsonSerialize()));
             }
-            $target = json_encode($this->jsonSerialize());
+
+            $target = json_encode($this->sanitize($this->jsonSerialize()));
         }
 
         if ($action == "Insert") {
             $source = null;
-            $target = json_encode($this->jsonSerialize());
+            $target = json_encode($this->sanitize($this->jsonSerialize()));
         }
 
         EventLog::_table()->insert([

@@ -142,13 +142,13 @@ class AuthController
 
         if (!self::PasswordVerify($password, $user->password)) {
             //save to UserLog
-            UserLog::Create([
+            UserLog::_table()->insert([
                 "user_id" => $user->user_id,
                 "login_dt" => date("Y-m-d H:i:s"),
                 "result" => "FAIL",
                 "ip" => $_SERVER["REMOTE_ADDR"],
                 "user_agent" => $_SERVER["HTTP_USER_AGENT"],
-            ])->save();
+            ]);
 
             throw new Error("user not found or password error");
         }

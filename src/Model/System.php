@@ -97,27 +97,27 @@ class System
 
     #[Field]
     #[Logged]
-    /**
-     * @return string[]
-     */
-    public function getPasswordPolicy(): array
+    public function getPasswordPolicy():string
     {
         $policy = ["required"];
         if ($_ENV["PASSWORD_POLICY_CONTAIN_UPPER"]) {
-            $policy[] = "containUpper";
+            $policy[] = "contains_uppercase";
         }
         if ($_ENV["PASSWORD_POLICY_CONTAIN_LOWER"]) {
-            $policy[] = "containLower";
+            $policy[] = "contains_lowercase";
         }
         if ($_ENV["PASSWORD_POLICY_CONTAIN_NUMBER"]) {
-            $policy[] = "containNumber";
+            $policy[] = "contains_numeric";
         }
         if ($_ENV["PASSWORD_POLICY_CONTAIN_SPECIAL"]) {
-            $policy[] = "containSpecial";
+            $policy[] = "contains_symbol";
         }
         if ($_ENV["PASSWORD_POLICY_MIN_LENGTH"]) {
-            $policy[] = "minLength:" . $_ENV["PASSWORD_POLICY_MIN_LENGTH"];
+            $policy[] = "length:" . $_ENV["PASSWORD_POLICY_MIN_LENGTH"];
         }
+
+        //join to string
+        $policy = implode("|", $policy);
         return $policy;
     }
 

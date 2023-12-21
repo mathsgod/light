@@ -377,15 +377,15 @@ class App implements MiddlewareInterface
         $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
 
         //save UserLog
-        UserLog::Create([
+        UserLog::_table()->insert([
             "user_id" => $user->user_id,
             "login_dt" => date("Y-m-d H:i:s"),
             "result" => "SUCCESS",
             "ip" => $_SERVER["REMOTE_ADDR"],
             "user_agent" => $_SERVER["HTTP_USER_AGENT"],
             "jti" => $jti
-        ])->save();
-
+        ]);
+        
         //set cookie
         setcookie("access_token", $token, [
             "expires" => time() + 3600 * 8,

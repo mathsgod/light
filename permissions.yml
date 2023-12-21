@@ -40,7 +40,7 @@ Administrators:
   - permission.all
   - system.server
   - system.setting
-  - system.mailtest
+  - system.mailTest
   - system.phpinfo  
   - system.package
   - system.database

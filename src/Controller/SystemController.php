@@ -33,7 +33,7 @@ class SystemController
     }
 
     #[Mutation]
-    #[Right("system.mailTest")]
+    #[Right("system.mailtest")]
     public function mailTest(#[Autowire] App $app, string $email, string $subject, string $content): bool
     {
         $mailer = $app->getMailer();

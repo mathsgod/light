@@ -26,7 +26,7 @@ class Role extends Model
     /**
      * @return User[]
      */
-    #[Right('Role.User.get')]
+    #[Right('role.getUser')]
     public function getUser(): array
     {
         $name = $this->getName();

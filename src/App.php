@@ -15,6 +15,7 @@ use Light\Model\Permission;
 use Light\Model\Role;
 use Light\Model\User;
 use Light\Model\UserLog;
+use Mouf\Composer\ClassNameMapper;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -24,6 +25,7 @@ use Ramsey\Uuid\Uuid;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Yaml\Yaml;
+use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 
 class App implements MiddlewareInterface
@@ -252,7 +254,58 @@ class App implements MiddlewareInterface
 
     public function getPermissions()
     {
-        $permissions = $this->permissions;
+        $permissions = [];
+        foreach (glob(__DIR__ . "/Controller/*.php") as $file) {
+            $class = "Light\\Controller\\" . basename($file, ".php");
+            $rc = new \ReflectionClass($class);
+            foreach ($rc->getMethods() as $method) {
+                foreach ($method->getAttributes("TheCodingMachine\GraphQLite\Annotations\Right") as $attr) {
+                    $permissions[] = $attr->getArguments()[0];
+                }
+            }
+        }
+
+        foreach (glob(__DIR__ . "/Model/*.php") as $file) {
+            $class = "Light\\Model\\" . basename($file, ".php");
+            $rc = new \ReflectionClass($class);
+            foreach ($rc->getMethods() as $method) {
+                foreach ($method->getAttributes("TheCodingMachine\GraphQLite\Annotations\Right") as $attr) {
+                    $permissions[] = $attr->getArguments()[0];
+                }
+            }
+        }
+
+        $explorer = new GlobClassExplorer("Controller", $this->getCache());
+        foreach ($explorer->getClasses() as $class) {
+            $rc = new \ReflectionClass($class);
+            foreach ($rc->getMethods() as $method) {
+                foreach ($method->getAttributes("TheCodingMachine\GraphQLite\Annotations\Right") as $attr) {
+                    $permissions[] = $attr->getArguments()[0];
+                }
+            }
+        }
+
+
+
+        $explorer = new GlobClassExplorer("Model", $this->getCache());
+        foreach ($explorer->getClasses() as $class) {
+            $rc = new \ReflectionClass($class);
+            foreach ($rc->getMethods() as $method) {
+                foreach ($method->getAttributes("TheCodingMachine\GraphQLite\Annotations\Right") as $attr) {
+                    $permissions[] = $attr->getArguments()[0];
+                }
+            }
+        }
+
+
+
+
+
+
+
+
+
+        $permissions = array_merge($this->permissions, $permissions);
         //permissions from menus
 
 
@@ -262,7 +315,6 @@ class App implements MiddlewareInterface
 
 
         //permissions from db
-
         try {
             foreach (Permission::Query() as $p) {
                 $permissions[] = $p->value;
@@ -270,7 +322,13 @@ class App implements MiddlewareInterface
         } catch (Exception $e) {
         }
 
+        //filter # from permissions
+        $permissions = array_filter($permissions, function ($p) {
+            return $p[0] != "#";
+        });
+
         $permissions = array_unique($permissions);
+
         //sort
         sort($permissions);
         return  $permissions;
@@ -385,7 +443,7 @@ class App implements MiddlewareInterface
             "user_agent" => $_SERVER["HTTP_USER_AGENT"],
             "jti" => $jti
         ]);
-        
+
         //set cookie
         setcookie("access_token", $token, [
             "expires" => time() + 3600 * 8,

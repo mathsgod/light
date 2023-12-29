@@ -18,11 +18,8 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class Database
 {
-    #[Field]
+    #[Field(outputType: "mixed")]
     #[Right("system.database.table")]
-    /**
-     * @return mixed
-     */
     public function getTable(#[Autowire] App $app): array
     {
         $db = $app->getDatabase();

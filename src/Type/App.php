@@ -40,10 +40,7 @@ class App
     }
 
 
-    #[Field]
-    /**
-     * @return mixed
-     */
+    #[Field(outputType: "mixed")]
     public function getLanguages()
     {
         return [
@@ -88,11 +85,8 @@ class App
     }
 
 
-    #[Field]
+    #[Field(outputType: "mixed")]
     #[Logged]
-    /**
-     * @return mixed
-     */
     public function getMenus(#[InjectUser()] User $user, #[Autowire] LightApp $app)
     {
         return $this->filterMenus($app->getMenus(), $app->getRbac(), $user->getRoles());

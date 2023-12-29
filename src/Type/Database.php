@@ -2,12 +2,7 @@
 
 namespace Light\Type;
 
-use Exception;
-use Laminas\Permissions\Rbac\Rbac;
 use Light\App;
-use Light\Model\Config;
-use Light\Model\User;
-use Symfony\Component\Yaml\Yaml;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;

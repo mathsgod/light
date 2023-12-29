@@ -4,8 +4,6 @@ namespace Light\Controller;
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use GraphQL\Error\Error;
 use Light\App;
 use Light\Auth\Service;

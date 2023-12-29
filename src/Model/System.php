@@ -108,19 +108,19 @@ class System
     public function getPasswordPolicy(): string
     {
         $policy = ["required"];
-        if ($_ENV["PASSWORD_POLICY_CONTAIN_UPPER"]) {
+        if (Config::Value("password_contains_uppercase")) {
             $policy[] = "contains_uppercase";
         }
-        if ($_ENV["PASSWORD_POLICY_CONTAIN_LOWER"]) {
+        if (Config::Value("password_contains_lowercase")) {
             $policy[] = "contains_lowercase";
         }
-        if ($_ENV["PASSWORD_POLICY_CONTAIN_NUMBER"]) {
+        if (Config::Value("password_contains_numeric")) {
             $policy[] = "contains_numeric";
         }
-        if ($_ENV["PASSWORD_POLICY_CONTAIN_SPECIAL"]) {
+        if (Config::Value("password_contains_symbol")) {
             $policy[] = "contains_symbol";
         }
-        if ($_ENV["PASSWORD_POLICY_MIN_LENGTH"]) {
+        if (Config::Value("password_min_length")) {
             $policy[] = "length:" . $_ENV["PASSWORD_POLICY_MIN_LENGTH"];
         }
 

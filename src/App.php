@@ -83,7 +83,7 @@ class App implements MiddlewareInterface
         try {
             if ($config = Config::Get(["name" => "mode"])) {
                 $this->mode = $config->value;
-                if ($this->mode == "prod") {
+                if ($this->mode === "prod") {
                     $this->factory->prodMode();
                 } else {
                     $this->factory->devMode();

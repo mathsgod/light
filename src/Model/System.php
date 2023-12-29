@@ -121,7 +121,7 @@ class System
             $policy[] = "contains_symbol";
         }
         if (Config::Value("password_min_length")) {
-            $policy[] = "length:" . $_ENV["PASSWORD_POLICY_MIN_LENGTH"];
+            $policy[] = "length:" . Config::Value("password_min_length");
         }
 
         //join to string

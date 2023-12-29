@@ -97,7 +97,7 @@ class System
 
     #[Field]
     #[Logged]
-    public function getPasswordPolicy():string
+    public function getPasswordPolicy(): string
     {
         $policy = ["required"];
         if ($_ENV["PASSWORD_POLICY_CONTAIN_UPPER"]) {
@@ -130,30 +130,39 @@ class System
      */
     public function isValidPassword(string $password)
     {
-        foreach ($this->getPasswordPolicy() as $rule) {
+
+        $policy = $this->getPasswordPolicy();
+        //explode to array
+        $policy = explode("|", $policy);
+
+
+        foreach ($policy as $rule) {
             if ($rule === "required") {
                 if (empty($password)) return false;
             }
-            if ($rule === "containUpper") {
+
+            if ($rule === "contain_upper") {
                 if (!preg_match("/[A-Z]/", $password)) return false;
             }
-            if ($rule === "containLower") {
+
+            if ($rule === "contain_lower") {
                 if (!preg_match("/[a-z]/", $password)) return false;
             }
 
-            if ($rule === "containNumber") {
+            if ($rule === "contain_numeric") {
                 if (!preg_match("/[0-9]/", $password)) return false;
             }
 
-            if ($rule === "containSpecial") {
+            if ($rule === "contain_symbol") {
                 if (!preg_match("/[!@#$%^&*()\-_=+{};:,<.>]/", $password)) return false;
             }
 
-            if (strpos($rule, "minLength:") === 0) {
-                $minLength = (int) str_replace("minLength:", "", $rule);
+            if (strpos($rule, "length:") !== false) {
+                $minLength = (int) str_replace("length:", "", $rule);
                 if (strlen($password) < $minLength) return false;
             }
         }
+        
         return true;
     }
 

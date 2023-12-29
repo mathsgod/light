@@ -53,8 +53,7 @@ class RequestHandler implements RequestHandlerInterface
         $as = new Light\Auth\Service($request);
         $factory->setAuthenticationService($as);
         $factory->setAuthorizationService($as);
-        $factory->devMode();
-
+        
         $result = $app->execute($request);
 
         try {

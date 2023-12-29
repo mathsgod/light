@@ -35,7 +35,7 @@ class App implements MiddlewareInterface
     protected $rbac;
     protected $permissions = [];
 
-    protected $dev_mode = true;
+    protected $prod_mode = false;
 
     protected $cache;
 
@@ -81,15 +81,16 @@ class App implements MiddlewareInterface
         $this->loadRbac();
 
         try {
-            if ($config = Config::Get(["name" => "dev_mode"])) {
-                $this->dev_mode = (bool)$config->value;
-                if ($this->dev_mode) {
-                    $this->factory->devMode();
-                } else {
+            if ($config = Config::Get(["name" => "prod_mode"])) {
+                $this->prod_mode = (bool)$config->value;
+                if ($this->prod_mode) {
                     $this->factory->prodMode();
+                } else {
+                    $this->factory->devMode();
                 }
             }
         } catch (Exception $e) {
+            $this->factory->devMode();
         }
 
         $this->loadMenu();
@@ -406,7 +407,7 @@ class App implements MiddlewareInterface
 
     public function isDevMode(): bool
     {
-        return $this->dev_mode;
+        return !$this->prod_mode;
     }
 
     public function getCustomMenus(): array

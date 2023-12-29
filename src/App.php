@@ -403,7 +403,7 @@ class App implements MiddlewareInterface
 
     public function isDevMode(): bool
     {
-        return !$this->prod_mode;
+        return $this->mode != "prod";
     }
 
     public function getCustomMenus(): array

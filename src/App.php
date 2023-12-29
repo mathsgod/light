@@ -15,7 +15,6 @@ use Light\Model\Permission;
 use Light\Model\Role;
 use Light\Model\User;
 use Light\Model\UserLog;
-use Mouf\Composer\ClassNameMapper;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -46,7 +45,6 @@ class App implements MiddlewareInterface
     {
         $this->container = new \League\Container\Container();
         $this->cache = new Psr16Cache(new FilesystemAdapter());
-        $this->cache->clear();
         $this->factory = new SchemaFactory($this->cache, $this->container);
 
         $this->factory->addControllerNamespace("\\Light\\Controller\\");
@@ -71,10 +69,13 @@ class App implements MiddlewareInterface
         $this->container->add(Controller\WebAuthnController::class);
         $this->container->add(Controller\SystemValueController::class);
 
+        /*        $this->container->delegate(
+            new \League\Container\ReflectionContainer()
+        );
+ */
 
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
-
 
         $this->rbac = new Rbac();
         $this->loadRbac();
@@ -82,6 +83,11 @@ class App implements MiddlewareInterface
         try {
             if ($config = Config::Get(["name" => "dev_mode"])) {
                 $this->dev_mode = (bool)$config->value;
+                if ($this->dev_mode) {
+                    $this->factory->devMode();
+                } else {
+                    $this->factory->prodMode();
+                }
             }
         } catch (Exception $e) {
         }

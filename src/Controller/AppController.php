@@ -6,6 +6,7 @@ use Light\App as LightApp;
 use Light\Model\Config;
 use Light\Model\User;
 use Light\Type\App;
+use Psr\Http\Message\ServerRequestInterface;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -15,6 +16,8 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 
 class AppController
 {
+
+        
     #[Query]
     public function getApp(): App
     {

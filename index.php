@@ -5,6 +5,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 use GraphQL\Error\DebugFlag;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\ServerRequestFactory;
+use League\Container\ReflectionContainer;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -43,12 +44,16 @@ class RequestHandler implements RequestHandlerInterface
             //db may not be ready yet
         }
 
+        $container=$app->getContainer();
+        $container->add(ServerRequestInterface::class, $request);
+        
 
 
         $factory = $app->getSchemaFactory();
         $as = new Light\Auth\Service($request);
         $factory->setAuthenticationService($as);
         $factory->setAuthorizationService($as);
+        $factory->devMode();
 
         $result = $app->execute($request);
 

@@ -35,7 +35,7 @@ class App implements MiddlewareInterface
     protected $rbac;
     protected $permissions = [];
 
-    protected $prod_mode = false;
+    protected $mode = "dev";
 
     protected $cache;
 
@@ -81,9 +81,9 @@ class App implements MiddlewareInterface
         $this->loadRbac();
 
         try {
-            if ($config = Config::Get(["name" => "prod_mode"])) {
-                $this->prod_mode = (bool)$config->value;
-                if ($this->prod_mode) {
+            if ($config = Config::Get(["name" => "mode"])) {
+                $this->mode = $config->value;
+                if ($this->mode == "prod") {
                     $this->factory->prodMode();
                 } else {
                     $this->factory->devMode();
@@ -384,10 +384,6 @@ class App implements MiddlewareInterface
         $this->factory->setAuthenticationService($auth_service);
         $this->factory->setAuthorizationService($auth_service);
 
-
-        if (!$this->isDevMode()) {
-            $this->factory->prodMode();
-        }
 
         $this->container->add(ServerRequestInterface::class, $request);
         $this->container->add(Auth\Service::class, $auth_service);

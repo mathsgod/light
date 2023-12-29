@@ -2,8 +2,10 @@
 
 namespace Light\Model;
 
+use Light\App;
 use Light\Type\Database;
 use Light\Util;
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
@@ -13,6 +15,12 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class System
 {
+    #[Field]
+    public function isDevMode(#[Autowire] App $app): bool
+    {
+        return $app->isDevMode();
+    }
+
     #[Field]
     #[Right("system.storage")]
     public function getDiskUsageSpace(): string
@@ -162,7 +170,7 @@ class System
                 if (strlen($password) < $minLength) return false;
             }
         }
-        
+
         return true;
     }
 

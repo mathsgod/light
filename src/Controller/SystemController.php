@@ -2,12 +2,8 @@
 
 namespace Light\Controller;
 
-use Error;
-use Exception;
 use Firebase\JWT\JWT;
-use Laminas\Permissions\Rbac\Rbac;
 use Light\App;
-use Light\Model\Role;
 use Light\Model\System;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;

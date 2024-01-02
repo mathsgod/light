@@ -112,25 +112,31 @@ abstract class Model extends \R\DB\Model
 
     public function save()
     {
-
-        $key = $this->_key();
-        if (!$this->$key) {
-            if (in_array("created_time", $this->__fields())) {
-                $this->created_time = date("Y-m-d H:i:s");
-            }
-        } else {
-            if (in_array("updated_time", $this->__fields())) {
-                $this->updated_time = date("Y-m-d H:i:s");
-            }
-        }
-
-
         $user_id = null;
         if ($container = self::GetSchema()->getContainer()) {
             if ($service = $container->get(Auth\Service::class)) {
                 $user_id = $service->getUser()?->user_id;
             }
         }
+
+
+        $key = $this->_key();
+        if (!$this->$key) {
+            if (in_array("created_time", $this->__fields())) {
+                $this->created_time = date("Y-m-d H:i:s");
+            }
+            if (in_array("created_by", $this->__fields())) {
+                $this->created_by = $user_id;
+            }
+        } else {
+            if (in_array("updated_time", $this->__fields()) && $user_id) {
+                $this->updated_time = date("Y-m-d H:i:s");
+            }
+            if (in_array("updated_by", $this->__fields()) && $user_id) {
+                $this->updated_by = $user_id;
+            }
+        }
+
 
         $action = $this->$key ? "Update" : "Insert";
 

@@ -125,11 +125,11 @@ abstract class Model extends \R\DB\Model
             if (in_array("created_time", $this->__fields())) {
                 $this->created_time = date("Y-m-d H:i:s");
             }
-            if (in_array("created_by", $this->__fields())) {
+            if (in_array("created_by", $this->__fields()) && $user_id) {
                 $this->created_by = $user_id;
             }
         } else {
-            if (in_array("updated_time", $this->__fields()) && $user_id) {
+            if (in_array("updated_time", $this->__fields())) {
                 $this->updated_time = date("Y-m-d H:i:s");
             }
             if (in_array("updated_by", $this->__fields()) && $user_id) {

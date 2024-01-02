@@ -424,12 +424,13 @@ class App implements MiddlewareInterface
 
     public function userLogin(User $user)
     {
+        $access_token_expire = Config::Value("access_token_expire", 3600 * 8);
         $jti = Uuid::uuid4()->toString();
         $payload = [
             "iss" => "light server",
             "jti" => $jti,
             "iat" => time(),
-            "exp" => time() + 3600 * 8,
+            "exp" => time() + $access_token_expire,
             "role" => "Users",
             "id" => $user->user_id,
             "type" => "access_token"
@@ -449,7 +450,7 @@ class App implements MiddlewareInterface
 
         //set cookie
         setcookie("access_token", $token, [
-            "expires" => time() + 3600 * 8,
+            "expires" => time() + $access_token_expire,
             "path" => "/",
             "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
             "secure" => $_ENV["COOKIE_SECURE"] ?? false,

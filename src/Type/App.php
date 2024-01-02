@@ -163,6 +163,18 @@ class App
     }
 
     #[Field]
+    public function getCopyrightYear(): string
+    {
+        return Config::Value("copyright_year", date("Y"));
+    }
+
+    #[Field]
+    public function getCopyrightName(): string
+    {
+        return Config::Value("copyright_name", "HostLink(HK)");
+    }
+
+    #[Field]
     public function isLogged(#[InjectUser] $user): bool
     {
         if ($user) return true;

@@ -25,4 +25,23 @@ class Database
         }
         return $data;
     }
+
+    #[Field()]
+    #[Right("system.database.export")]
+    public function export(#[Autowire] App $app): string
+    {
+        $username = $_ENV["DATABASE_USERNAME"];
+        $password = $_ENV["DATABASE_PASSWORD"];
+        $database = $_ENV["DATABASE_DATABASE"];
+        $host = $_ENV["DATABASE_HOSTNAME"];
+        $port = $_ENV["DATABASE_PORT"];
+
+        $command = "mysqldump -u $username -p$password --databases $database --host $host --port $port";
+
+        //exec
+        $output = [];
+        exec($command, $output);
+
+        return implode("\n", $output);
+    }
 }

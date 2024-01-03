@@ -8,6 +8,7 @@ use GraphQL\Error\Error;
 use Light\App;
 use Light\Auth\Service;
 use Light\Input\User as InputUser;
+use Light\Model\Config;
 use Light\Model\System;
 use Light\Model\User;
 use Light\Model\UserLog;
@@ -135,7 +136,7 @@ class AuthController
 
 
         if ($user->isAuthLocked()) {
-            throw new Error("user is locked for 3 minutes");
+            throw new Error("user is locked for " . Config::Value("auth_lockout_duration", 15) . " minutes");
         }
 
 

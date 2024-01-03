@@ -12,11 +12,11 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "value", outputType: "String")]
 class Config extends \Light\Model
 {
-    public static function Value(string $name, ?string $default = ""): string
+    public static function Value(string $name, string $default = ""): string
     {
         $config = self::Get(["name" => $name]);
         if ($config) {
-            return $config->value ?? $default ?? "";
+            return $config->value ?? ($default ?? "");
         }
         return $default ?? "";
     }

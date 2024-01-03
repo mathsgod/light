@@ -33,8 +33,13 @@ class RoleController
     {
         $rs = [];
         foreach ($rbac->getRoles() as $role) {
+
+            //only administrators can see administrators
+            if ($role->getName() == "Administrators" && !$user->is("Administrators")) continue;
+
             $rs[] = Role::LoadByRole($role);
         }
+
         return $rs;
     }
 

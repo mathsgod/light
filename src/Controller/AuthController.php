@@ -99,9 +99,10 @@ class AuthController
     #[Mutation]
     public function logout(#[Autowire] Service $service, #[Autowire] App $app): bool
     {
+        $access_token_expire = $app->getAccessTokenExpire();
         if ($jti = $service->getJti()) {
             $cache = $app->getCache();
-            $cache->set("logout_" . $jti, true, 3600 * 8);
+            $cache->set("logout_" . $jti, true, $access_token_expire);
         }
 
 
@@ -113,7 +114,7 @@ class AuthController
 
         //set cookie
         setcookie("access_token", "", [
-            "expires" => time() - 3600 * 8,
+            "expires" => time() - 3600,
             "path" => "/",
             "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
             "secure" => $_ENV["COOKIE_SECURE"] ?? false,

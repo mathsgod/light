@@ -42,20 +42,22 @@ class SystemController
 
     #[Mutation]
     #[Logged]
-    public function cancelViewAs(#[Autowire] \Light\Auth\Service $service): bool
+    public function cancelViewAs(#[Autowire] \Light\Auth\Service $service, #[Autowire] App $app): bool
     {
+
+        $access_token_expire = $app->getAccessTokenExpire();
         $payload = [
             "iss" => "light server",
             "jti" => Uuid::uuid4()->toString(),
             "iat" => time(),
-            "exp" => time() + 3600 * 8,
+            "exp" => time() + $access_token_expire,
             "role" =>  $service->getOrginalUser()->getRoles(),
             "id" => $service->getOrginalUser()->user_id,
             "type" => "access_token"
         ];
         $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
         //set cookie
-        setcookie("access_token", $token, time() + 3600 * 8, "/", "", true, true);
+        setcookie("access_token", $token, time() + $access_token_expire, "/", "", true, true);
         return true;
     }
 
@@ -63,13 +65,14 @@ class SystemController
     #[Mutation]
     #[Logged]
     #[Right("system.view_as")]
-    public function viewAs(#[InjectUser] $user, int $user_id): bool
+    public function viewAs(#[InjectUser] $user, int $user_id, #[Autowire] App $app): bool
     {
+        $access_token_expire = $app->getAccessTokenExpire();
         $payload = [
             "iss" => "light server",
             "jti" => Uuid::uuid4()->toString(),
             "iat" => time(),
-            "exp" => time() + 3600 * 8,
+            "exp" => time() + $access_token_expire,
             "role" => "Users",
             "id" => $user->user_id,
             "view_as" => $user_id,
@@ -77,7 +80,7 @@ class SystemController
         ];
         $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
         //set cookie
-        setcookie("access_token", $token, time() + 3600 * 8, "/", "", true, true);
+        setcookie("access_token", $token, time() + $access_token_expire, "/", "", true, true);
         return true;
     }
 

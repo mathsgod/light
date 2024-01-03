@@ -6,6 +6,7 @@ use GraphQL\Error\DebugFlag;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\ServerRequestFactory;
 use League\Container\ReflectionContainer;
+use Light\Model\Config;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -35,6 +36,7 @@ class RequestHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
 
+
         /** @var Light\App $app */
         $app = $request->getAttribute(Light\App::class);
 
@@ -44,16 +46,18 @@ class RequestHandler implements RequestHandlerInterface
             //db may not be ready yet
         }
 
-        $container=$app->getContainer();
+        $container = $app->getContainer();
         $container->add(ServerRequestInterface::class, $request);
-        
 
 
-       // $factory = $app->getSchemaFactory();
-       /*  $as = new Light\Auth\Service($request);
+
+        // $factory = $app->getSchemaFactory();
+        /*  $as = new Light\Auth\Service($request);
         $factory->setAuthenticationService($as);
         $factory->setAuthorizationService($as);
          */
+
+
         $result = $app->execute($request);
 
         try {

@@ -422,9 +422,14 @@ class App implements MiddlewareInterface
         return $config->value ?? false;
     }
 
+    public function getAccessTokenExpire(): int
+    {
+        return intval(Config::Value("access_token_expire", 3600 * 8));
+    }
+
     public function userLogin(User $user)
     {
-        $access_token_expire = Config::Value("access_token_expire", 3600 * 8);
+        $access_token_expire = $this->getAccessTokenExpire();
         $jti = Uuid::uuid4()->toString();
         $payload = [
             "iss" => "light server",

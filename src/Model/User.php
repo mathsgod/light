@@ -45,16 +45,17 @@ class User extends \Light\Model
         $q = UserLog::Query(["user_id" => $this->user_id, "ip" => $ip]);
         // within 180 seconds 
 
-        $auth_lock_time = $_ENV["AUTH_LOCK_TIME"] ?? 180; // 3 minutes
-        $auth_lock_max_attempts = $_ENV["AUTH_LOCK_MAX_ATTEMPTS"] ?? 5; // 5 times
+        $auth_lock_time = Config::Value("auth_lockout_duration", 15);  // default 15 minutes
 
-        $q->where->greaterThan("login_dt", date("Y-m-d H:i:s", time() - $auth_lock_time));
-        foreach ($q->order("userlog_id")->limit($auth_lock_max_attempts) as $ul) {
+        $auth_lockout_attempts = Config::Value("auth_lockout_attempts", 5);  // default 5 attempts
+
+        $q->where->greaterThan("login_dt", date("Y-m-d H:i:s", time() - ($auth_lock_time * 60)));
+        foreach ($q->order("userlog_id")->limit($auth_lockout_attempts) as $ul) {
             if ($ul->result == "FAIL") {
                 $total++;
             }
         }
-        if ($total >= $auth_lock_max_attempts) {
+        if ($total >= $auth_lockout_attempts) {
             return true;
         }
         return false;

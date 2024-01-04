@@ -119,9 +119,9 @@ abstract class Model extends \R\DB\Model
             }
         }
 
-
         $key = $this->_key();
         if (!$this->$key) {
+            $action = "Insert";
             if (in_array("created_time", $this->__fields())) {
                 $this->created_time = date("Y-m-d H:i:s");
             }
@@ -129,6 +129,7 @@ abstract class Model extends \R\DB\Model
                 $this->created_by = $user_id;
             }
         } else {
+            $action = "Update";
             if (in_array("updated_time", $this->__fields())) {
                 $this->updated_time = date("Y-m-d H:i:s");
             }
@@ -136,9 +137,6 @@ abstract class Model extends \R\DB\Model
                 $this->updated_by = $user_id;
             }
         }
-
-
-        $action = $this->$key ? "Update" : "Insert";
 
         if ($action == "Update") {
             $source = static::get($this->$key);
@@ -155,7 +153,6 @@ abstract class Model extends \R\DB\Model
         }
 
         $result = parent::save();
-
 
         EventLog::_table()->insert([
             "class" => static::class,

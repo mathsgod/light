@@ -154,16 +154,19 @@ abstract class Model extends \R\DB\Model
             $target = json_encode($this->sanitize($this->jsonSerialize()));
         }
 
+        $result = parent::save();
+
+
         EventLog::_table()->insert([
             "class" => static::class,
             "id" => $this->$key,
-            "action" => $this->$key ? "Update" : "Insert",
+            "action" => $action,
             "source" => $source,
             "target" => $target,
             "user_id" => $user_id,
             "created_time" => date("Y-m-d H:i:s"),
         ]);
 
-        return parent::save();
+        return $result;
     }
 }

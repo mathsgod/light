@@ -5885,12 +5885,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/mathsgod/puxt.git",
-                "reference": "f8681ec5463ad31dbddf4f6c9b3323c3c0e6a8f3"
+                "reference": "4dcd25d4811f54dda383e7559732ff33c19a6aaa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mathsgod/puxt/zipball/f8681ec5463ad31dbddf4f6c9b3323c3c0e6a8f3",
-                "reference": "f8681ec5463ad31dbddf4f6c9b3323c3c0e6a8f3",
+                "url": "https://api.github.com/repos/mathsgod/puxt/zipball/4dcd25d4811f54dda383e7559732ff33c19a6aaa",
+                "reference": "4dcd25d4811f54dda383e7559732ff33c19a6aaa",
                 "shasum": ""
             },
             "require": {
@@ -5940,7 +5940,7 @@
                 "issues": "https://github.com/mathsgod/puxt/issues",
                 "source": "https://github.com/mathsgod/puxt/tree/main"
             },
-            "time": "2024-01-09T04:38:31+00:00"
+            "time": "2024-01-09T04:47:31+00:00"
         },
         {
             "name": "monolog/monolog",

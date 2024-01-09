@@ -25,6 +25,7 @@ use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Yaml\Yaml;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
+use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 
 class App implements MiddlewareInterface
@@ -382,6 +383,14 @@ class App implements MiddlewareInterface
         $request = $uploadMiddleware->processRequest($request);
 
         $request = $request->withAttribute(self::class, $this);
+
+        $puxt = $request->getAttribute(\PUXT\App::class);
+
+        if (assert($puxt instanceof \PUXT\App)) {
+            $puxt->addAttributeMiddleware(new \Light\Attributes\Logged);
+            $puxt->addParameterHandler(InjectUser::class, new \Light\ParameterHandlers\InjectedUser);
+        }
+
 
         $auth_service = new Auth\Service($request);
 

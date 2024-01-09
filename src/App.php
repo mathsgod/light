@@ -374,6 +374,10 @@ class App implements MiddlewareInterface
             return new EmptyResponse(200);
         }
 
+        $body = $request->getBody()->getContents();
+        $request = $request->withParsedBody(json_decode($body, true));
+
+
         $uploadMiddleware = new UploadMiddleware();
         $request = $uploadMiddleware->processRequest($request);
 

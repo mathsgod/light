@@ -27,7 +27,8 @@
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*",
         "web-auth/webauthn-lib": "^3.3",
-        "google/apiclient": "^2.15"
+        "google/apiclient": "^2.15",
+        "mathsgod/puxt": "dev-main"
     },
     "autoload": {
         "psr-4": {

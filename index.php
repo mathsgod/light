@@ -10,68 +10,13 @@ use Light\Model\Config;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 
 require_once __DIR__ . "/vendor/autoload.php";
-try {
-    Dotenv\Dotenv::createImmutable(__DIR__)->load();
-} catch (Exception $e) {
-    echo $e->getMessage();
-    die();
-}
 
+$app = new PUXT\App;
+$app->addAttributeMiddleware(new Light\Attributes\Logged);
+$app->addParameterHandler(InjectUser::class, new Light\ParameterHandlers\InjectedUser);
 
-
-
-$request = ServerRequestFactory::fromGlobals();
-if (!$request->getParsedBody()) {
-    $body = json_decode(file_get_contents('php://input'), true);
-    $request = $request->withParsedBody($body);
-}
-
-
-$app = new Light\App;
-
-class RequestHandler implements RequestHandlerInterface
-{
-    public function handle(ServerRequestInterface $request): ResponseInterface
-    {
-
-
-        /** @var Light\App $app */
-        $app = $request->getAttribute(Light\App::class);
-
-        try {
-            \Light\Model::GetSchema()->setContainer($app->getContainer());
-        } catch (Exception $e) {
-            //db may not be ready yet
-        }
-
-        $container = $app->getContainer();
-        $container->add(ServerRequestInterface::class, $request);
-
-
-
-        // $factory = $app->getSchemaFactory();
-        /*  $as = new Light\Auth\Service($request);
-        $factory->setAuthenticationService($as);
-        $factory->setAuthorizationService($as);
-         */
-
-
-        $result = $app->execute($request);
-
-        try {
-
-            return new JsonResponse($result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE));
-        } catch (\Exception $e) {
-            return new JsonResponse(['errors' => [
-                ["message" => $e->getMessage()]
-            ]]);
-        }
-    }
-}
-
-$response = $app->process($request, new RequestHandler);
-
-// Send the response to the HTTP client
-(new Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
+$app->pipe(new Light\App);
+$app->run();

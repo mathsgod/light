@@ -45,12 +45,12 @@ class FileSystemController
         return true;
     }
 
-    
+
     #[Mutation]
     #[Right("fs.file.write")]
     public function fsWriteFile(string $path, string $content): bool
     {
-        $this->fs->write($path,$content);
+        $this->fs->write($path, $content);
         return true;
     }
 
@@ -219,10 +219,21 @@ class FileSystemController
         return false;
     }
 
+    private function getNextFilename($path, $filename)
+    {
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        $filename = pathinfo($filename, PATHINFO_FILENAME);
+
+        $i = 1;
+        while ($this->fs->fileExists($path . "/" . $filename . "($i)." . $ext)) {
+            $i++;
+        }
+        return $filename . "($i)." . $ext;
+    }
 
     #[Mutation]
     #[Right("fs.file.upload")]
-    public function fsUploadFile(string $path, UploadedFileInterface $file): bool
+    public function fsUploadFile(string $path, UploadedFileInterface $file, ?bool $rename = false): string
     {
         //get path extension
         $filename = $file->getClientFilename();
@@ -232,11 +243,19 @@ class FileSystemController
         if (in_array($ext, self::DISALLOW_EXT)) throw new Error("File type not allowed");
 
         //check if file already exists
-        if ($this->fs->fileExists($path . "/" . $filename)) throw new Error("File already exists");
+        if ($this->fs->fileExists($path . "/" . $filename)) {
+
+            if ($rename) {
+                $filename = $this->getNextFilename($path, $filename);
+            } else {
+                throw new Error("File already exists");
+            }
+        }
 
         //move file
         $this->fs->write($path . "/" . $filename, $file->getStream()->getContents());
-        return true;
+
+        return $path . "/" . $filename;
     }
 
     #[Right('fs.file.move')]

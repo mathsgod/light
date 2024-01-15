@@ -22,7 +22,7 @@ class System
     }
 
     #[Field]
-    public function getMaxUploadSize(): int
+    public function getMaxUploadSize(): string
     {
         $max_size = -1;
         if ($max_size < 0) {
@@ -39,7 +39,7 @@ class System
                 $max_size = $upload_max;
             }
         }
-        return $max_size;
+        return Util::Size($max_size, ["binary" => true]);
     }
 
     #[Field]

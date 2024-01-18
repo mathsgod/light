@@ -74,6 +74,7 @@ class App implements MiddlewareInterface
             new \League\Container\ReflectionContainer()
         );
  */
+        Model::GetSchema()->setContainer($this->container);
 
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);

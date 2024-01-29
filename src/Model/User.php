@@ -30,6 +30,25 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 class User extends \Light\Model
 {
+    #[Field]
+    /**
+     * @return MyFavorite[]
+     */
+    public function getMyFavorites()
+    {
+        return MyFavorite::Query(["user_id" => $this->user_id])->toArray();
+    }
+
+    public function addMyFavorite(string $label, string $path)
+    {
+        $myfav = MyFavorite::Create([
+            "user_id" => $this->user_id,
+            "label" => $label,
+            "path" => $path,
+        ]);
+        $myfav->save();
+        return $myfav;
+    }
 
     #[Field]
     /**

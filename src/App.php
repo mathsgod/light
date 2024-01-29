@@ -69,6 +69,7 @@ class App implements MiddlewareInterface
         $this->container->add(Controller\TranslateController::class);
         $this->container->add(Controller\WebAuthnController::class);
         $this->container->add(Controller\SystemValueController::class);
+        $this->container->add(Controller\MyFavoriteController::class);
 
         /*        $this->container->delegate(
             new \League\Container\ReflectionContainer()

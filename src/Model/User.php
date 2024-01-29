@@ -33,6 +33,32 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class User extends \Light\Model
 {
 
+    #[Field]
+    /**
+     * @return string[]
+     */
+    public function getPermissions(#[Autowire] App $app): array
+    {
+        $result = [];
+        $rbac = $app->getRbac();
+
+        $permissions = $app->getPermissions();
+
+        foreach ($this->getRoles() as $role) {
+
+            foreach ($permissions as $permission) {
+                $rbac->getRole($role)->hasPermission($permission) && $result[] = $permission;
+            }
+        }
+
+        //unique
+        $result = array_unique($result);
+
+        return $result;
+    }
+
+
+
     public function saveLastAccessTime(string $jti)
     {
         UserLog::_table()->update(["last_access_time" => date("Y-m-d H:i:s")], ["jti" => $jti]);

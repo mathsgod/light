@@ -3,8 +3,6 @@
 namespace Light\Model;
 
 use Light\App;
-use Light\Input\User as InputUser;
-use R\DB\Model;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Field;

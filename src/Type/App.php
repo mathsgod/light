@@ -5,6 +5,7 @@ namespace Light\Type;
 use Laminas\Permissions\Rbac\Rbac;
 use Light\App as LightApp;
 use Light\Model\Config;
+use Light\Model\MyFavorite;
 use Light\Model\Translate;
 use Light\Model\User;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
@@ -16,6 +17,14 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class App
 {
+
+    #[Field]
+    public function hasFavorite(#[Autowire] LightApp $app): bool
+    {
+        return $app->hasFavorite();
+    }
+
+
     #[Field]
     #[Logged]
     /**

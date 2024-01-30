@@ -34,8 +34,9 @@ class User extends \Light\Model
     /**
      * @return MyFavorite[]
      */
-    public function getMyFavorites()
+    public function getMyFavorites(#[Autowire] App $app)
     {
+        if (!$app->hasFavorite()) return [];
         return MyFavorite::Query(["user_id" => $this->user_id])->toArray();
     }
 

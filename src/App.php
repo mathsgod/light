@@ -11,6 +11,7 @@ use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Permissions\Rbac\Rbac;
 use Laminas\Permissions\Rbac\RoleInterface;
 use Light\Model\Config;
+use Light\Model\MyFavorite;
 use Light\Model\Permission;
 use Light\Model\Role;
 use Light\Model\User;
@@ -478,5 +479,13 @@ class App implements MiddlewareInterface
             "httponly" => true,
             "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax"
         ]);
+    }
+
+    public function hasFavorite(): bool
+    {
+
+        $result = MyFavorite::GetSchema()->query("Show tables like 'MyFavorite'")->fetchAll();
+        if (count($result) == 0) return false;
+        return true;
     }
 }

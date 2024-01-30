@@ -15,8 +15,9 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 
 class AppController
 {
+    
 
-        
+    
     #[Query]
     public function getApp(): App
     {

@@ -2,6 +2,7 @@
 
 namespace Light\Controller;
 
+use Google\Service\Transcoder\Input;
 use Light\App as LightApp;
 use Light\Model\Config;
 use Light\Model\MyFavorite;
@@ -13,9 +14,52 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
+use Light\Input\MyFavorite as InputMyFavorite;
+use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 
 class MyFavoriteController
 {
+
+    #[Mutation]
+    #[Logged]
+    public function deleteMyFavorite(#[InjectUser] User $user, int $id): bool
+    {
+        $fav = MyFavorite::Get([
+            "user_id" => $user->user_id,
+            "my_favorite_id" => $id,
+        ]);
+
+        if (!$fav) {
+            return false;
+        }
+
+        $fav->delete();
+
+        return true;
+    }
+
+    #[Mutation]
+    #[Logged]
+    public function updateMyFavorite(
+        #[InjectUser] User $user,
+        int $id,
+        #[UseInputType(inputType: "UpdateMyFavoriteInput")] InputMyFavorite $data
+
+    ): bool {
+        $fav = MyFavorite::Get([
+            "user_id" => $user->user_id,
+            "my_favorite_id" => $id,
+        ]);
+
+        if (!$fav) {
+            return false;
+        }
+
+        $fav->bind($data);
+        $fav->save();
+
+        return true;
+    }
 
 
     #[Mutation]

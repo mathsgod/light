@@ -16,6 +16,12 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class System
 {
     #[Field]
+    public function time(): string
+    {
+        return date("Y-m-d H:i:s");
+    }
+
+    #[Field]
     public function isDevMode(#[Autowire] App $app): bool
     {
         return $app->isDevMode();

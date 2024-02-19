@@ -134,5 +134,10 @@
           to: /SystemValue/add
           permission: systemvalue.add
 
+    - label: File system
+      icon: sym_o_folder
+      to: /System/fs
+      permission: filesystem.list
+
     
       

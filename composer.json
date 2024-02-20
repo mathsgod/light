@@ -28,7 +28,8 @@
         "laminas/laminas-httphandlerrunner": "*",
         "web-auth/webauthn-lib": "^3.3",
         "google/apiclient": "^2.15",
-        "mathsgod/puxt": "dev-main"
+        "mathsgod/puxt": "dev-main",
+        "league/flysystem-aws-s3-v3": "^3.24"
     },
     "autoload": {
         "psr-4": {

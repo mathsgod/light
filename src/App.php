@@ -537,6 +537,23 @@ class App implements MiddlewareInterface
                     'secret' => $fs["secretKey"],
                 ],
             ]);
+            // The internal adapter
+            $adapter = new \League\Flysystem\AwsS3V3\AwsS3V3Adapter(
+                // S3Client
+                $client,
+                // Bucket name
+                $fs['bucket'],
+                // Optional path prefix
+                $fs["prefix"],
+                // Visibility converter (League\Flysystem\AwsS3V3\VisibilityConverter)
+                new \League\Flysystem\AwsS3V3\PortableVisibilityConverter(
+                    // Optional default for directories
+                    $fs["visibility"]
+                )
+            );
+
+            // The FilesystemOperator
+            return new \League\Flysystem\Filesystem($adapter);
         }
     }
 }

@@ -493,32 +493,24 @@ class App implements MiddlewareInterface
 
     public function getFS(string $name = "default")
     {
+        $config = Config::Get(["name" => "fs"]);
 
-        if ($name == "default") {
-            $visibilityConverter = PortableVisibilityConverter::fromArray([
-                'file' => [
-                    'public' => 0640,
-                    'private' => 0640,
-                ],
-                'dir' => [
-                    'public' => 0777,
-                    'private' => 0777,
-                ],
-            ]);
-
-
-            $location = getcwd() . "/uploads";
-            $adapter = new \League\Flysystem\Local\LocalFilesystemAdapter($location, $visibilityConverter);
-            $filesystem = new \League\Flysystem\Filesystem($adapter);
-            return $filesystem;
+        if (!$config) {
+            $fss = [];
+        } else {
+            $fss = json_decode($config->value, true);
         }
 
-        //find from config
-        if (!$config = Config::Get(["name" => "fs"])) {
-            throw new \Exception("File system not found");
-        }
+        //push default if not exists
 
-        $fss = json_decode($config->value, true);
+        if (!isset($fss["default"])) {
+            $fss["default"] = [
+                "type" => "local",
+                "data" => [
+                    "location" => getcwd() . "/uploads"
+                ]
+            ];
+        }
 
         if (!isset($fss[$name])) {
             throw new \Exception("File system not found");

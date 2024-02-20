@@ -15,7 +15,6 @@ use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
-use Light\Input\FileSystem as InputFileSystem;
 use Light\Model\Config;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 

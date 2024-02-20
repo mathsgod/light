@@ -64,3 +64,5 @@ Administrators:
   - systemvalue.delete
   - systemvalue.update
   - fs.add
+  - fs.list
+  - fs.delete

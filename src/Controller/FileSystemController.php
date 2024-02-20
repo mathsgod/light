@@ -34,4 +34,33 @@ class FileSystemController
         $config->save();
         return true;
     }
+
+    #[Query(outputType: "mixed")]
+    #[Right("fs.list")]
+    public function listFileSystem(): array
+    {
+        if (!$config = Config::Get(["name" => "fs"])) {
+            return [];
+        }
+        return json_decode($config->value);
+    }
+
+    #[Mutation]
+    #[Right("fs.delete")]
+    public function deleteFileSystem(string $name): bool
+    {
+        if (!$config = Config::Get(["name" => "fs"])) {
+            return false;
+        }
+        $fs = json_decode($config->value);
+        $newFs = [];
+        foreach ($fs as $f) {
+            if ($f->name != $name) {
+                $newFs[] = $f;
+            }
+        }
+        $config->value = json_encode($newFs, JSON_UNESCAPED_UNICODE);
+        $config->save();
+        return true;
+    }
 }

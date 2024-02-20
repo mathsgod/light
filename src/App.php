@@ -501,19 +501,19 @@ class App implements MiddlewareInterface
             $fss = json_decode($config->value, true);
         }
 
-        //push default if not exists
+        //map name to index
+        $fss = array_combine(array_column($fss, "name"), $fss);
 
+
+        //push default if not exists
         if (!isset($fss["default"])) {
             $fss["default"] = [
+                "name" => "default",
                 "type" => "local",
                 "data" => [
                     "location" => getcwd() . "/uploads"
                 ]
             ];
-        }
-
-        if (!isset($fss[$name])) {
-            throw new \Exception("File system not found");
         }
 
         $fs = $fss[$name];

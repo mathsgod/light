@@ -10,6 +10,7 @@ use GraphQL\Upload\UploadMiddleware;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Permissions\Rbac\Rbac;
 use Laminas\Permissions\Rbac\RoleInterface;
+use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\Model\Config;
 use Light\Model\MyFavorite;
 use Light\Model\Permission;
@@ -488,5 +489,54 @@ class App implements MiddlewareInterface
         $result = MyFavorite::GetSchema()->query("Show tables like 'MyFavorite'")->fetchAll();
         if (count($result) == 0) return false;
         return true;
+    }
+
+    public function getFS(string $name)
+    {
+        //find from config
+        if (!$config = Config::Get(["name" => "fs"])) {
+            throw new \Exception("File system not found");
+        }
+
+        $fss = json_decode($config->value, true);
+
+        if (!isset($fss[$name])) {
+            throw new \Exception("File system not found");
+        }
+
+        $fs = $fss[$name];
+
+        if ($fs["type"] == "local") {
+
+            $visibilityConverter = PortableVisibilityConverter::fromArray([
+                'file' => [
+                    'public' => 0640,
+                    'private' => 0640,
+                ],
+                'dir' => [
+                    'public' => 0777,
+                    'private' => 0777,
+                ],
+            ]);
+
+
+            $location = $fs["location"];
+            $adapter = new \League\Flysystem\Local\LocalFilesystemAdapter($location, $visibilityConverter);
+            $filesystem = new \League\Flysystem\Filesystem($adapter);
+            return $filesystem;
+        }
+
+        if ($fs["type"] == "S3") {
+            $client = new \Aws\S3\S3Client([
+                'version' => 'latest',
+                'region' => $fs["region"],
+                'endpoint' => $fs["endpoint"],
+                'use_path_style_endpoint' => true,
+                'credentials' => [
+                    'key' => $fs["accessKey"],
+                    'secret' => $fs["secretKey"],
+                ],
+            ]);
+        }
     }
 }

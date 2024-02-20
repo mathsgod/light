@@ -23,7 +23,10 @@ class FileSystemController
 {
     #[Mutation]
     #[Right("fs.add")]
-    public function addFileSystem(InputFileSystem $data, #[Autowire] App $app): bool
+    /**
+     * @param mixed $data
+     */
+    public function addFileSystem($data, #[Autowire] App $app): bool
     {
         if (!$config = Config::Get(["name" => "fs"])) {
             $config = Config::Create(["name" => "fs", "value" => "[]"]);

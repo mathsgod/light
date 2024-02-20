@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "413822d4a06889f93851d620c94d6ea8",
+    "content-hash": "9c33c51516f638be4f23f840754b7efd",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -5361,6 +5361,50 @@
                 }
             ],
             "time": "2023-12-03T20:05:35+00:00"
+        },
+        {
+            "name": "hostlink/hostlink-storage-adapter",
+            "version": "1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/HostLink/hostlink-storage-adapter.git",
+                "reference": "0f9a36580053cd382b98519d4315eef1a2c48b89"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/HostLink/hostlink-storage-adapter/zipball/0f9a36580053cd382b98519d4315eef1a2c48b89",
+                "reference": "0f9a36580053cd382b98519d4315eef1a2c48b89",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.4",
+                "symfony/polyfill-php80": "^1.23"
+            },
+            "require-dev": {
+                "league/flysystem": "^2.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "HL\\Storage\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Raymond Chong",
+                    "email": "mathsgod@yahoo.com"
+                }
+            ],
+            "description": "A flysystem adapter",
+            "support": {
+                "issues": "https://github.com/HostLink/hostlink-storage-adapter/issues",
+                "source": "https://github.com/HostLink/hostlink-storage-adapter/tree/1.0.3"
+            },
+            "time": "2021-12-13T09:40:01+00:00"
         },
         {
             "name": "laminas/laminas-config",

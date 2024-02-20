@@ -507,6 +507,7 @@ class App implements MiddlewareInterface
         $fs = $fss[$name];
 
         if ($fs["type"] == "local") {
+            $data = $fs["data"];
 
             $visibilityConverter = PortableVisibilityConverter::fromArray([
                 'file' => [
@@ -520,21 +521,22 @@ class App implements MiddlewareInterface
             ]);
 
 
-            $location = $fs["location"];
+            $location = $data["location"];
             $adapter = new \League\Flysystem\Local\LocalFilesystemAdapter($location, $visibilityConverter);
             $filesystem = new \League\Flysystem\Filesystem($adapter);
             return $filesystem;
         }
 
         if ($fs["type"] == "S3") {
+            $data = $fs["data"];
             $client = new \Aws\S3\S3Client([
                 'version' => 'latest',
-                'region' => $fs["region"],
-                'endpoint' => $fs["endpoint"],
+                'region' => $data["region"],
+                'endpoint' => $data["endpoint"],
                 'use_path_style_endpoint' => true,
                 'credentials' => [
-                    'key' => $fs["accessKey"],
-                    'secret' => $fs["secretKey"],
+                    'key' => $data["accessKey"],
+                    'secret' => $data["secretKey"],
                 ],
             ]);
             // The internal adapter
@@ -542,18 +544,26 @@ class App implements MiddlewareInterface
                 // S3Client
                 $client,
                 // Bucket name
-                $fs['bucket'],
+                $data['bucket'],
                 // Optional path prefix
-                $fs["prefix"],
+                $data["prefix"],
                 // Visibility converter (League\Flysystem\AwsS3V3\VisibilityConverter)
                 new \League\Flysystem\AwsS3V3\PortableVisibilityConverter(
                     // Optional default for directories
-                    $fs["visibility"]
+                    $data["visibility"]
                 )
             );
 
             // The FilesystemOperator
             return new \League\Flysystem\Filesystem($adapter);
         }
+
+        if ($fs["type"] == "hostlink") {
+            $data = $fs["data"];
+            $adapter = new \HL\Storage\Adapter($data["token"], $data["endpoint"]);
+            return  new \League\Flysystem\Filesystem($adapter);
+        }
+
+        throw new \Exception("File system not found");
     }
 }

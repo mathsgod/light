@@ -31,6 +31,18 @@ class File
     }
 
     #[Field]
+    public function getLastModifiedHuman(): string
+    {
+        return date("Y-m-d H:i:s", $this->file->lastModified());
+    }
+
+    #[Field]
+    public function getLastModified(): int
+    {
+        return $this->file->lastModified();
+    }
+
+    #[Field]
     public function getSize(): int
     {
         return $this->file->fileSize();

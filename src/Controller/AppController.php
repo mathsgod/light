@@ -12,12 +12,20 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
+use Psr\Http\Message\UploadedFileInterface;
 
 class AppController
 {
-    
 
-    
+/* 
+    #[Mutation]
+    public function test(UploadedFileInterface $file): string
+    {
+        return $file->getStream()->getContents();
+        return true;
+    }
+ */
+
     #[Query]
     public function getApp(): App
     {

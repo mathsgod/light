@@ -4,17 +4,12 @@ namespace Light\Controller;
 
 use GraphQL\Error\Error;
 use League\Flysystem\Filesystem;
-use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
-use Light\App;
-use Light\Model\EventLog;
 use Light\Type\FS\File;
 use Psr\Http\Message\UploadedFileInterface;
 use Ramsey\Uuid\Uuid;
-use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
-use TheCodingMachine\GraphQLite\Annotations\Logged;
 
 class FileManagerController
 {
@@ -84,9 +79,6 @@ class FileManagerController
         }
         return null;
     }
-
-
-
 
     #[Query]
     /**

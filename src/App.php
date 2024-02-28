@@ -67,7 +67,9 @@ class App implements MiddlewareInterface
         $this->container->add(Controller\ConfigController::class);
         $this->container->add(Controller\UserLogController::class);
         $this->container->add(Controller\MailLogController::class);
-        $this->container->add(Controller\FileManagerController::class);
+        $this->container->add(Controller\FileManagerController::class, function () {
+            return new Controller\FileManagerController($this->getFS());
+        });
         $this->container->add(Controller\TranslateController::class);
         $this->container->add(Controller\WebAuthnController::class);
         $this->container->add(Controller\SystemValueController::class);

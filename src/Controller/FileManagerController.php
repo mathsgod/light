@@ -3,7 +3,9 @@
 namespace Light\Controller;
 
 use GraphQL\Error\Error;
+use League\Flysystem\Filesystem;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
+use Light\App;
 use Light\Model\EventLog;
 use Light\Type\FS\File;
 use Psr\Http\Message\UploadedFileInterface;
@@ -19,23 +21,10 @@ class FileManagerController
     const DISALLOW_EXT = ['zip', 'js', 'jsp', 'jsb', 'mhtml', 'mht', 'xhtml', 'xht', 'php', 'phtml', 'php3', 'php4', 'php5', 'phps', 'shtml', 'jhtml', 'pl', 'sh', 'py', 'cgi', 'exe', 'application', 'gadget', 'hta', 'cpl', 'msc', 'jar', 'vb', 'jse', 'ws', 'wsf', 'wsc', 'wsh', 'ps1', 'ps2', 'psc1', 'psc2', 'msh', 'msh1', 'msh2', 'inf', 'reg', 'scf', 'msp', 'scr', 'dll', 'msi', 'vbs', 'bat', 'com', 'pif', 'cmd', 'vxd', 'cpl', 'htpasswd', 'htaccess'];
 
     protected $fs;
-    
 
-    public function __construct()
+    public function __construct(Filesystem $fs)
     {
-        $path = getcwd() . "/uploads";
-        $visibilityConverter = PortableVisibilityConverter::fromArray([
-            'file' => [
-                'public' => 0640,
-                'private' => 0640,
-            ],
-            'dir' => [
-                'public' => 0777,
-                'private' => 0777,
-            ],
-        ]);
-        $adapter = new \League\Flysystem\Local\LocalFilesystemAdapter($path, $visibilityConverter);
-        $this->fs = new \League\Flysystem\Filesystem($adapter);
+        $this->fs = $fs;
     }
 
     #[Mutation]

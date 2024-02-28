@@ -2,6 +2,7 @@
 
 namespace Light\Controller;
 
+use Light\App as LightApp;
 use Light\Model\Config;
 use Light\Model\User;
 use Light\Type\App;
@@ -37,7 +38,7 @@ class AppController
     /**
      * @param mixed $data
      */
-    function updateAppConfigs(array $data, #[Autowire] \Light\App $app): bool
+    function updateAppConfigs(array $data, #[Autowire] LightApp $app): bool
     {
         foreach ($data as $d) {
             if (!$config = Config::Get(["name" => $d['name']])) {

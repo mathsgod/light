@@ -2,7 +2,6 @@
 
 namespace Light\Controller;
 
-use Light\App as LightApp;
 use Light\Model\Config;
 use Light\Model\User;
 use Light\Type\App;
@@ -17,7 +16,7 @@ use Psr\Http\Message\UploadedFileInterface;
 class AppController
 {
 
-/* 
+    /* 
     #[Mutation]
     public function test(UploadedFileInterface $file): string
     {
@@ -38,7 +37,7 @@ class AppController
     /**
      * @param mixed $data
      */
-    function updateAppConfigs(array $data): bool
+    function updateAppConfigs(array $data, #[Autowire] \Light\App $app): bool
     {
         foreach ($data as $d) {
             if (!$config = Config::Get(["name" => $d['name']])) {
@@ -49,6 +48,10 @@ class AppController
             $config->value = $d['value'];
             $config->save();
         }
+
+        //flush cache
+        $app->getCache()->clear();
+
         return true;
     }
 

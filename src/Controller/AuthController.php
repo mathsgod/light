@@ -56,12 +56,12 @@ class AuthController
         }
 
         // reset all gmail
-        foreach (User::Query(["gmail" => $payload["email"]]) as $u) {
+        foreach (User::Query(["gmail" => $payload["sub"]]) as $u) {
             $u->gmail = "";
             $u->save();
         }
 
-        $user->gmail = $payload["email"];
+        $user->gmail = $payload["sub"];
         $user->save();
 
         return true;
@@ -86,7 +86,7 @@ class AuthController
             throw new Error("Google login error");
         }
 
-        $user = User::Get(["gmail" => $payload["email"], "status" => 0]);
+        $user = User::Get(["gmail" => $payload["sub"], "status" => 0]);
         if (!$user) {
             throw new Error("Google login error");
         }

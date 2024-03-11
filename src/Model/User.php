@@ -31,6 +31,12 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class User extends \Light\Model
 {
     #[Field]
+    public function has2FA(): bool
+    {
+        return $this->secret ? true : false;
+    }
+
+    #[Field]
     /**
      * @return MyFavorite[]
      */

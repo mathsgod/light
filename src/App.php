@@ -580,4 +580,19 @@ class App implements MiddlewareInterface
 
         throw new \Exception("File system not found");
     }
+
+    public function isRevisionEnabled(string $model)
+    {
+        if (!$config = Config::Get(["name" => "revision"])) {
+            return false;
+        }
+
+        $revisions = explode(",", $config->value) ?? [];
+
+        if (!in_array($model, $revisions)) {
+            return false;
+        }
+
+        return true;
+    }
 }

@@ -3,6 +3,7 @@
 namespace Light;
 
 use Light\Model\EventLog;
+use Light\Model\Revision;
 use Light\Model\User;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -127,6 +128,14 @@ abstract class Model extends \R\DB\Model
         if ($action == "Update") {
             $source = static::get($this->$key);
             if ($source) {
+
+                if ($app = self::GetSchema()->getContainer()->get(App::class)) {
+                    assert($app instanceof App);
+                    if ($app->isRevisionEnabled(static::class)) {
+                        Revision::Insert($user_id, static::class, $this->$key, $source);
+                    }
+                }
+
                 $source = json_encode(Util::Sanitize($source->jsonSerialize()), JSON_UNESCAPED_UNICODE);
             }
 

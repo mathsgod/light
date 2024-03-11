@@ -12,6 +12,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type]
 #[MagicField(name: "revision_id", outputType: "Int")]
+#[MagicField(name: "user_id", outputType: "Int")]
 class Revision extends \Light\Model
 {
     public static function Insert(int $user_id, string $model_class, int $model_id, Model $model)
@@ -23,5 +24,11 @@ class Revision extends \Light\Model
             "model_content" =>  json_encode(Util::Sanitize($model->jsonSerialize()), JSON_UNESCAPED_UNICODE),
             "created_time" => date("Y-m-d H:i:s"),
         ]);
+    }
+
+    #[Field(outputType: "mixed")]
+    public function getContent()
+    {
+        return $this->model_content;
     }
 }

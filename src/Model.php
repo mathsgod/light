@@ -94,6 +94,9 @@ abstract class Model extends \R\DB\Model
             "user_id" => $user_id,
             "created_time" => date("Y-m-d H:i:s"),
         ]);
+
+        //remove revision
+        Revision::Remove(static::class, $this->$key);
         return parent::delete();
     }
 

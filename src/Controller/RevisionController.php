@@ -37,7 +37,7 @@ class RevisionController
     {
 
         return \Light\Model\Revision::Query(["model_class" => $model_class, "model_id" => $model_id])
-        ->sort("created_time:desc")
-        ->toArray();
+            ->sort("created_time:desc")
+            ->toArray();
     }
 }

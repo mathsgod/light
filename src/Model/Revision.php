@@ -44,6 +44,15 @@ class Revision extends \Light\Model
         return null;
     }
 
+    public static function Remove(string $model_class, int $model_id)
+    {
+        return self::_table()->delete([
+            "model_class" => $model_class,
+            "model_id" => $model_id
+        ]);
+    }
+
+
     public static function Insert(int $user_id, string $model_class, int $model_id, Model $model, Model $target)
     {
 
@@ -74,5 +83,14 @@ class Revision extends \Light\Model
         //sort by key
         ksort($data);
         return $data;
+    }
+
+    #[Field(outputType: "mixed")]
+    public function getDelta()
+    {
+        $delta = $this->delta;
+        //sort by key
+        ksort($delta);
+        return $delta;
     }
 }

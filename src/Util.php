@@ -4,6 +4,23 @@ namespace Light;
 
 class Util
 {
+    /*
+    * Sanitize an array
+    */
+    static  function Sanitize(array $data)
+    {
+
+        $out = [];
+        foreach ($data as $k => $v) {
+            if (is_array($v)) {
+                $out[$k] = self::Sanitize($v);
+            } else {
+                $out[$k] = iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            }
+        }
+        return $out;
+    }
+
     static function ParseSize($size)
     {
         $unit = preg_replace('/[^bkmgtpezy]/i', '', $size); // Remove the non-unit characters from the size.

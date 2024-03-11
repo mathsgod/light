@@ -36,6 +36,8 @@ class RevisionController
     public function getRevisionsByModel(string $model_class, int $model_id): array
     {
 
-        return \Light\Model\Revision::Query(["model_class" => $model_class, "model_id" => $model_id])->toArray();
+        return \Light\Model\Revision::Query(["model_class" => $model_class, "model_id" => $model_id])
+        ->sort("created_time:desc")
+        ->toArray();
     }
 }

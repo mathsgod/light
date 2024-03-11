@@ -132,7 +132,7 @@ abstract class Model extends \R\DB\Model
                 if ($app = self::GetSchema()->getContainer()->get(App::class)) {
                     assert($app instanceof App);
                     if ($app->isRevisionEnabled(static::class)) {
-                        Revision::Insert($user_id, static::class, $this->$key, $source);
+                        Revision::Insert($user_id, static::class, $this->$key, $source, $this);
                     }
                 }
 

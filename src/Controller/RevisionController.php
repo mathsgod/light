@@ -24,6 +24,7 @@ class RevisionController
     /**
      * @param string[] $fields
      */
+    #[Right("revision.restore")]
     public function restoreRevision(int $revision_id, array $fields): bool
     {
         return Revision::Get($revision_id)->retoreFields($fields);
@@ -33,6 +34,7 @@ class RevisionController
 
     #[Logged]
     #[Query(outputType: "[Revision]")]
+    #[Right("revision.read")]
     public function getRevisionsByModel(string $model_class, int $model_id): array
     {
 

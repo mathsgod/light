@@ -2,6 +2,7 @@
 
 namespace Light\Model;
 
+use Error;
 use Laminas\Db\Sql\Insert;
 use Laminas\Permissions\Rbac\Role as RbacRole;
 use Light\Model;
@@ -15,6 +16,22 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "user_id", outputType: "Int")]
 class Revision extends \Light\Model
 {
+    public function retoreFields(array $fields)
+    {
+        $class = $this->model_class;
+        $model_object = $class::Get($this->model_id);
+        if ($model_object) {
+            foreach ($fields as $field) {
+                if (property_exists($model_object, $field)) {
+                    $model_object->$field = $this->getContent()[$field];
+                }
+            }
+            $model_object->save();
+            return true;
+        }
+        return false;
+    }
+
     public static function Insert(int $user_id, string $model_class, int $model_id, Model $model)
     {
         return self::_table()->insert([
@@ -29,6 +46,9 @@ class Revision extends \Light\Model
     #[Field(outputType: "mixed")]
     public function getContent()
     {
-        return $this->model_content;
+        $data = $this->model_content;
+        //sort by key
+        ksort($data);
+        return $data;
     }
 }

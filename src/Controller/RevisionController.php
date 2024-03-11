@@ -4,6 +4,7 @@ namespace Light\Controller;
 
 use Light\App as LightApp;
 use Light\Model\Config;
+use Light\Model\Revision;
 use Light\Model\User;
 use Light\Type\App;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
@@ -16,6 +17,20 @@ use Psr\Http\Message\UploadedFileInterface;
 
 class RevisionController
 {
+
+
+    #[Mutation]
+    #[Logged]
+    /**
+     * @param string[] $fields
+     */
+    public function restoreRevision(int $revision_id, array $fields): bool
+    {
+        return Revision::Get($revision_id)->retoreFields($fields);
+    }
+
+
+
     #[Logged]
     #[Query(outputType: "[Revision]")]
     public function getRevisionsByModel(string $model_class, int $model_id): array
@@ -23,6 +38,4 @@ class RevisionController
 
         return \Light\Model\Revision::Query(["model_class" => $model_class, "model_id" => $model_id])->toArray();
     }
-
-    
 }

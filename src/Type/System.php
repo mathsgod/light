@@ -1,8 +1,9 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Type;
 
 use Light\App;
+use Light\Model\Config;
 use Light\Type\Database;
 use Light\Util;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;

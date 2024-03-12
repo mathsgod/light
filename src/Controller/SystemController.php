@@ -4,7 +4,7 @@ namespace Light\Controller;
 
 use Firebase\JWT\JWT;
 use Light\App;
-use Light\Model\System;
+use Light\Type\System;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;

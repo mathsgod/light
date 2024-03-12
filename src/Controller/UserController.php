@@ -3,7 +3,7 @@
 namespace Light\Controller;
 
 use Light\Input\User as InputUser;
-use Light\Model\System;
+use Light\Type\System;
 use Light\Model\User;
 use Light\Model\UserRole;
 use Psr\Http\Message\ServerRequestInterface;

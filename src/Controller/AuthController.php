@@ -9,7 +9,7 @@ use Light\App;
 use Light\Auth\Service;
 use Light\Input\User as InputUser;
 use Light\Model\Config;
-use Light\Model\System;
+use Light\Type\System;
 use Light\Model\User;
 use Light\Model\UserLog;
 use Light\Security\TwoFactorAuthentication;

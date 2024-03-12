@@ -7,6 +7,7 @@ use Light\Model\Config;
 use Light\Type\Database;
 use Light\Util;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
+use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
@@ -51,14 +52,26 @@ class System
 
     #[Field]
     #[Right("system.storage")]
+
     public function getDiskUsageSpace(): string
     {
         return Util::Size(disk_total_space(getcwd()) - disk_free_space(getcwd()));
     }
 
+    #[Field]
+    #[Right("system.storage")]
+    #[Logged]
+    #[FailWith(["value" => null])]
+    public function getStorage(): ?Storage
+    {
+        return new Storage;
+    }
 
     #[Field]
     #[Right("system.storage")]
+    /**
+     * @deprecated Use storage instead
+     */
     public function getDiskFreeSpacePercent(): float
     {
         return disk_free_space(getcwd()) / disk_total_space(getcwd());
@@ -66,6 +79,9 @@ class System
 
     #[Field]
     #[Right("system.storage")]
+    /**
+     * @deprecated Use storage instead
+     */
     public function getDiskFreeSpace(): string
     {
         return Util::Size(disk_free_space(getcwd()));
@@ -73,6 +89,9 @@ class System
 
     #[Field]
     #[Right("system.storage")]
+    /**
+     * @deprecated Use storage instead
+     */
     public function getDiskTotalSpace(): string
     {
         return Util::Size(disk_total_space(getcwd()));

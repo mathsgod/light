@@ -66,3 +66,5 @@ Administrators:
   - fs.add
   - fs.list
   - fs.delete
+  - revision.restore
+  - revision.read

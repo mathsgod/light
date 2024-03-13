@@ -22,7 +22,8 @@
         "ecodev/graphql-upload": "^6.1",
         "phpmailer/phpmailer": "^6.8",
         "symfony/cache": "^6.0",
-        "endroid/qr-code": "^4.8"
+        "endroid/qr-code": "^4.8",
+        "sebastian/diff": "^4.0"
     },
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*",

@@ -7,6 +7,9 @@ use Laminas\Db\Sql\Insert;
 use Laminas\Permissions\Rbac\Role as RbacRole;
 use Light\Model;
 use Light\Util;
+use SebastianBergmann\Diff\Differ;
+use SebastianBergmann\Diff\Output\StrictUnifiedDiffOutputBuilder;
+use SebastianBergmann\Diff\Output\UnifiedDiffOutputBuilder;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
@@ -92,5 +95,36 @@ class Revision extends \Light\Model
         //sort by key
         ksort($delta);
         return $delta;
+    }
+
+    #[Field(outputType: "mixed")]
+    public function getDiff()
+    {
+        $source = $this->getContent();
+        $delta = $this->getDelta();
+        $diff = [];
+
+
+        $builder = new StrictUnifiedDiffOutputBuilder([
+            'collapseRanges'      => true, // ranges of length one are rendered with the trailing `,1`
+            'commonLineThreshold' => 6,    // number of same lines before ending a new hunk and creating a new one (if needed)
+            'contextLines'        => 3,    // like `diff:  -u, -U NUM, --unified[=NUM]`, for patch/git apply compatibility best to keep at least @ 3
+            'fromFile'            => 'Original',
+            'fromFileDate'        => null,
+            'toFile'              => 'New',
+            'toFileDate'          => null,
+        ]);
+        $differ = new Differ($builder);
+        foreach ($delta as $k => $v) {
+
+
+            if (is_array($source[$k])) {
+                $d = $differ->diff(json_encode($source[$k], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), json_encode($v, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+            } else {
+                $d = $differ->diff($source[$k], $v);
+            }
+            $diff[$k] = $d;
+        }
+        return $diff;
     }
 }

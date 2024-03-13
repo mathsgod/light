@@ -25,7 +25,9 @@ class Revision extends \Light\Model
         $model_object = $class::Get($this->model_id);
         if ($model_object) {
             foreach ($fields as $field) {
-                if (property_exists($model_object, $field)) {
+                assert($model_object instanceof \Light\Model);
+
+                if (in_array($field, $model_object->__fields())) {
                     $model_object->$field = $this->getContent()[$field];
                 }
             }

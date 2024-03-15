@@ -3,6 +3,7 @@
 namespace Light\Model;
 
 use Error;
+use Exception;
 use Laminas\Db\Sql\Insert;
 use Laminas\Permissions\Rbac\Role as RbacRole;
 use Light\Model;
@@ -51,10 +52,13 @@ class Revision extends \Light\Model
 
     public static function Remove(string $model_class, int $model_id)
     {
-        return self::_table()->delete([
-            "model_class" => $model_class,
-            "model_id" => $model_id
-        ]);
+        try {
+            return self::_table()->delete([
+                "model_class" => $model_class,
+                "model_id" => $model_id
+            ]);
+        } catch (Exception $e) {
+        }
     }
 
 

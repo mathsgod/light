@@ -482,8 +482,9 @@ class App implements MiddlewareInterface
             "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
             "secure" => $_ENV["COOKIE_SECURE"] ?? false,
             "httponly" => true,
-            "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax"
+            "samesite" => ($_ENV["COOKIE_SAMESITE"] ?? "Lax").";Partitioned"
         ]);
+     
     }
 
     public function hasFavorite(): bool

@@ -475,6 +475,11 @@ class App implements MiddlewareInterface
             "jti" => $jti
         ]);
 
+        $samesite = $_ENV["COOKIE_SAMESITE"] ?? "Lax";
+        // if is https then add Partitioned
+        if ($_SERVER["HTTPS"] == "on") {
+            $samesite .= ";Partitioned";
+        }
         //set cookie
         setcookie("access_token", $token, [
             "expires" => time() + $access_token_expire,
@@ -482,9 +487,8 @@ class App implements MiddlewareInterface
             "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
             "secure" => $_ENV["COOKIE_SECURE"] ?? false,
             "httponly" => true,
-            "samesite" => ($_ENV["COOKIE_SAMESITE"] ?? "Lax").";Partitioned"
+            "samesite" => $samesite
         ]);
-     
     }
 
     public function hasFavorite(): bool

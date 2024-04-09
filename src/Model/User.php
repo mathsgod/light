@@ -190,7 +190,7 @@ class User extends \Light\Model
         }
 
         //only administrators can delete administrators
-        if (in_array("Administrators", $this->getRoles()) && !in_array("Administrators", $by->getRoles())) {
+        if ($this->is("Administrators") && !$by->is("Administrators")) {
             return false;
         }
 

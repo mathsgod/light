@@ -194,7 +194,12 @@ class User extends \Light\Model
             return false;
         }
 
-        return parent::canDelete($by);
+        //administrators can delete everyone
+        if ($by->is("Administrators") || $by->is("Power Users")) {
+            return true;
+        }
+        
+        return false;
     }
 
     public function is(string $role): bool
@@ -212,18 +217,18 @@ class User extends \Light\Model
     #[Field]
     public function canUpdate(#[InjectUser] ?User $by): bool
     {
-        //only administrators can update administrators
-        if ($this->is("Administrators") && !$by->is("Administrators")) {
-            return false;
-        }
-
         //user can update himself
         if ($by && $by->user_id == $this->user_id) {
             return true;
         }
 
+        //only administrators can update administrators
+        if ($this->is("Administrators") && !$by->is("Administrators")) {
+            return false;
+        }
+
         //administrators can update everyone
-        if ($by->is("Administrators")) {
+        if ($by->is("Administrators") || $by->is("Power Users")) {
             return true;
         }
 

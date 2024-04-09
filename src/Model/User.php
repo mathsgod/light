@@ -216,7 +216,18 @@ class User extends \Light\Model
         if ($this->is("Administrators") && !$by->is("Administrators")) {
             return false;
         }
-        return true;
+
+        //user can update himself
+        if ($by && $by->user_id == $this->user_id) {
+            return true;
+        }
+
+        //administrators can update everyone
+        if ($by->is("Administrators")) {
+            return true;
+        }
+
+        return false;
     }
 
     #[Field]

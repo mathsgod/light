@@ -17,14 +17,18 @@ use Psr\Http\Message\UploadedFileInterface;
 class AppController
 {
 
-    /* 
-    #[Mutation]
-    public function test(UploadedFileInterface $file): string
+
+    #[Query]
+    public function test(#[InjectUser] User $user, #[Autowire] LightApp $app): string
     {
-        return $file->getStream()->getContents();
-        return true;
+
+        return $user->is("Administrators");
+
+
+
+        //return $user->is("Administrators");
     }
- */
+
 
     #[Query]
     public function getApp(): App

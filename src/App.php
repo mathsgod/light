@@ -477,7 +477,7 @@ class App implements MiddlewareInterface
 
         $samesite = $_ENV["COOKIE_SAMESITE"] ?? "Lax";
         // if is https then add Partitioned
-        if ($_SERVER["HTTPS"] == "on") {
+        if ($_SERVER["HTTPS"] == "on" && $_ENV["COOKIE_PARTITIONED"] == "true") {
             $samesite .= ";Partitioned";
         }
         //set cookie

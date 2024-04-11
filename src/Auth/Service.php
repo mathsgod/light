@@ -97,7 +97,13 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
             return false;
         }
 
+
         if ($user instanceof User) {
+
+            if ($user->is("Administrators")) {
+                return true;
+            }
+
             $rbac = $this->app->getRbac();
 
             foreach ($user->getRoles() as $role) {

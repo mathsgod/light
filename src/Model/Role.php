@@ -121,4 +121,13 @@ class Role extends Model
 
         return $this->_role->hasPermission($permission);
     }
+
+    public function is(string $role): bool
+    {
+        if ($this->getName() == $role) return true;
+        foreach ($this->getParents() as $p) {
+            if ($p->is($role)) return true;
+        }
+        return false;
+    }
 }

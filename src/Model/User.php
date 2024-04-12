@@ -63,23 +63,9 @@ class User extends \Light\Model
      */
     public function getPermissions(#[Autowire] App $app): array
     {
-        $result = [];
         $rbac = $app->getRbac();
-        foreach ($this->getRoles() as $role) {
-            if ($rbac->hasRole($role)) {
-                foreach ($rbac->getRole($role)->getPermissions() as $permission) {
-                    $result[] = $permission;
-                }
-            }
-        }
-
-        //unique
-        $result = array_unique($result);
-
-        return $result;
+        return $rbac->getUser($this->user_id)->getPermissions();
     }
-
-
 
     public function saveLastAccessTime(string $jti)
     {

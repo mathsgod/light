@@ -1791,16 +1791,16 @@
         },
         {
             "name": "mathsgod/light-rbac",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mathsgod/light-rbac.git",
-                "reference": "4ac07cce867ff578972c6824a1efaebd39536235"
+                "reference": "1ec5be1fe266fbe576b922927457bcccba2b0311"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mathsgod/light-rbac/zipball/4ac07cce867ff578972c6824a1efaebd39536235",
-                "reference": "4ac07cce867ff578972c6824a1efaebd39536235",
+                "url": "https://api.github.com/repos/mathsgod/light-rbac/zipball/1ec5be1fe266fbe576b922927457bcccba2b0311",
+                "reference": "1ec5be1fe266fbe576b922927457bcccba2b0311",
                 "shasum": ""
             },
             "require": {
@@ -1834,9 +1834,9 @@
             ],
             "support": {
                 "issues": "https://github.com/mathsgod/light-rbac/issues",
-                "source": "https://github.com/mathsgod/light-rbac/tree/1.0.0"
+                "source": "https://github.com/mathsgod/light-rbac/tree/1.0.1"
             },
-            "time": "2024-04-12T07:18:20+00:00"
+            "time": "2024-04-12T09:17:20+00:00"
         },
         {
             "name": "mathsgod/r-db",

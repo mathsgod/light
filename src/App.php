@@ -16,6 +16,7 @@ use Light\Model\Permission;
 use Light\Model\Role;
 use Light\Model\User;
 use Light\Model\UserLog;
+use Light\Model\UserRole;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -183,13 +184,11 @@ class App implements MiddlewareInterface
     public function loadRbac()
     {
         /** Roles */
-        $this->rbac->addRole("Administrators");
-        $this->rbac->getRole("Administrators")->addPermission("#administrators");
-        $this->rbac->getRole("Administrators")->addPermission("*");
+        $this->rbac->addRole("Administrators")->addPermission("#administrators");
 
-        $this->rbac->addRole("Power Users");
-        $this->rbac->getRole("Power Users")->addPermission("#power users");
-        $this->rbac->getRole("Power Users")->addParent("Administrators");
+        $role = $this->rbac->addRole("Power Users");
+        $role->addPermission("#power users");
+        $role->addParent("Administrators");
 
         $this->rbac->addRole("Users", ["Power Users"]);
         $this->rbac->getRole("Users")->addPermission("#users");
@@ -201,24 +200,13 @@ class App implements MiddlewareInterface
         $this->rbac->getRole("Everyone")->addParent("Users");
 
         //check if table exists
-
-
         try {
-
-
             foreach (Role::Query() as $q) {
+                $this->rbac->addRole($q->name)->addPermission("#" . strtolower($q->name));
 
-                if (!$this->rbac->hasRole($q->name)) {
-                    $this->rbac->addRole($q->name);
-                    $this->rbac->getRole($q->name)->addPermission("#" . strtolower($q->name));
-                }
+                $this->rbac->addRole($q->child)->addPermission("#" . strtolower($q->child));
 
-                if (!$this->rbac->hasRole($q->child)) {
-                    $this->rbac->addRole($q->child);
-                    $this->rbac->getRole($q->child)->addPermission("#" . strtolower($q->child));
-                }
-
-                $this->rbac->getRole($q->name)->addChild($this->rbac->getRole($q->child));
+                $this->rbac->getRole($q->name)->addChild($q->child);
             }
         } catch (Exception $e) {
             // may be mysql not ready
@@ -227,20 +215,30 @@ class App implements MiddlewareInterface
         /** Permissions */
         $all = Yaml::parseFile(dirname(__DIR__) . '/permissions.yml');
 
+
         foreach ($all as $role => $permissions) {
             $this->addRolePermissions($role, $permissions);
         }
 
         foreach (Permission::Query() as $p) {
+            if ($p->role) {
+                $role = $this->rbac->addRole($p->role);
+                $role->addPermission($p->value);
 
-            $this->rbac->getRole($p->role)->addPermission($p->value);
+                $this->permissions[] = $p->value;
+            }
         }
 
+        //load user role
+        foreach (UserRole::Query() as $ur) {
+            $role = $this->rbac->addRole($ur->role);
+            $role->addPermission("#" . strtolower($ur->role));
 
+            $this->rbac->addUser($ur->user_id, [$ur->role]);
+        }
 
         //unique
         $this->permissions = array_unique($this->permissions);
-
 
         $this->container->add(Rbac::class, $this->rbac);
     }
@@ -509,7 +507,6 @@ class App implements MiddlewareInterface
 
         //map name to index
         $fss = array_combine(array_column($fss, "name"), $fss);
-
 
         //push default if not exists
         if (!isset($fss["default"])) {

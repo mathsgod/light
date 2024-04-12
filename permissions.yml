@@ -1,3 +1,6 @@
+Administrators:
+  - '*'
+  
 Power Users:
   - user.list
   - user.read

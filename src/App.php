@@ -185,6 +185,7 @@ class App implements MiddlewareInterface
         /** Roles */
         $this->rbac->addRole("Administrators");
         $this->rbac->getRole("Administrators")->addPermission("#administrators");
+        $this->rbac->getRole("Administrators")->addPermission("*");
 
         $this->rbac->addRole("Power Users");
         $this->rbac->getRole("Power Users")->addPermission("#power users");

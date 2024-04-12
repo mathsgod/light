@@ -2,7 +2,7 @@
 
 namespace Light\Type;
 
-use Laminas\Permissions\Rbac\Rbac;
+use Light\Rbac\Rbac;
 use Light\App as LightApp;
 use Light\Model\Config;
 use Light\Model\MyFavorite;
@@ -123,7 +123,7 @@ class App
 
                 foreach ($permission as $p) {
                     foreach ($roles as $role) {
-                        if ($rbac->isGranted($role, $p)) {
+                        if ($rbac->getRole($role)->can($p)) {
                             $canAccess = true;
                             break;
                         }

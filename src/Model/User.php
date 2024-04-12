@@ -65,14 +65,9 @@ class User extends \Light\Model
     {
         $result = [];
         $rbac = $app->getRbac();
-        
-        $permissions = $app->getPermissions();
-
-
         foreach ($this->getRoles() as $role) {
-
-            foreach ($permissions as $permission) {
-                $rbac->getRole($role)->hasPermission($permission) && $result[] = $permission;
+            foreach ($rbac->getRole($role)->getPermissions() as $permission) {
+                $result[] = $permission;
             }
         }
 
@@ -152,7 +147,7 @@ class User extends \Light\Model
         $rbac = $app->getRbac();
 
         foreach ($this->getRoles() as $role) {
-            if ($rbac->isGranted($role, $right)) {
+            if ($rbac->getRole($role)->can($right)) {
                 return true;
             }
         }
@@ -199,7 +194,7 @@ class User extends \Light\Model
         if ($by->is("Administrators") || $by->is("Power Users")) {
             return true;
         }
-        
+
         return false;
     }
 

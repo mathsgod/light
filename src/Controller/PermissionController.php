@@ -2,7 +2,6 @@
 
 namespace Light\Controller;
 
-use Laminas\Permissions\Rbac\Rbac;
 use Light\App;
 use Light\Model\Permission;
 use Light\Model\User;

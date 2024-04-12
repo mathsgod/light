@@ -15,7 +15,6 @@
         "thecodingmachine/graphqlite": "^6.0",
         "mathsgod/graphqlite-mixed-type": "^2.1",
         "laminas/laminas-diactoros": "^3.1",
-        "laminas/laminas-permissions-rbac": "^3.4",
         "symfony/yaml": "^6.0",
         "ramsey/uuid": "^4.7",
         "league/flysystem": "^3.15",
@@ -23,7 +22,8 @@
         "phpmailer/phpmailer": "^6.8",
         "symfony/cache": "^6.0",
         "endroid/qr-code": "^4.8",
-        "sebastian/diff": "^4.0"
+        "sebastian/diff": "^4.0",
+        "mathsgod/light-rbac": "^1.0"
     },
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*",

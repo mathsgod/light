@@ -2,7 +2,7 @@
 
 namespace Light\Controller;
 
-use Laminas\Permissions\Rbac\Rbac;
+use Light\Rbac\Rbac;
 use Light\Model\Role;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;

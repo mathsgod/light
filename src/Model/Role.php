@@ -2,7 +2,7 @@
 
 namespace Light\Model;
 
-use Laminas\Permissions\Rbac\Role as RbacRole;
+use Light\Rbac\Role as RbacRole;
 use R\DB\Model;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -101,7 +101,7 @@ class Role extends Model
     public function getChildren(): array
     {
         $cs = [];
-        foreach ($this->_role->getChildren() as $c) {
+        foreach ($this->_role->getChild() as $c) {
             $cs[] = $c->getName();
         }
         return $cs;
@@ -118,8 +118,7 @@ class Role extends Model
 
     public function hasPermission(string $permission): bool
     {
-
-        return $this->_role->hasPermission($permission);
+        return in_array($permission, $this->getPermissions());
     }
 
     public function is(string $role): bool

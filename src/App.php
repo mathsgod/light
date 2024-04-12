@@ -8,8 +8,7 @@ use GQL\Type\MixedTypeMapperFactory;
 use GraphQL\GraphQL;
 use GraphQL\Upload\UploadMiddleware;
 use Laminas\Diactoros\Response\EmptyResponse;
-use Laminas\Permissions\Rbac\Rbac;
-use Laminas\Permissions\Rbac\RoleInterface;
+use Light\Rbac\Rbac;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\Model\Config;
 use Light\Model\MyFavorite;
@@ -161,11 +160,11 @@ class App implements MiddlewareInterface
     /**
      * Adds permissions to a given role.
      *
-     * @param RoleInterface|string $role The role to add permissions to.
+     * @param string $role The role to add permissions to.
      * @param string[] $permissions An array of permissions to add to the role.
      * @return void
      */
-    public function addRolePermissions(RoleInterface|string $role, array $permissions)
+    public function addRolePermissions(string $role, array $permissions)
     {
         if (!$this->rbac->hasRole($role)) {
             $this->rbac->addRole($role);
@@ -183,21 +182,22 @@ class App implements MiddlewareInterface
 
     public function loadRbac()
     {
-        $this->rbac->setCreateMissingRoles(true);
-
-
         /** Roles */
         $this->rbac->addRole("Administrators");
         $this->rbac->getRole("Administrators")->addPermission("#administrators");
 
-        $this->rbac->addRole("Power Users", ["Administrators"]);
+        $this->rbac->addRole("Power Users");
         $this->rbac->getRole("Power Users")->addPermission("#power users");
+        $this->rbac->getRole("Power Users")->addParent("Administrators");
 
         $this->rbac->addRole("Users", ["Power Users"]);
         $this->rbac->getRole("Users")->addPermission("#users");
+        $this->rbac->getRole("Users")->addParent("Power Users");
+
 
         $this->rbac->addRole("Everyone", ["Users"]);
         $this->rbac->getRole("Everyone")->addPermission("#everyone");
+        $this->rbac->getRole("Everyone")->addParent("Users");
 
         //check if table exists
 
@@ -358,9 +358,6 @@ class App implements MiddlewareInterface
         }
         return $config->value;
     }
-
-
-
 
     public function getRbac()
     {

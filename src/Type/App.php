@@ -123,7 +123,7 @@ class App
 
                 foreach ($permission as $p) {
                     foreach ($roles as $role) {
-                        if ($rbac->getRole($role)->can($p)) {
+                        if ($rbac->hasRole($role) && $rbac->getRole($role)->can($p)) {
                             $canAccess = true;
                             break;
                         }

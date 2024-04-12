@@ -107,7 +107,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
             $rbac = $this->app->getRbac();
 
             foreach ($user->getRoles() as $role) {
-                if ($rbac->getRole($role)->can($right)) {
+                if ($rbac->hasRole($role) && $rbac->getRole($role)->can($right)) {
                     return true;
                 }
             }

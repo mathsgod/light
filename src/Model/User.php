@@ -66,8 +66,10 @@ class User extends \Light\Model
         $result = [];
         $rbac = $app->getRbac();
         foreach ($this->getRoles() as $role) {
-            foreach ($rbac->getRole($role)->getPermissions() as $permission) {
-                $result[] = $permission;
+            if ($rbac->hasRole($role)) {
+                foreach ($rbac->getRole($role)->getPermissions() as $permission) {
+                    $result[] = $permission;
+                }
             }
         }
 

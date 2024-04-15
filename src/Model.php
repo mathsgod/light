@@ -60,7 +60,7 @@ abstract class Model extends \R\DB\Model
     #[Field]
     public function canDelete(#[InjectUser] ?User $by): bool
     {
-        return false;
+        return true;
     }
 
     #[Field]
@@ -70,10 +70,12 @@ abstract class Model extends \R\DB\Model
             $rbac = $container->get(App::class)->getRbac();
             assert($rbac instanceof Rbac);
             if ($user = $rbac->getUser($by->user_id)) {
-                return $user->can(static::class . "." . $this->_key() . ".write");
+                if ($user->can(static::class . "." . $this->_key() . ".write")) {
+                    return true;
+                }
             }
         }
-        return false;
+        return true;
     }
 
     #[Field]
@@ -83,13 +85,17 @@ abstract class Model extends \R\DB\Model
             $rbac = $container->get(App::class)->getRbac();
             assert($rbac instanceof Rbac);
             if ($user = $rbac->getUser($by->user_id)) {
-                return $user->can(static::class . "." . $this->_key() . ".read")
-                    || $user->can(static::class . "." . $this->_key() . ".write");
+                if (
+                    $user->can(static::class . "." . $this->_key() . ".read")
+                    || $user->can(static::class . "." . $this->_key() . ".write")
+                ) {
+                    return true;
+                }
             }
         }
 
 
-        return false;
+        return true;
     }
 
     public function delete()

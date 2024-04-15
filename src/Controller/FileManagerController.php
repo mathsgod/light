@@ -23,7 +23,7 @@ class FileManagerController
     }
 
     #[Mutation]
-    #[Right("fs:file.write")]
+    #[Right("fs:file:write")]
     public function fsWriteFileBase64(string $path, string $content): bool
     {
         $this->fs->write($path, base64_decode($content));
@@ -32,7 +32,7 @@ class FileManagerController
 
 
     #[Mutation]
-    #[Right("fs:file.write")]
+    #[Right("fs:file:write")]
     public function fsWriteFile(string $path, string $content): bool
     {
         $this->fs->write($path, $content);
@@ -40,7 +40,7 @@ class FileManagerController
     }
 
     #[Mutation]
-    #[Right("fs:file.upload")]
+    #[Right("fs:file:upload")]
     public function fsUploadTempFile(UploadedFileInterface $file): File
     {
         //get path extension
@@ -84,7 +84,7 @@ class FileManagerController
     /**
      * @return \Light\Type\FS\File[]
      */
-    #[Right('fs:file.list')]
+    #[Right('fs:file:list')]
     public function fsListFiles(?string $path = "", ?string $type = null, ?string $search = null): array
     {
 
@@ -128,7 +128,7 @@ class FileManagerController
     /**
      * @return \Light\Type\FS\Folder[]
      */
-    #[Right('fs:folder.list')]
+    #[Right('fs:folder:list')]
     public function fsListFolders(?string $path = ""): array
     {
         $files = [];
@@ -140,7 +140,7 @@ class FileManagerController
     }
 
     #[Mutation]
-    #[Right("fs:folder.create")]
+    #[Right("fs:folder:create")]
     public function fsCreateFolder(string $path): bool
     {
         $this->fs->createDirectory($path);
@@ -148,7 +148,7 @@ class FileManagerController
     }
 
     #[Mutation]
-    #[Right("fs:folder.delete")]
+    #[Right("fs:folder:delete")]
     public function fsDeleteFolder(string $path): bool
     {
         $this->fs->deleteDirectory($path);
@@ -156,7 +156,7 @@ class FileManagerController
     }
 
     #[Mutation]
-    #[Right("fs:file.delete")]
+    #[Right("fs:file:delete")]
     public function fsDeleteFile(string $path): bool
     {
         $this->fs->delete($path);
@@ -164,7 +164,7 @@ class FileManagerController
     }
 
     #[Mutation]
-    #[Right("fs:file.rename")]
+    #[Right("fs:file:rename")]
     public function fsRenameFile(string $path, string $name): bool
     {
 
@@ -177,7 +177,7 @@ class FileManagerController
     }
 
     #[Mutation]
-    #[Right("fs:folder.rename")]
+    #[Right("fs:folder:rename")]
     public function fsRenameFolder(string $path, string $name): bool
     {
         $this->fs->move($path, dirname($path) . "/" . $name);
@@ -214,7 +214,7 @@ class FileManagerController
     }
 
     #[Mutation]
-    #[Right("fs:file.upload")]
+    #[Right("fs:file:upload")]
     public function fsUploadFile(string $path, UploadedFileInterface $file, ?bool $rename = false): string
     {
         //get path extension
@@ -240,7 +240,7 @@ class FileManagerController
         return $path . "/" . $filename;
     }
 
-    #[Right('fs:file.move')]
+    #[Right('fs:file:move')]
     public function fsMoveFile(string $source, string $target): bool
     {
         $basename = basename($source);

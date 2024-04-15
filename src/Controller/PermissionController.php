@@ -39,7 +39,7 @@ class PermissionController
 
     #[Query()]
     #[Logged]
-    #[Right("permission.all")]
+    #[Right("permission:all")]
     /**
      * @return string[]
      */
@@ -54,7 +54,7 @@ class PermissionController
      * @return \Light\Model\Permission[]
      * @param ?mixed $filters
      */
-    #[Right("permission.list")]
+    #[Right("permission:list")]
     public function listPermission(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
     {
         return Permission::Query()->filters($filters)->sort($sort);
@@ -62,7 +62,7 @@ class PermissionController
 
 
     #[Mutation]
-    #[Right("role.permission.add")]
+    #[Right("role:permission:add")]
     public function addPermission(string $role, string $value): bool
     {
         $permission = Permission::Create([
@@ -74,7 +74,7 @@ class PermissionController
     }
 
     #[Mutation]
-    #[Right("role.permission.add")]
+    #[Right("role:permission:add")]
     /**
      * @param string[] $roles
      */
@@ -92,7 +92,7 @@ class PermissionController
     }
 
     #[Mutation]
-    #[Right("role.permission.remove")]
+    #[Right("role:permission:remove")]
     public function removePermission(string $role, string $value): bool
     {
         if ($permission = Permission::Get([
@@ -106,7 +106,7 @@ class PermissionController
     }
 
     #[Mutation]
-    #[Right("permission.delete")]
+    #[Right("permission:delete")]
     public function deletePermission(int $id): bool
     {
         if ($permission = Permission::Get($id)) {

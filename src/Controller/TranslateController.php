@@ -16,7 +16,7 @@ class TranslateController
 
 
     #[Mutation]
-    #[Right('translate.update')]
+    #[Right('translate:update')]
     public function updateTranslate(string $name, string $value, string $language): bool
     {
         if (!$t = Translate::Get(["name" => $name, "language" => $language])) {
@@ -55,7 +55,7 @@ class TranslateController
 
     #[Mutation]
     #[Logged]
-    #[Right('translate.add')]
+    #[Right('translate:add')]
     public function addTranslate(InputTranslate $data, #[InjectUser] \Light\Model\User $user): int
     {
         foreach ($data->values as $value) {
@@ -81,7 +81,7 @@ class TranslateController
 
     #[Mutation]
     #[Logged]
-    #[Right('translate.delete')]
+    #[Right('translate:delete')]
     public function deleteTranslate(string $name): bool
     {
         foreach (Translate::Query(["name" => $name]) as $obj) {

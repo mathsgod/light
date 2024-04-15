@@ -18,7 +18,7 @@ class UserLogController
      * @return \Light\Model\UserLog[]
      * @param ?mixed $filters
      */
-    #[Right("userlog.list")]
+    #[Right("userlog:list")]
     public function listUserLog(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
     {
         return UserLog::Query()->filters($filters)->sort($sort);

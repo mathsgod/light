@@ -64,7 +64,7 @@ class SystemController
 
     #[Mutation]
     #[Logged]
-    #[Right("system.view_as")]
+    #[Right("system:view_as")]
     public function viewAs(#[InjectUser] $user, int $user_id, #[Autowire] App $app): bool
     {
         $access_token_expire = $app->getAccessTokenExpire();

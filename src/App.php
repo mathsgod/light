@@ -174,7 +174,6 @@ class App implements MiddlewareInterface
         foreach ($permissions as $p) {
             $r->addPermission($p);
         }
-
     }
 
     public function loadRbac()
@@ -220,6 +219,11 @@ class App implements MiddlewareInterface
             if ($p->role) {
                 $role = $this->rbac->addRole($p->role);
                 $role->addPermission($p->value);
+            }
+
+            if ($p->user_id) {
+                $user = $this->rbac->addUser($p->user_id);
+                $user->addPermission($p->value);
             }
         }
 
@@ -308,7 +312,7 @@ class App implements MiddlewareInterface
         }
 
 
-        foreach($this->rbac->getPermissions() as $permission){
+        foreach ($this->rbac->getPermissions() as $permission) {
             $permissions[] = $permission;
         }
 

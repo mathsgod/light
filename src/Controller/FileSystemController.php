@@ -21,7 +21,7 @@ use TheCodingMachine\GraphQLite\Annotations\Autowire;
 class FileSystemController
 {
     #[Mutation]
-    #[Right("filesystem:add")]
+    #[Right("filesystem.add")]
     /**
      * @param mixed $data
      */
@@ -38,7 +38,7 @@ class FileSystemController
     }
 
     #[Query(outputType: "mixed")]
-    #[Right("filesystem:list")]
+    #[Right("filesystem.list")]
     public function listFileSystem(): array
     {
         if (!$config = Config::Get(["name" => "fs"])) {

@@ -18,7 +18,7 @@ class SystemValueController
      * @return \Light\Model\SystemValue[]
      * @param ?mixed $filters
      */
-    #[Right('systemvalue:list')]
+    #[Right('systemvalue.list')]
     public function listSystemValue(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
     {
         return SystemValue::Query()->filters($filters)->sort($sort);
@@ -26,7 +26,7 @@ class SystemValueController
 
     #[Mutation]
     #[Logged]
-    #[Right('systemvalue:add')]
+    #[Right('systemvalue.add')]
     public function addSystemValue(\Light\Input\SystemValue $data, #[InjectUser] \Light\Model\User $user): int
     {
         $obj = SystemValue::Create();

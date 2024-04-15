@@ -28,7 +28,7 @@ class RoleController
      * @return \Light\Model\Role[]
      * @param ?mixed $filters
      */
-    #[Right("role:list")]
+    #[Right("role.list")]
     public function listRole(#[Autowire] Rbac $rbac, #[InjectUser] \Light\Model\User $user): array
     {
         $rs = [];
@@ -45,7 +45,7 @@ class RoleController
 
     #[Mutation]
     #[Logged]
-    #[Right("role:add")]
+    #[Right("role.add")]
     public function addRole(\Light\Input\Role $data, #[InjectUser] \Light\Model\User $user): bool
     {
         foreach ($data->childs as $child) {

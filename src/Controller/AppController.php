@@ -38,7 +38,7 @@ class AppController
 
     #[Mutation]
     #[Logged]
-    #[Right('config:update')]
+    #[Right('config.update')]
     /**
      * @param mixed $data
      */
@@ -62,7 +62,7 @@ class AppController
 
     #[Mutation]
     #[Logged]
-    #[Right('config:update')]
+    #[Right('config.update')]
     function updateAppConfig(string $name, string $value): bool
     {
         if (!$config = Config::Get(["name" => $name])) {
@@ -77,7 +77,7 @@ class AppController
 
     #[Mutation]
     #[Logged]
-    #[Right('menu:update')]
+    #[Right('menu.update')]
     /**
      * @param mixed $data
      */

@@ -84,7 +84,7 @@ class FileManagerController
     /**
      * @return \Light\Type\FS\File[]
      */
-    #[Right('fs:file:list')]
+    #[Right('fs:file.list')]
     public function fsListFiles(?string $path = "", ?string $type = null, ?string $search = null): array
     {
 
@@ -128,7 +128,7 @@ class FileManagerController
     /**
      * @return \Light\Type\FS\Folder[]
      */
-    #[Right('fs:folder:list')]
+    #[Right('fs:folder.list')]
     public function fsListFolders(?string $path = ""): array
     {
         $files = [];

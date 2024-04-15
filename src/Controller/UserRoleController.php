@@ -15,7 +15,7 @@ class UserRoleController
 {
     #[Mutation]
     #[Logged]
-    #[Right("user:role:add")]
+    #[Right("user:role.add")]
     public function addUserRole(#[InjectUser] \Light\Model\User $user, #[Autowire] Rbac $rbac, int $user_id, string $role): bool
     {
         if ($role == "Administrators") { // Only administrators can add administrators
@@ -31,7 +31,7 @@ class UserRoleController
     
     #[Mutation]
     #[Logged]
-    #[Right("user:role:add")]
+    #[Right("user:role.add")]
     public function removeUserRole(#[InjectUser] \Light\Model\User $user, #[Autowire] Rbac $rbac, int $user_id, string $role): bool
     {
         if ($role == "Administrators") { // Only administrators can remove administrators
@@ -50,7 +50,7 @@ class UserRoleController
 
     #[Mutation]
     #[Logged]
-    #[Security("is_granted('user:role:add') and is_granted('user:role:remove')")]
+    #[Security("is_granted('user:role.add') and is_granted('user:role:remove')")]
     /**
      * @param string[] $roles
      */

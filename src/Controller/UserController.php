@@ -28,7 +28,7 @@ class UserController
      * @return \Light\Model\User[]
      * @param ?mixed $filters
      */
-    #[Right("user:list")]
+    #[Right("user.list")]
     public function listUser(#[InjectUser] \Light\Model\User $user, $filters = [], ?string $sort = ""): DBQuery
     {
         //only administrators can list administrators
@@ -106,7 +106,7 @@ class UserController
     }
 
     #[Mutation]
-    #[Right("user:add")]
+    #[Right("user.add")]
     public function addUser(InputUser $data, #[InjectUser] \Light\Model\User $user): int
     {
         $user = new User();

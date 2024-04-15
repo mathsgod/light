@@ -55,7 +55,7 @@ class TranslateController
 
     #[Mutation]
     #[Logged]
-    #[Right('translate:add')]
+    #[Right('translate.add')]
     public function addTranslate(InputTranslate $data, #[InjectUser] \Light\Model\User $user): int
     {
         foreach ($data->values as $value) {

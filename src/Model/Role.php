@@ -101,7 +101,7 @@ class Role extends Model
     public function getChildren(): array
     {
         $cs = [];
-        foreach ($this->_role->getChild() as $c) {
+        foreach ($this->_role->getChildren() as $c) {
             $cs[] = $c->getName();
         }
         return $cs;

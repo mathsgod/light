@@ -5,6 +5,7 @@ namespace Light;
 use Light\Model\EventLog;
 use Light\Model\Revision;
 use Light\Model\User;
+use Light\Rbac\Rbac;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 
@@ -65,12 +66,28 @@ abstract class Model extends \R\DB\Model
     #[Field]
     public function canUpdate(#[InjectUser] ?User $by): bool
     {
-        return true;
+        if ($container = self::GetSchema()->getContainer()) {
+            $rbac = $container->get(App::class)->getRbac();
+            assert($rbac instanceof Rbac);
+            if ($user = $rbac->getUser($by->user_id)) {
+                return $user->can(static::class . "." . $this->_key() . ".write");
+            }
+        }
     }
 
     #[Field]
     public function canView(#[InjectUser] ?User $by): bool
     {
+        if ($container = self::GetSchema()->getContainer()) {
+            $rbac = $container->get(App::class)->getRbac();
+            assert($rbac instanceof Rbac);
+            if ($user = $rbac->getUser($by->user_id)) {
+                return $user->can(static::class . "." . $this->_key() . ".read")
+                    || $user->can(static::class . "." . $this->_key() . ".write");
+            }
+        }
+
+
         return true;
     }
 

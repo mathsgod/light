@@ -64,7 +64,10 @@ class User extends \Light\Model
     public function getPermissions(#[Autowire] App $app): array
     {
         $rbac = $app->getRbac();
-        return $rbac->getUser($this->user_id)->getPermissions();
+        if ($u = $rbac->getUser($this->user_id)) {
+            return $u->getPermissions();
+        }
+        return [];
     }
 
     public function saveLastAccessTime(string $jti)
@@ -134,10 +137,8 @@ class User extends \Light\Model
     {
         $rbac = $app->getRbac();
 
-        foreach ($this->getRoles() as $role) {
-            if ($rbac->getRole($role)->can($right)) {
-                return true;
-            }
+        if ($user = $rbac->getUser($this->user_id)) {
+            return $user->can($right);
         }
         return false;
     }

@@ -60,7 +60,7 @@ abstract class Model extends \R\DB\Model
     #[Field]
     public function canDelete(#[InjectUser] ?User $by): bool
     {
-        return true;
+        return false;
     }
 
     #[Field]
@@ -73,6 +73,7 @@ abstract class Model extends \R\DB\Model
                 return $user->can(static::class . "." . $this->_key() . ".write");
             }
         }
+        return false;
     }
 
     #[Field]
@@ -88,7 +89,7 @@ abstract class Model extends \R\DB\Model
         }
 
 
-        return true;
+        return false;
     }
 
     public function delete()

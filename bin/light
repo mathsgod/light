@@ -78,7 +78,7 @@ EOT
     $method->setReturnType("int");
     $method->addAttribute("#[Mutation]");
     $method->addAttribute("#[Logged]");
-    $param1 = new ParameterGenerator("data", "Input\\{$name}");
+    $param1 = new ParameterGenerator("data", "Input\\$name");
     $param2 = new ParameterGenerator("user", "Light\\Model\\User");
     $param2->addAttribute("#[InjectUser]");
     $method->setParameters([$param1, $param2]);
@@ -98,7 +98,7 @@ EOT
     $method->addAttribute("#[Mutation]");
     $method->addAttribute("#[Logged]");
     $param1 = new ParameterGenerator("id", "int");
-    $param2 = new ParameterGenerator("data", "Input\\{$name}");
+    $param2 = new ParameterGenerator("data", "Input\\$name");
     $param2->addAttribute("#[UseInputType(inputType: \"Update{$name}Input\")]");
     $param3 = new ParameterGenerator("user", "Light\\Model\\User");
     $param3->addAttribute("#[InjectUser]");

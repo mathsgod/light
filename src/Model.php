@@ -66,7 +66,7 @@ abstract class Model extends \R\DB\Model
     #[Field]
     public function canUpdate(#[InjectUser] ?User $by): bool
     {
-        if ($container = self::GetSchema()->getContainer()) {
+ /*        if ($container = self::GetSchema()->getContainer()) {
             $rbac = $container->get(App::class)->getRbac();
             assert($rbac instanceof Rbac);
             if ($user = $rbac->getUser($by->user_id)) {
@@ -74,14 +74,14 @@ abstract class Model extends \R\DB\Model
                     return true;
                 }
             }
-        }
+        } */
         return true;
     }
 
     #[Field]
     public function canView(#[InjectUser] ?User $by): bool
     {
-        if ($container = self::GetSchema()->getContainer()) {
+/*         if ($container = self::GetSchema()->getContainer()) {
             $rbac = $container->get(App::class)->getRbac();
             assert($rbac instanceof Rbac);
             if ($user = $rbac->getUser($by->user_id)) {
@@ -92,7 +92,7 @@ abstract class Model extends \R\DB\Model
                     return true;
                 }
             }
-        }
+        } */
 
 
         return true;

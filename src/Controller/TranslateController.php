@@ -16,7 +16,7 @@ class TranslateController
 
 
     #[Mutation]
-    #[Right('translate:update')]
+    #[Right('translate.update')]
     public function updateTranslate(string $name, string $value, string $language): bool
     {
         if (!$t = Translate::Get(["name" => $name, "language" => $language])) {
@@ -81,7 +81,7 @@ class TranslateController
 
     #[Mutation]
     #[Logged]
-    #[Right('translate:delete')]
+    #[Right('translate.delete')]
     public function deleteTranslate(string $name): bool
     {
         foreach (Translate::Query(["name" => $name]) as $obj) {

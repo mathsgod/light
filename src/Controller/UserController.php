@@ -44,7 +44,7 @@ class UserController
 
     #[Mutation]
     #[Logged]
-    #[Right("user:update")]
+    #[Right("user.update")]
     public function updateUser(
         int $id,
         #[UseInputType(inputType: "UpdateUserInput")] InputUser $data,
@@ -69,7 +69,7 @@ class UserController
     }
 
     #[Mutation]
-    #[Right("user:changePassword")]
+    #[Right("user.changePassword")]
     public function updateUserPassword(int $id, string $password, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = $this->listUser($user, ["user_id" => $id], "")->first()) return false;
@@ -139,7 +139,7 @@ class UserController
 
     #[Mutation]
     #[Logged]
-    #[Right("user:delete")]
+    #[Right("user.delete")]
     public function deleteUser(int $id, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = User::Get($id)) return false;

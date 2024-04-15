@@ -37,7 +37,7 @@ class SystemValueController
 
     #[Mutation]
     #[Logged]
-    #[Right('systemvalue:update')]
+    #[Right('systemvalue.update')]
     public function updateSystemValue(int $id,  \Light\Input\SystemValue $data, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = SystemValue::Get($id)) return false;
@@ -49,7 +49,7 @@ class SystemValueController
 
     #[Mutation]
     #[Logged]
-    #[Right('systemvalue:delete')]
+    #[Right('systemvalue.delete')]
     public function deleteSystemValue(int $id, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = SystemValue::Get($id)) return false;

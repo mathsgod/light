@@ -48,7 +48,7 @@ class FileSystemController
     }
 
     #[Mutation]
-    #[Right("filesystem:delete")]
+    #[Right("filesystem.delete")]
     public function deleteFileSystem(string $name): bool
     {
         if (!$config = Config::Get(["name" => "fs"])) {

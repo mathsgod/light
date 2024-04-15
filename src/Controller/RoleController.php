@@ -61,7 +61,7 @@ class RoleController
 
     #[Mutation]
     #[Logged]
-    #[Right("role:update")]
+    #[Right("role.update")]
     public function updateRole(int $id,  \Light\Input\Role $data, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = Role::Get($id)) return false;
@@ -72,7 +72,7 @@ class RoleController
 
     #[Mutation]
     #[Logged]
-    #[Right("role:delete")]
+    #[Right("role.delete")]
     public function deleteRole(string $name, #[InjectUser] \Light\Model\User $user): bool
     {
 
@@ -86,7 +86,7 @@ class RoleController
 
     #[Mutation]
     #[Logged]
-    #[Right('role:update')]
+    #[Right('role.update')]
     /**
      * @param string[] $childs
      */

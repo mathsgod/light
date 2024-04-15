@@ -36,7 +36,6 @@ class App implements MiddlewareInterface
     protected $factory;
 
     protected $rbac;
-    protected $permissions = [];
 
     protected $mode = "dev";
 
@@ -174,11 +173,8 @@ class App implements MiddlewareInterface
         $r = $this->rbac->getRole($role);
         foreach ($permissions as $p) {
             $r->addPermission($p);
-            $this->permissions[] = $p;
         }
 
-        //unique
-        $this->permissions = array_unique($this->permissions);
     }
 
     public function loadRbac()
@@ -224,8 +220,6 @@ class App implements MiddlewareInterface
             if ($p->role) {
                 $role = $this->rbac->addRole($p->role);
                 $role->addPermission($p->value);
-
-                $this->permissions[] = $p->value;
             }
         }
 
@@ -236,9 +230,6 @@ class App implements MiddlewareInterface
 
             $this->rbac->addUser($ur->user_id, [$ur->role]);
         }
-
-        //unique
-        $this->permissions = array_unique($this->permissions);
 
         $this->container->add(Rbac::class, $this->rbac);
     }
@@ -312,29 +303,13 @@ class App implements MiddlewareInterface
             }
         }
 
-
-
-
-
-
-
-
-
-        $permissions = array_merge($this->permissions, $permissions);
-        //permissions from menus
-
-
         foreach ($this->getMenusPermission($this->menus) as $p) {
             $permissions[] = $p;
         }
 
 
-        //permissions from db
-        try {
-            foreach (Permission::Query() as $p) {
-                $permissions[] = $p->value;
-            }
-        } catch (Exception $e) {
+        foreach($this->rbac->getPermissions() as $permission){
+            $permissions[] = $permission;
         }
 
         //filter # from permissions

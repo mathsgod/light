@@ -17,7 +17,7 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 class SystemController
 {
     #[Mutation]
-    #[Right("mail.send")]
+    #[Right("mail:send")]
     public function sendMail(#[Autowire] App $app, string $email, string $subject, string $message): bool
     {
         $mailer = $app->getMailer();
@@ -29,7 +29,7 @@ class SystemController
     }
 
     #[Mutation]
-    #[Right("system.mailtest")]
+    #[Right("system:mailtest")]
     public function mailTest(#[Autowire] App $app, string $email, string $subject, string $content): bool
     {
         $mailer = $app->getMailer();

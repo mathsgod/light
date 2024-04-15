@@ -26,7 +26,7 @@ class ConfigController
     }
 
     #[Query]
-    #[Right('config.list')]
+    #[Right('config:list')]
     #[Logged]
     /**
      * @return \Light\Model\Config[]

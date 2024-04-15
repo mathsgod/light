@@ -28,7 +28,7 @@ class RoleController
      * @return \Light\Model\Role[]
      * @param ?mixed $filters
      */
-    #[Right("role.list")]
+    #[Right("role:list")]
     public function listRole(#[Autowire] Rbac $rbac, #[InjectUser] \Light\Model\User $user): array
     {
         $rs = [];
@@ -45,7 +45,7 @@ class RoleController
 
     #[Mutation]
     #[Logged]
-    #[Right("role.add")]
+    #[Right("role:add")]
     public function addRole(\Light\Input\Role $data, #[InjectUser] \Light\Model\User $user): bool
     {
         foreach ($data->childs as $child) {
@@ -61,7 +61,7 @@ class RoleController
 
     #[Mutation]
     #[Logged]
-    #[Right("role.update")]
+    #[Right("role:update")]
     public function updateRole(int $id,  \Light\Input\Role $data, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = Role::Get($id)) return false;
@@ -72,7 +72,7 @@ class RoleController
 
     #[Mutation]
     #[Logged]
-    #[Right("role.delete")]
+    #[Right("role:delete")]
     public function deleteRole(string $name, #[InjectUser] \Light\Model\User $user): bool
     {
 
@@ -86,7 +86,7 @@ class RoleController
 
     #[Mutation]
     #[Logged]
-    #[Right('role.update')]
+    #[Right('role:update')]
     /**
      * @param string[] $childs
      */

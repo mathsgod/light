@@ -7,12 +7,12 @@
         - label: List
           icon: sym_o_list
           to: /User
-          permission: user.list
+          permission: user:list
         
         - label: Add
           icon: sym_o_add
           to: /User/add
-          permission: user.add
+          permission: user:add
             
     
     - label: Role
@@ -21,38 +21,38 @@
         - label: List
           icon: sym_o_list
           to: /Role
-          permission: role.list
+          permission: role:list
           
         - label: Add
           icon: sym_o_add
           to: /Role/add
-          permission: role.add
+          permission: role:add
 
 
     - label: Permission
       icon: sym_o_lock
       to: /Permission
-      permission: permission.list
+      permission: permission:list
       children:
         - label: List
           icon: sym_o_list
           to: /Permission
-          permission: permission.list
+          permission: permission:list
           
         - label: All
           icon: sym_o_add
           to: /Permission/all
-          permission: [permission.list, permission.add, permission.remove]
+          permission: [permission:list, permission:add, permission:remove]
 
         - label: Add
           icon: sym_o_add
           to: /Permission/add
-          permission: permission.add
+          permission: permission:add
         
         - label: Export
           icon: sym_o_download
           to: /Permission/export
-          permission: permission.all
+          permission: permission:all
 
     - label: Translate
       icon: sym_o_translate
@@ -65,33 +65,33 @@
         - label: Menu
           icon: sym_o_menu
           to: /System/menu
-          permission: system.menu
+          permission: system:menu
 
     
         - label: Server
           icon: sym_o_dns
           to: /System
-          permission: system.server
+          permission: system:server
 
         - label: Setting
           icon: sym_o_settings
           to: /System/setting
-          permission: system.setting
+          permission: system:setting
 
         - label: Mail test
           icon: sym_o_mail
           to: /System/mailtest
-          permission: system.mailtest
+          permission: system:mailtest
         
         - label: PHPInfo
           icon: sym_o_php
           to: /System/phpinfo
-          permission: system.phpinfo
+          permission: system:phpinfo
 
         - label: Package
           icon: sym_o_package
           to: /System/package
-          permission: system.package
+          permission: system:package
 
         - label: Database
           icon: sym_o_database
@@ -99,27 +99,27 @@
             - label: Table
               icon: sym_o_table
               to: /System/database/table
-              permission: system.database.table
+              permission: system:database:table
 
             - label: Backup
               icon: sym_o_database
               to: /System/database/backup
-              permission: system.database.backup
+              permission: system:database:backup
           
     - label: User log
       icon: sym_o_description
       to: /UserLog
-      permission: userlog.list
+      permission: userlog:list
 
     - label: Mail log
       icon: sym_o_description
       to: /MailLog
-      permission: maillog.list
+      permission: maillog:list
 
     - label: Event log
       icon: sym_o_description
       to: /EventLog
-      permission: eventlog.list
+      permission: eventlog:list
       
     - label: System Value
       icon: sym_o_description
@@ -127,17 +127,17 @@
         - label: List
           icon: sym_o_list
           to: /SystemValue
-          permission: systemvalue.list
+          permission: systemvalue:list
         
         - label: Add
           icon: sym_o_add
           to: /SystemValue/add
-          permission: systemvalue.add
+          permission: systemvalue:add
 
     - label: File system
       icon: sym_o_folder
       to: /System/fs
-      permission: fs.list
+      permission: filesystem:list
 
     
       

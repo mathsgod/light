@@ -66,7 +66,7 @@ abstract class Model extends \R\DB\Model
     #[Field]
     public function canUpdate(#[InjectUser] ?User $by): bool
     {
- /*        if ($container = self::GetSchema()->getContainer()) {
+        /*        if ($container = self::GetSchema()->getContainer()) {
             $rbac = $container->get(App::class)->getRbac();
             assert($rbac instanceof Rbac);
             if ($user = $rbac->getUser($by->user_id)) {
@@ -81,7 +81,7 @@ abstract class Model extends \R\DB\Model
     #[Field]
     public function canView(#[InjectUser] ?User $by): bool
     {
-/*         if ($container = self::GetSchema()->getContainer()) {
+        /*         if ($container = self::GetSchema()->getContainer()) {
             $rbac = $container->get(App::class)->getRbac();
             assert($rbac instanceof Rbac);
             if ($user = $rbac->getUser($by->user_id)) {
@@ -155,8 +155,9 @@ abstract class Model extends \R\DB\Model
         if ($action == "Update") {
             $source = static::get($this->$key);
             if ($source) {
+                $container = self::GetSchema()->getContainer();
 
-                if ($app = self::GetSchema()->getContainer()->get(App::class)) {
+                if ($container && $app = $container->get(App::class)) {
                     assert($app instanceof App);
                     if ($app->isRevisionEnabled(static::class)) {
                         Revision::Insert($user_id, static::class, $this->$key, $source, $this);

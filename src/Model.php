@@ -155,6 +155,19 @@ abstract class Model extends \R\DB\Model
         if ($action == "Update") {
             $source = static::get($this->$key);
             if ($source) {
+
+
+                //filter out blob fields
+                $attributes = $this->__attributes();
+
+                foreach ($attributes as $attribute) {
+
+                    if ($attribute["Type"] == "longblob" || $attribute["Type"] == "mediumblob" || $attribute["Type"] == "tinyblob") {
+                        $field = $attribute["Field"];
+                        $source->$field = null;
+                    }
+                }
+
                 $container = self::GetSchema()->getContainer();
 
                 if ($container && $app = $container->get(App::class)) {
@@ -163,11 +176,22 @@ abstract class Model extends \R\DB\Model
                         Revision::Insert($user_id, static::class, $this->$key, $source, $this);
                     }
                 }
-
                 $source = json_encode(Util::Sanitize($source->jsonSerialize()), JSON_UNESCAPED_UNICODE);
             }
 
-            $target = json_encode(Util::Sanitize($this->jsonSerialize()), JSON_UNESCAPED_UNICODE);
+
+            //filter out blob fields for target
+            $attributes = $this->__attributes();
+            $target = $this->jsonSerialize();
+
+            foreach ($attributes as $attribute) {
+                if ($attribute["Type"] == "longblob" || $attribute["Type"] == "mediumblob" || $attribute["Type"] == "tinyblob") {
+                    $field = $attribute["Field"];
+                    unset($target[$field]);
+                }
+            }
+
+            $target = json_encode(Util::Sanitize($target), JSON_UNESCAPED_UNICODE);
         }
 
         if ($action == "Insert") {

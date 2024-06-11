@@ -109,8 +109,21 @@ class UserController
     #[Right("user.add")]
     public function addUser(InputUser $data, #[InjectUser] \Light\Model\User $user): int
     {
+
         $user = new User();
         $user->bind($data);
+
+        if (!$user->join_date) {
+            $user->join_date = date("Y-m-d");
+        }
+
+        if ($user->status === null) {
+            $user->status = 0;
+        }
+
+        if (!$user->language) {
+            $user->language = "en";
+        }
 
         //check is valid password
         $system = new System();
@@ -119,6 +132,13 @@ class UserController
         }
 
         $user->password = password_hash($data->password, PASSWORD_DEFAULT);
+
+        //check is user exist
+
+        if (User::Query(["username" => $user->username])->count()) {
+            throw new \Exception("Username already exist");
+        }
+
 
         $user->save();
 

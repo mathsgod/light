@@ -43,7 +43,7 @@ class User
 
     #[Field(for: "CreateUserInput")]
     #[Field(for: "UpdateUserInput")]
-    public string $join_date;
+    public ?string $join_date;
 
     #[Field(for: "CreateUserInput")]
     #[Field(for: "UpdateUserInput")]
@@ -55,10 +55,10 @@ class User
 
     #[Field(for: "CreateUserInput")]
     #[Field(for: "UpdateUserInput")]
-    public int $status;
+    public int $status = 0;
 
     #[Field]
-    public string $language;
+    public string $language = "en";
 
 
     #[Field(for: "CreateUserInput")]

@@ -87,7 +87,7 @@ class FileManagerController
     #[Right('fs.file.list')]
     public function fsListFiles(?string $path = "", ?string $type = null, ?string $search = null): array
     {
-
+    
         $TYPES = [
             "image" => ["jpg", "jpeg", "png", "gif", "svg", "webp", "bmp", "ico"],
             "video" => ["mp4", "webm", "ogg", "avi", "mov", "flv", "wmv", "mkv"],

@@ -54,7 +54,7 @@ if ($command == "make:controller") {
     $method->addAttribute("#[Query]");
     $method->addAttribute("#[Logged]");
 
-    $method->setDocBlock("@return \Model\{$name}[]
+    $method->setDocBlock("@return \Model\\{$name}[]
 @param ?mixed \$filters");
 
     $param1 = new ParameterGenerator("filters", null, []);

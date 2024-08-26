@@ -191,6 +191,7 @@ if ($command == "make:model") {
         $type = explode("(", $type)[0];
         switch ($type) {
             case "timestamp":
+            case "int unsigned":
             case "int":
                 $gql_type = "Int";
                 break;

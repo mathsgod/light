@@ -32,7 +32,7 @@ class SystemValue extends Model
                 $s = explode("|", $s, 2);
 
                 $values[] = [
-                    "label" => trim($s[1]),
+                    "label" => $s[1] ? trim($s[1]) : $s[0],
                     "value" => is_numeric($s[0]) ? (int) $s[0] : $s[0]
                 ];
             }

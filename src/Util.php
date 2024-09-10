@@ -12,6 +12,10 @@ class Util
 
         $out = [];
         foreach ($data as $k => $v) {
+            if($v === null){
+                $out[$k] = null;
+                continue;
+            }
             if (is_array($v)) {
                 $out[$k] = self::Sanitize($v);
             } else {

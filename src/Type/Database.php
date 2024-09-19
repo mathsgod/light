@@ -13,6 +13,15 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class Database
 {
+    #[Field]
+    #[Right("system.database")]
+    public function getVersion(#[Autowire] App $app): string
+    {
+        $db = $app->getDatabase();
+        $result = $db->query("SELECT VERSION()")->fetchAll();
+        return $result[0]["VERSION()"];
+    }
+
     #[Field(outputType: "mixed")]
     #[Right("system.database.table")]
     public function getTable(#[Autowire] App $app): array

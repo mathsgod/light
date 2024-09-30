@@ -11,9 +11,24 @@ use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
+
 #[Type]
 class Database
 {
+    #[Field(outputType: "[Table]")]
+    #[Right("system.database.table")]
+    public function getTables(#[Autowire] App $app)
+    {
+        $db = $app->getDatabase();
+        $result = $db->query("SHOW TABLE STATUS")->fetchAll();
+
+        $data = [];
+        foreach ($result as $row) {
+            $data[] = new Table($row["Name"], $row);
+        }
+
+        return $data;
+    }
 
     #[Field]
     #[Right("system.database")]
@@ -26,13 +41,35 @@ class Database
 
     #[Field(outputType: "mixed")]
     #[Right("system.database.table")]
+    public function getTableStatus(#[Autowire] App $app)
+    {
+        $db = $app->getDatabase();
+        $result = $db->query("SHOW TABLE STATUS")->fetchAll();
+        return $result;;
+
+        //map to table name
+        /*       $tables = [];
+        foreach ($result as $row) {
+            $tables[$row["Name"]] = $row;
+        }
+ */
+        return $tables;
+    }
+
+    #[Field(outputType: "mixed")]
+    #[Right("system.database.table")]
     public function getTable(#[Autowire] App $app): array
     {
         $db = $app->getDatabase();
         $tables = $db->getTables();
         $data = [];
         foreach ($tables as $table) {
-            $data[] = ["name" => $table->getName(), "columns" => $table->getColumns()];
+
+            $name = $table->getName();
+            $data[] = [
+                "name" => $name,
+                "columns" => $table->getColumns()
+            ];
         }
         return $data;
     }
@@ -55,5 +92,4 @@ class Database
 
         return implode("\n", $output);
     }
-    
 }

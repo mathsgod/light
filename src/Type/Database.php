@@ -15,6 +15,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class Database
 {
+
     #[Field(outputType: "[Table]")]
     #[Right("system.database.table")]
     public function getTables(#[Autowire] App $app)

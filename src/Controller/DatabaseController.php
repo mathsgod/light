@@ -20,21 +20,23 @@ class DatabaseController
     #[Mutation]
     #[Right("system.database.table.create")]
     /**
-     * @param mixed $columns
+     * @param \Light\Input\Table\Column[] $columns
      */
-    public function createTable(#[Autowire] App $app, string $table, array $columns): bool
+    public function createDatabaseTable(#[Autowire] App $app, string $name, array $columns): bool
     {
-        /*         $db = $app->getDatabase();
+        $db = $app->getDatabase();
+
+        $t = new CreateTable($name);
+        foreach ($columns as $column) {
+            if ($column->type == "int") {
+                $t->addColumn(new Column\Integer($column->name, $column->nullable ?? false));
+            }
+        }
+
+        $db->exec($t->getSqlString($db->getAdapter()->getPlatform()));
 
 
 
-        $t=new CreateTable($table);
-        $t->addColumn(new Column\Integer("id"));
-        $t->addColumn(new Column\Varchar("name"));
-
-
-        $db->createTable($table, $columns);
- */
         return false;
     }
 }

@@ -31,7 +31,8 @@
         "google/apiclient": "^2.15",
         "mathsgod/puxt": "dev-main",
         "league/flysystem-aws-s3-v3": "^3.24",
-        "hostlink/hostlink-storage-adapter": "^1.0"
+        "hostlink/hostlink-storage-adapter": "^1.0",
+        "alphasnow/aliyun-oss-flysystem": "^3.4"
     },
     "autoload": {
         "psr-4": {

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "05f0abe9ff1cf33b666826a075a82f3b",
+    "content-hash": "3f02d01f1a46b65fed0c1a83b620e074",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4548,6 +4548,107 @@
         }
     ],
     "packages-dev": [
+        {
+            "name": "aliyuncs/oss-sdk-php",
+            "version": "v2.7.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/aliyun/aliyun-oss-php-sdk.git",
+                "reference": "ce5d34dae9868237a32248788ea175c7e9da14b1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/aliyun/aliyun-oss-php-sdk/zipball/ce5d34dae9868237a32248788ea175c7e9da14b1",
+                "reference": "ce5d34dae9868237a32248788ea175c7e9da14b1",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "*",
+                "phpunit/phpunit": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "OSS\\": "src/OSS"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Aliyuncs",
+                    "homepage": "http://www.aliyun.com"
+                }
+            ],
+            "description": "Aliyun OSS SDK for PHP",
+            "homepage": "http://www.aliyun.com/product/oss/",
+            "support": {
+                "issues": "https://github.com/aliyun/aliyun-oss-php-sdk/issues",
+                "source": "https://github.com/aliyun/aliyun-oss-php-sdk/tree/v2.7.1"
+            },
+            "time": "2024-02-28T11:22:18+00:00"
+        },
+        {
+            "name": "alphasnow/aliyun-oss-flysystem",
+            "version": "3.4.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/alphasnow/aliyun-oss-flysystem.git",
+                "reference": "e5b3cb546c88f6dff5aad293cda460d3a1efca96"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/alphasnow/aliyun-oss-flysystem/zipball/e5b3cb546c88f6dff5aad293cda460d3a1efca96",
+                "reference": "e5b3cb546c88f6dff5aad293cda460d3a1efca96",
+                "shasum": ""
+            },
+            "require": {
+                "aliyuncs/oss-sdk-php": "^2.7",
+                "league/flysystem": "^3.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.6",
+                "mockery/mockery": "^1.5",
+                "php-coveralls/php-coveralls": "*",
+                "phpstan/phpstan": "^1.4",
+                "phpunit/phpunit": "^9.5",
+                "vlucas/phpdotenv": "^5.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "AlphaSnow\\Flysystem\\Aliyun\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Alpha Snow",
+                    "email": "wind91@foxmail.com"
+                }
+            ],
+            "description": "Flysystem adapter for the Aliyun storage",
+            "homepage": "https://alphasnow.github.io/aliyun-oss-flysystem/",
+            "keywords": [
+                "adapter",
+                "aliyun",
+                "filesystem",
+                "oss"
+            ],
+            "support": {
+                "issues": "https://github.com/alphasnow/aliyun-oss-flysystem/issues",
+                "source": "https://github.com/alphasnow/aliyun-oss-flysystem/tree/3.4.1"
+            },
+            "time": "2024-05-08T06:14:16+00:00"
+        },
         {
             "name": "aws/aws-crt-php",
             "version": "v1.2.6",

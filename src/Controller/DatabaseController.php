@@ -17,8 +17,12 @@ use Laminas\Db\Sql\Ddl\Column;
 
 class DatabaseController
 {
+    
+
+
     #[Mutation]
     #[Right("system.database.table.create")]
+    #[Logged]
     /**
      * @param \Light\Input\Table\Column[] $columns
      */
@@ -30,6 +34,23 @@ class DatabaseController
         foreach ($columns as $column) {
             if ($column->type == "int") {
                 $t->addColumn(new Column\Integer($column->name, $column->nullable ?? false));
+            }
+
+
+            if ($column->type == "varchar") {
+                $t->addColumn(new Column\Varchar($column->name, $column->length ?? 255, $column->nullable ?? false));
+            }
+
+            if ($column->type == "text") {
+                $t->addColumn(new Column\Text($column->name, $column->length ?? 4000, $column->nullable ?? false));
+            }
+
+            if ($column->type == "boolean") {
+                $t->addColumn(new Column\Boolean($column->name, $column->nullable ?? false));
+            }
+
+            if ($column->type == "date") {
+                $t->addColumn(new Column\Date($column->name, $column->nullable ?? false));
             }
         }
 

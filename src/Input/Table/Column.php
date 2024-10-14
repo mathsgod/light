@@ -13,6 +13,8 @@ class Column
     public string $name;
 
     #[Field]
+    public ?int $length;
+    #[Field]
     public string $type;
 
     #[Field]

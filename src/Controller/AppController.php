@@ -18,11 +18,13 @@ class AppController
 {
 
 
-    #[Query]
-    public function test(#[InjectUser] User $user, #[Autowire] LightApp $app): string
+    #[Mutation]
+    public function testFile(UploadedFileInterface $file, #[Autowire] LightApp $app): string
     {
 
-        return $user->is("Administrators");
+        //save file
+
+        return "return full path";
 
 
 

@@ -522,6 +522,10 @@ class App implements MiddlewareInterface
             return $filesystem;
         }
 
+        if ($fs["type"] == "aliyun-oss") {
+            return (new \AlphaSnow\Flysystem\Aliyun\AliyunFactory())->createFilesystem($fs["data"]);
+        }
+
         if ($fs["type"] == "S3") {
             $data = $fs["data"];
             $client = new \Aws\S3\S3Client([

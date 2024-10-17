@@ -298,10 +298,17 @@ class AuthController
         //generate a email to send code to user
         $mailer = $app->getMailer();
         $mailer->addAddress($email);
-        $mailer->Subject = "Forget Password";
-        $mailer->msgHTML("Your code is " . $code);
-        $mailer->send();
 
+        $mailer->Subject = Config::Value("forget_password_email_subject", "Password Reset Code");
+
+        $template = Config::Value("forget_password_email_template", "Your password reset code is: {code}");
+        $mailer->msgHTML(str_replace("{code}", $code, $template));
+
+        try {
+            $mailer->send();
+        } catch (\Exception $e) {
+            throw new Error($e->getMessage());
+        }
 
         $cache = $app->getCache();
         //5 minutes

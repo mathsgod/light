@@ -149,11 +149,33 @@ class App implements MiddlewareInterface
     public function getMailer()
     {
         $mailer = new Mailer();
-        $mailer->isSMTP();
-        $mailer->SMTPAuth = true;
 
+        if (Config::Value("mail_driver") == "smtp") {
+            $mailer->isSMTP();
+            $mailer->SMTPAuth = true;
+            $mailer->Host = Config::Value("mail_host");
+            $mailer->Username = Config::Value("mail_username");
+            $mailer->Password = Config::Value("mail_password");
+            $mailer->Port = Config::Value("mail_port");
+            $mailer->SMTPSecure = Config::Value("mail_encryption");
+        }
 
+        if ($mail_from = Config::Value("mail_from")) {
 
+            if ($mail_from_name = Config::Value("mail_from_name")) {
+                $mailer->setFrom($mail_from, $mail_from_name);
+            } else {
+                $mailer->setFrom($mail_from);
+            }
+        }
+
+        if ($mail_reply_to = Config::Value("mail_reply_to")) {
+            if ($mail_reply_to_name = Config::Value("mail_reply_to_name")) {
+                $mailer->addReplyTo($mail_reply_to, $mail_reply_to_name);
+            } else {
+                $mailer->addReplyTo($mail_reply_to);
+            }
+        }
 
         return $mailer;
     }

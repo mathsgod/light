@@ -11,5 +11,6 @@ Power Users:
   - user.role.add
   - user.role.remove
   - user.changePassword
+  - role.getUser
 
   

@@ -37,6 +37,9 @@ class RoleController
             //only administrators can see administrators
             if ($role->getName() == "Administrators" && !$user->is("Administrators")) continue;
 
+            //only administrators can see Everyone
+            if ($role->getName() == "Everyone" && !$user->is("Administrators")) continue;
+
             $rs[] = Role::LoadByRole($role);
         }
 

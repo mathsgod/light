@@ -288,7 +288,7 @@ class AuthController
     {
 
         //check if email exists
-        if (!User::Get(["email" => $email])) {
+        if (!$user = User::Get(["email" => $email])) {
             return "";
         }
 
@@ -312,7 +312,7 @@ class AuthController
 
         $cache = $app->getCache();
         //5 minutes
-        $cache->set("forget_password_" . $email, $code, 300);
+        $cache->set("forget_password_" . $user->user_id, $code, 300);
 
         return true;
     }

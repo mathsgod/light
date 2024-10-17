@@ -244,11 +244,16 @@ class AuthController
     }
 
     #[Mutation]
-    public function verifyCode(#[Autowire] App $app, string $email, string $code): bool
+    public function verifyCode(#[Autowire] App $app, string $username, string $code): bool
     {
+        $user = User::Get(["username" => $username]);
+        if (!$user) {
+            return false;
+        }
+
         $cache = $app->getCache();
-        if ($cache->has("forget_password_" . $email)) {
-            $cache_code = $cache->get("forget_password_" . $email);
+        if ($cache->has("forget_password_" . $user->user_id)) {
+            $cache_code = $cache->get("forget_password_" . $user->user_id);
             if ($cache_code == $code) {
                 return true;
             }
@@ -258,11 +263,11 @@ class AuthController
     }
 
     #[Mutation]
-    public function resetPassword(#[Autowire] App $app, string $email, string $password, string $code): bool
+    public function resetPassword(#[Autowire] App $app, string $username, string $password, string $code): bool
     {
-        $user = User::Get(["email" => $email]);
+        $user = User::Get(["username" => $username]);
         if (!$user) {
-            return false;
+            throw new Error("User not found");
         }
 
         $system = new System();
@@ -271,25 +276,36 @@ class AuthController
         }
 
         $cache = $app->getCache();
-        if ($cache->has("forget_password_" . $email)) {
-            $cache_code = $cache->get("forget_password_" . $email);
-            if ($cache_code == $code) {
-                $user->password = password_hash($password, PASSWORD_DEFAULT);
-                $user->save();
-                return true;
-            }
+        if (!$cache->has("forget_password_" . $user->user_id)) {
+            throw new Error("Code is expired");
         }
 
-        return false;
+        $cache_code = $cache->get("forget_password_" . $user->user_id);
+        if ($cache_code != $code) {
+            throw new Error("Code is not valid");
+        }
+
+        User::_table()->update([
+            "password" => password_hash($password, PASSWORD_DEFAULT)
+        ], [
+            "user_id" => $user->user_id
+        ]);
+
+        //remove cache
+        $cache->delete("forget_password_" . $user->user_id);
+        return true;
     }
 
     #[Mutation]
-    public function forgetPassword(#[Autowire] App $app, string $email): bool
+    public function forgetPassword(#[Autowire] App $app, string $username, string $email): bool
     {
 
         //check if email exists
-        if (!$user = User::Get(["email" => $email])) {
-            return "";
+        if (!$user = User::Get([
+            "username" => $username,
+            "email" => $email
+        ])) {
+            return true;
         }
 
         $code = rand(100000, 999999);
@@ -311,8 +327,10 @@ class AuthController
         }
 
         $cache = $app->getCache();
-        //5 minutes
-        $cache->set("forget_password_" . $user->user_id, $code, 300);
+
+        //10 minutes
+        $cache->set("forget_password_" . $user->user_id, $code, 600);
+
 
         return true;
     }

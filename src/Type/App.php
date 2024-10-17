@@ -155,6 +155,12 @@ class App
     }
 
     #[Field]
+    public function isForgetPasswordEnabled(): bool
+    {
+        return Config::Value("forget_password_enabled", true);
+    }
+
+    #[Field]
     public function getCompany(): string
     {
         if ($c = Config::Get(["name" => "company"])) {

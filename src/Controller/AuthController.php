@@ -18,10 +18,26 @@ use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Query;
+use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 
 class AuthController
 {
+
+    #[Mutation]
+    #[Logged]
+    #[Right('user.reset2fa')]
+    public function reset2FA(int $id): bool
+    {
+        $user = User::Get($id);
+        if (!$user) {
+            throw new Error("User not found");
+        }
+
+        $user->secret = "";
+        $user->save();
+        return true;
+    }
 
     #[Mutation]
     #[Logged]
@@ -134,11 +150,9 @@ class AuthController
             throw new Error("user not found or password error");
         }
 
-
         if ($user->isAuthLocked()) {
             throw new Error("user is locked for " . Config::Value("auth_lockout_duration", 15) . " minutes");
         }
-
 
         if (!self::PasswordVerify($password, $user->password)) {
             //save to UserLog
@@ -151,6 +165,16 @@ class AuthController
             ]);
 
             throw new Error("user not found or password error");
+        }
+
+        if ($user->secret) {
+            if (!$code) {
+                throw new Error("two factor authentication code is required");
+            }
+
+            if (!(new TwoFactorAuthentication)->checkCode($user->secret, $code)) {
+                throw new Error("two factor authentication error");
+            }
         }
 
 

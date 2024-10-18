@@ -294,11 +294,6 @@ class AuthController
             throw new Error("User not found");
         }
 
-        $system = new System();
-        if (!$system->isValidPassword($password)) {
-            throw new Error("Password is not valid to the password policy");
-        }
-
         $cache = $app->getCache();
         if (!$cache->has("forget_password_" . $user->user_id)) {
             throw new Error("Code is expired");
@@ -307,6 +302,11 @@ class AuthController
         $cache_code = $cache->get("forget_password_" . $user->user_id);
         if ($cache_code != $code) {
             throw new Error("Code is not valid");
+        }
+
+        $system = new System();
+        if (!$system->isValidPassword($password)) {
+            throw new Error("Password is not valid to the password policy");
         }
 
         User::_table()->update([

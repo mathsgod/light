@@ -90,7 +90,7 @@ class AuthController
             throw new Error("google/apiclient is not installed");
         }
 
-        if (!$google_client_id = $_ENV["GOOGLE_CLIENT_ID"]) {
+        if (!$google_client_id = Config::Value("authentication_google_client_id")) {
             throw new Error("GOOGLE_CLIENT_ID is not set");
         }
 

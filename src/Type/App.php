@@ -147,7 +147,7 @@ class App
             return null;
         }
 
-        if (!$google_client_id = $_ENV["GOOGLE_CLIENT_ID"]) {
+        if (!$google_client_id = Config::Value("authentication_google_client_id")) {
             return null;
         }
 

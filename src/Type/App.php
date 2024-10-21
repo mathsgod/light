@@ -17,7 +17,30 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class App
 {
+    /*  #[Field]
+    function testMS(): string
+    {
+        $client_id = "fbe538f7-fe46-470c-9cc5-5f44e9abba84";
+        //$client_id="159a9bfd-7b5c-4b6a-869c-b00a7471dea3";
+        $tenant_id = "common";
+        $scopes = "user.read";
 
+
+
+        $deviceCodeRequestUrl = 'https://login.microsoftonline.com/' . $tenant_id . '/oauth2/v2.0/devicecode';
+        $client = new \GuzzleHttp\Client([
+            "verify" => false
+        ]);
+        $response = $client->post($deviceCodeRequestUrl, [
+            'form_params' => [
+                'client_id' => $client_id,
+                'scope' => $scopes
+            ]
+        ]);
+
+        return $response->getBody()->getContents();
+    }
+ */
     #[Field]
     public function hasFavorite(#[Autowire] LightApp $app): bool
     {
@@ -141,6 +164,22 @@ class App
         return $result;
     }
 
+    #[Field]
+    function getMicrosoftClientId(): ?string
+    {
+        if (!\Composer\InstalledVersions::isInstalled("microsoft/microsoft-graph")) {
+            return null;
+        }
+
+        if (!$microsoft_client_id = Config::Value("authentication_microsoft_client_id")) {
+            return null;
+        }
+
+        return $microsoft_client_id;
+    }
+
+
+
     #[Field] function getGoogleClientId(): ?string
     {
         if (!\Composer\InstalledVersions::isInstalled("google/apiclient")) {
@@ -206,5 +245,11 @@ class App
     {
 
         return Config::Query()->toArray();
+    }
+
+    #[Field]
+    public function getAuth(): Auth
+    {
+        return new Auth();
     }
 }

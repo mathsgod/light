@@ -50,6 +50,7 @@ class AuthController
         return true;
     }
 
+
     //google register
     #[Mutation]
     #[Logged]
@@ -81,6 +82,28 @@ class AuthController
         $user->save();
 
         return true;
+    }
+
+    //microsoft login
+    #[Mutation]
+    /**
+     * @return mixed
+     */
+    function microsoftLogin(string $access_token)
+    {
+        $client = new \GuzzleHttp\Client([
+            "verify" => false
+        ]);
+
+        $response = $client->get("https://graph.microsoft.com/v1.0/me", [
+            "headers" => [
+                "Authorization" => "Bearer " . $access_token
+            ]
+        ]);
+
+        $body = json_decode($response->getBody()->getContents());
+
+        return $body;
     }
 
     // google login

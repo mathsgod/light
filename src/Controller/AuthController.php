@@ -41,6 +41,17 @@ class AuthController
 
     #[Mutation]
     #[Logged]
+    public function unlinkMicrosoft(#[InjectUser] User $user): bool
+    {
+        if ($user->microsoft) {
+            $user->microsoft = "";
+            $user->save();
+        }
+        return true;
+    }
+
+    #[Mutation]
+    #[Logged]
     public function unlinkGoogle(#[InjectUser] User $user): bool
     {
         if ($user->gmail) {
@@ -50,6 +61,15 @@ class AuthController
         return true;
     }
 
+    //microsoft register
+    #[Mutation]
+    #[Logged]
+    function microsoftRegister(string $account_id, #[InjectUser] User $user): bool
+    {
+        $user->microsoft = $account_id;
+        $user->save();
+        return true;
+    }
 
     //google register
     #[Mutation]
@@ -89,7 +109,7 @@ class AuthController
     /**
      * @return mixed
      */
-    function microsoftLogin(string $access_token)
+    function microsoftLogin(string $access_token, #[Autowire] App $app)
     {
         $client = new \GuzzleHttp\Client([
             "verify" => false
@@ -101,9 +121,19 @@ class AuthController
             ]
         ]);
 
-        $body = json_decode($response->getBody()->getContents());
+        $body = json_decode($response->getBody()->getContents(), true);
 
-        return $body;
+        if ($id = $body["id"]) {
+            $user = User::Get(["microsoft" => $id, "status" => 0]);
+            if (!$user) {
+                throw new Error("Microsoft login error");
+            }
+
+            $app->userLogin($user);
+            return true;
+        }
+
+        throw new Error("Microsoft login error");
     }
 
     // google login

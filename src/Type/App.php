@@ -202,18 +202,19 @@ class App
     #[Field]
     public function getCompany(): string
     {
-        if ($c = Config::Get(["name" => "company"])) {
-            return $c->value;
-        }
-        return "HostLink";
+        return Config::Value("company", "HostLink");
+    }
+
+    #[Field]
+    public function isPasswordBasedEnabled(): bool
+    {
+        return Config::Value("authentication_password_based", true);
     }
 
     #[Field]
     public function getCompanyLogo(): ?string
     {
-        if ($c = Config::Get(["name" => "company_logo"])) {
-            return $c->value;
-        }
+        return Config::Value("company_logo");
     }
 
     #[Field]

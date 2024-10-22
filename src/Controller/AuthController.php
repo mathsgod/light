@@ -61,6 +61,8 @@ class AuthController
         return true;
     }
 
+
+
     //microsoft register
     #[Mutation]
     #[Logged]
@@ -134,6 +136,35 @@ class AuthController
         }
 
         throw new Error("Microsoft login error");
+    }
+
+    //facebook login
+    #[Mutation]
+    public function facebookLogin(string $access_token, #[Autowire] App $app): bool
+    {
+        $client = new \GuzzleHttp\Client([
+            "verify" => false
+        ]);
+
+        $response = $client->get("https://graph.facebook.com/me?fields=id,name,email", [
+            "headers" => [
+                "Authorization" => "Bearer " . $access_token
+            ]
+        ]);
+
+        $body = json_decode($response->getBody()->getContents(), true);
+
+        if ($id = $body["id"]) {
+            $user = User::Get(["facebook" => $id, "status" => 0]);
+            if (!$user) {
+                throw new Error("Facebook login error");
+            }
+
+            $app->userLogin($user);
+            return true;
+        }
+
+        throw new Error("Facebook login error");
     }
 
     // google login

@@ -12,6 +12,7 @@ use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
+use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type]
@@ -167,10 +168,6 @@ class App
     #[Field]
     function getMicrosoftClientId(): ?string
     {
-        if (!\Composer\InstalledVersions::isInstalled("microsoft/microsoft-graph")) {
-            return null;
-        }
-
         if (!$microsoft_client_id = Config::Value("authentication_microsoft_client_id")) {
             return null;
         }
@@ -179,6 +176,11 @@ class App
     }
 
 
+    #[Field]
+    function getFacebookAppId(): ?string
+    {
+        return  Config::Value("authentication_facebook_app_id");
+    }
 
     #[Field] function getGoogleClientId(): ?string
     {
@@ -192,6 +194,8 @@ class App
 
         return $google_client_id;
     }
+
+
 
     #[Field]
     public function isForgetPasswordEnabled(): bool
@@ -218,13 +222,13 @@ class App
     }
 
     #[Field]
-    public function getCopyrightYear(): string
+    public function getCopyrightYear(): ?string
     {
         return Config::Value("copyright_year", date("Y"));
     }
 
     #[Field]
-    public function getCopyrightName(): string
+    public function getCopyrightName(): ?string
     {
         return Config::Value("copyright_name", "HostLink(HK)");
     }
@@ -239,18 +243,12 @@ class App
 
     #[Field]
     #[Logged]
+    #[Right("config")]
     /**
      * @return \Light\Model\Config[]
      */
     public function getConfig(): array
     {
-
         return Config::Query()->toArray();
-    }
-
-    #[Field]
-    public function getAuth(): Auth
-    {
-        return new Auth();
     }
 }

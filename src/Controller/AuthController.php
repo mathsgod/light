@@ -162,6 +162,10 @@ class AuthController
      */
     function microsoftLogin(string $access_token, #[Autowire] App $app)
     {
+        if(!Config::Value("authentication_microsoft_client_id")) {
+            throw new Error("Microsoft client id is not set");
+        }
+
         $client = new \GuzzleHttp\Client([
             "verify" => false
         ]);
@@ -191,6 +195,10 @@ class AuthController
     #[Mutation]
     public function facebookLogin(string $access_token, #[Autowire] App $app): bool
     {
+        if (!Config::Value("authentication_facebook_app_id")) {
+            throw new Error("Facebook app id is not set");
+        }
+
         $client = new \GuzzleHttp\Client([
             "verify" => false
         ]);
@@ -224,7 +232,7 @@ class AuthController
         }
 
         if (!$google_client_id = Config::Value("authentication_google_client_id")) {
-            throw new Error("GOOGLE_CLIENT_ID is not set");
+            throw new Error("google client id is not set");
         }
 
         $client = new \Google_Client(["client_id" => $google_client_id]);

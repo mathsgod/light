@@ -168,23 +168,34 @@ class App
     #[Field]
     function getMicrosoftClientId(): ?string
     {
-        if (!$microsoft_client_id = Config::Value("authentication_microsoft_client_id")) {
+        //check user database, column facebook is exist
+        if (!User::_table()->column("microsoft")) {
             return null;
         }
-
-        return $microsoft_client_id;
+        return Config::Value("authentication_microsoft_client_id");
     }
 
 
     #[Field]
     function getFacebookAppId(): ?string
     {
+
+        //check user database, column facebook is exist
+        if (!User::_table()->column("facebook")) {
+            return null;
+        }
+
         return  Config::Value("authentication_facebook_app_id");
     }
 
     #[Field] function getGoogleClientId(): ?string
     {
         if (!\Composer\InstalledVersions::isInstalled("google/apiclient")) {
+            return null;
+        }
+
+        //check user database, column facebook is exist
+        if (!User::_table()->column("gmail")) {
             return null;
         }
 

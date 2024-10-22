@@ -144,18 +144,12 @@ class App
     }
 
     #[Field]
-    /**
-     * @deprecated use auth microsoftTenantId
-     */
     function getMicrosoftTenantId(): ?string
     {
         return (new Auth)->getMicrosoftTenantId();
     }
 
     #[Field]
-    /**
-     * @deprecated use auth microsoftClientId
-     */
     function getMicrosoftClientId(): ?string
     {
         return (new Auth)->getMicrosoftClientId();
@@ -163,28 +157,15 @@ class App
 
 
     #[Field]
-    /**
-     * @deprecated use auth facebookAppId
-     */
     function getFacebookAppId(): ?string
     {
-
         return (new Auth)->getFacebookAppId();
-
-        //check user database, column facebook is exist
-        if (!User::_table()->column("facebook")) {
-            User::_table()->addColumn(new \Laminas\Db\Sql\Ddl\Column\Varchar("facebook", 255, true, null, ["comment" => "Facebook ID"]));
-        }
-
-        return  Config::Value("authentication_facebook_app_id");
     }
 
     #[Field] function getGoogleClientId(): ?string
     {
         return (new Auth)->getGoogleClientId();
     }
-
-
 
     #[Field]
     public function isForgetPasswordEnabled(): bool
@@ -241,9 +222,5 @@ class App
         return Config::Query()->toArray();
     }
 
-    #[Field]
-    public function getAuth(): Auth
-    {
-        return new Auth();
-    }
+    
 }

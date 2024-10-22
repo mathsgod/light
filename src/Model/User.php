@@ -28,6 +28,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "default_page", outputType: "String")]
 #[MagicField(name: "gmail", outputType: "String")]
 #[MagicField(name: "microsoft", outputType: "String")]
+#[MagicField(name: "facebook", outputType: "String")]
 
 class User extends \Light\Model
 {

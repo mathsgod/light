@@ -39,6 +39,43 @@ class AuthController
         return true;
     }
 
+
+    #[Mutation]
+    #[Logged]
+    public function facebookRegister(string $access_token, #[InjectUser] User $user): bool
+    {
+        $client = new \GuzzleHttp\Client([
+            "verify" => false
+        ]);
+
+        $response = $client->get("https://graph.facebook.com/me?fields=id,name,email", [
+            "headers" => [
+                "Authorization" => "Bearer " . $access_token
+            ]
+        ]);
+
+        $body = json_decode($response->getBody()->getContents(), true);
+
+        if ($id = $body["id"]) {
+            $user->facebook = $id;
+            $user->save();
+            return true;
+        }
+
+        throw new Error("Facebook login error");
+    }
+
+    #[Mutation]
+    #[Logged]
+    public function unlinkFacebook(#[InjectUser] User $user): bool
+    {
+        if ($user->facebook) {
+            $user->facebook = "";
+            $user->save();
+        }
+        return true;
+    }
+
     #[Mutation]
     #[Logged]
     public function unlinkMicrosoft(#[InjectUser] User $user): bool

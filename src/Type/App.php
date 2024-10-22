@@ -2,6 +2,7 @@
 
 namespace Light\Type;
 
+use Light\Type\Auth;
 use Light\Rbac\Rbac;
 use Light\App as LightApp;
 use Light\Input\Table\Column;
@@ -19,30 +20,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class App
 {
-    /*  #[Field]
-    function testMS(): string
-    {
-        $client_id = "fbe538f7-fe46-470c-9cc5-5f44e9abba84";
-        //$client_id="159a9bfd-7b5c-4b6a-869c-b00a7471dea3";
-        $tenant_id = "common";
-        $scopes = "user.read";
-
-
-
-        $deviceCodeRequestUrl = 'https://login.microsoftonline.com/' . $tenant_id . '/oauth2/v2.0/devicecode';
-        $client = new \GuzzleHttp\Client([
-            "verify" => false
-        ]);
-        $response = $client->post($deviceCodeRequestUrl, [
-            'form_params' => [
-                'client_id' => $client_id,
-                'scope' => $scopes
-            ]
-        ]);
-
-        return $response->getBody()->getContents();
-    }
- */
     #[Field]
     public function hasFavorite(#[Autowire] LightApp $app): bool
     {
@@ -167,25 +144,32 @@ class App
     }
 
     #[Field]
+    /**
+     * @deprecated use auth microsoftTenantId
+     */
     function getMicrosoftTenantId(): ?string
     {
-        return Config::Value("authentication_microsoft_tenant_id", "common");
+        return (new Auth)->getMicrosoftTenantId();
     }
 
     #[Field]
+    /**
+     * @deprecated use auth microsoftClientId
+     */
     function getMicrosoftClientId(): ?string
     {
-        //check user database, column facebook is exist
-        if (!User::_table()->column("microsoft")) {
-            User::_table()->addColumn(new \Laminas\Db\Sql\Ddl\Column\Varchar("microsoft", 255, true, null, ["comment" => "Microsoft ID"]));
-        }
-        return Config::Value("authentication_microsoft_client_id");
+        return (new Auth)->getMicrosoftClientId();
     }
 
 
     #[Field]
+    /**
+     * @deprecated use auth facebookAppId
+     */
     function getFacebookAppId(): ?string
     {
+
+        return (new Auth)->getFacebookAppId();
 
         //check user database, column facebook is exist
         if (!User::_table()->column("facebook")) {
@@ -197,20 +181,7 @@ class App
 
     #[Field] function getGoogleClientId(): ?string
     {
-        if (!\Composer\InstalledVersions::isInstalled("google/apiclient")) {
-            return null;
-        }
-
-        //check user database, column facebook is exist
-        if (!User::_table()->column("google")) {
-            User::_table()->addColumn(new \Laminas\Db\Sql\Ddl\Column\Varchar("google", 255, true, null, ["comment" => "Google ID"]));
-        }
-
-        if (!$google_client_id = Config::Value("authentication_google_client_id")) {
-            return null;
-        }
-
-        return $google_client_id;
+        return (new Auth)->getGoogleClientId();
     }
 
 
@@ -268,5 +239,11 @@ class App
     public function getConfig(): array
     {
         return Config::Query()->toArray();
+    }
+
+    #[Field]
+    public function getAuth(): Auth
+    {
+        return new Auth();
     }
 }

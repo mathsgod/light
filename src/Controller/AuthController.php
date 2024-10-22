@@ -56,6 +56,12 @@ class AuthController
 
         $body = json_decode($response->getBody()->getContents(), true);
 
+        //reset all facebook
+        foreach (User::Query(["facebook" => $body["id"]]) as $u) {
+            $u->facebook = "";
+            $u->save();
+        }
+
         if ($id = $body["id"]) {
             $user->facebook = $id;
             $user->save();
@@ -91,8 +97,8 @@ class AuthController
     #[Logged]
     public function unlinkGoogle(#[InjectUser] User $user): bool
     {
-        if ($user->gmail) {
-            $user->gmail = "";
+        if ($user->google) {
+            $user->google = "";
             $user->save();
         }
         return true;
@@ -105,6 +111,12 @@ class AuthController
     #[Logged]
     function microsoftRegister(string $account_id, #[InjectUser] User $user): bool
     {
+        //reset all microsoft
+        foreach (User::Query(["microsoft" => $account_id]) as $u) {
+            $u->microsoft = "";
+            $u->save();
+        }
+
         $user->microsoft = $account_id;
         $user->save();
         return true;
@@ -133,11 +145,11 @@ class AuthController
 
         // reset all gmail
         foreach (User::Query(["gmail" => $payload["sub"]]) as $u) {
-            $u->gmail = "";
+            $u->google = "";
             $u->save();
         }
 
-        $user->gmail = $payload["sub"];
+        $user->google = $payload["sub"];
         $user->save();
 
         return true;

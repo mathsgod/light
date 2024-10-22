@@ -4,6 +4,7 @@ namespace Light\Type;
 
 use Light\Rbac\Rbac;
 use Light\App as LightApp;
+use Light\Input\Table\Column;
 use Light\Model\Config;
 use Light\Model\MyFavorite;
 use Light\Model\Translate;
@@ -170,7 +171,7 @@ class App
     {
         //check user database, column facebook is exist
         if (!User::_table()->column("microsoft")) {
-            return null;
+            User::_table()->addColumn(new \Laminas\Db\Sql\Ddl\Column\Varchar("microsoft", 255, true, null, ["comment" => "Microsoft ID"]));
         }
         return Config::Value("authentication_microsoft_client_id");
     }
@@ -182,7 +183,7 @@ class App
 
         //check user database, column facebook is exist
         if (!User::_table()->column("facebook")) {
-            return null;
+            User::_table()->addColumn(new \Laminas\Db\Sql\Ddl\Column\Varchar("facebook", 255, true, null, ["comment" => "Facebook ID"]));
         }
 
         return  Config::Value("authentication_facebook_app_id");
@@ -195,8 +196,8 @@ class App
         }
 
         //check user database, column facebook is exist
-        if (!User::_table()->column("gmail")) {
-            return null;
+        if (!User::_table()->column("google")) {
+            User::_table()->addColumn(new \Laminas\Db\Sql\Ddl\Column\Varchar("google", 255, true, null, ["comment" => "Google ID"]));
         }
 
         if (!$google_client_id = Config::Value("authentication_google_client_id")) {

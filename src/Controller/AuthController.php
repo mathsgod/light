@@ -401,7 +401,7 @@ class AuthController
     }
 
     #[Mutation]
-    public function verifyCode(#[Autowire] App $app, string $username, string $code): bool
+    public function forgetPasswordverifyCode(#[Autowire] App $app, string $username, string $code): bool
     {
         $user = User::Get(["username" => $username]);
         if (!$user) {

@@ -157,12 +157,9 @@ class AuthController
 
     //microsoft login
     #[Mutation]
-    /**
-     * @return mixed
-     */
-    function microsoftLogin(string $access_token, #[Autowire] App $app)
+    function microsoftLogin(string $access_token, #[Autowire] App $app): bool
     {
-        if(!Config::Value("authentication_microsoft_client_id")) {
+        if (!Config::Value("authentication_microsoft_client_id")) {
             throw new Error("Microsoft client id is not set");
         }
 

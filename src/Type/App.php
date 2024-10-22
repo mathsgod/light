@@ -167,6 +167,12 @@ class App
     }
 
     #[Field]
+    function getMicrosoftTenantId(): ?string
+    {
+        return Config::Value("authentication_microsoft_tenant_id", "common");
+    }
+
+    #[Field]
     function getMicrosoftClientId(): ?string
     {
         //check user database, column facebook is exist

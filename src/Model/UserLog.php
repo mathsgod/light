@@ -23,10 +23,8 @@ class UserLog extends \Light\Model
     #[Field]
     public function getUsername(): ?string
     {
-        if ($u = User::Get($this->user)) {
+        if ($u = User::Get($this->user_id)) {
             return $u->username;
         }
     }
-
-    
 }

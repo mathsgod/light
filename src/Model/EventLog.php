@@ -33,7 +33,7 @@ class EventLog extends \Light\Model
         if (is_string($this->source)) {
             return json_decode($this->source, true);
         }
-        return $this->source;
+        return $this->source ?? [];
     }
 
     #[Field]
@@ -45,7 +45,7 @@ class EventLog extends \Light\Model
         if (is_string($this->target)) {
             return json_decode($this->target, true);
         }
-        return $this->target;
+        return $this->target ?? [];
     }
 
     #[Field]

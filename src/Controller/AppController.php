@@ -2,6 +2,7 @@
 
 namespace Light\Controller;
 
+use League\OAuth2\Client\Provider\Google;
 use Light\App as LightApp;
 use Light\Model\Config;
 use Light\Model\User;
@@ -16,6 +17,23 @@ use Psr\Http\Message\UploadedFileInterface;
 
 class AppController
 {
+
+    #[Query]
+    public function getAuthorizationUrl(): string
+    {
+
+        $provider = new Google([
+            'clientId' => "790028313082-8qqnoqvkqtqssufto11k6qe6pnievcpv.apps.googleusercontent.com",
+            'redirectUri' => "https://raymond4.hostlink.com.hk/light/gmail_notification/redirect.php",
+            'accessType' => 'offline'
+        ]);
+
+        $url = $provider->getAuthorizationUrl([
+            'scope' => ['https://mail.google.com/']
+        ]);
+
+        return $url;
+    }
 
 
     #[Mutation]

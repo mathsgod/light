@@ -10,6 +10,7 @@ use GraphQL\Upload\UploadMiddleware;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Light\Rbac\Rbac;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
+use League\OAuth2\Client\Provider\Google;
 use Light\Model\Config;
 use Light\Model\MyFavorite;
 use Light\Model\Permission;
@@ -17,6 +18,8 @@ use Light\Model\Role;
 use Light\Model\User;
 use Light\Model\UserLog;
 use Light\Model\UserRole;
+use PHPMailer\PHPMailer\OAuth;
+use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -149,6 +152,35 @@ class App implements MiddlewareInterface
     public function getMailer()
     {
         $mailer = new Mailer();
+
+        if (Config::Value("mail_driver") == "gmail") {
+            $mailer->isSMTP();
+            $mailer->SMTPAuth = true;
+            $mailer->Port = 465;
+            $mailer->Host = "smtp.gmail.com";
+            $mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mailer->AuthType = 'XOAUTH2';
+
+            $provider = new Google([
+                'clientId' => '588911816574-tufei2kd5l23kj2sulucqutj28qghqqq.apps.googleusercontent.com',
+                'clientSecret' => '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',
+            ], [
+                "httpClient" => new \GuzzleHttp\Client([
+                    "verify" => false
+                ])
+            ]);
+
+            $mailer->setOAuth(
+                new OAuth([
+                    'provider' => $provider,
+                    'clientId' => '588911816574-tufei2kd5l23kj2sulucqutj28qghqqq.apps.googleusercontent.com',
+                    "clientSecret" => "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",
+                    'refreshToken' => Config::Value("mail_google_refresh_token"),
+                    'userName' => "mathsgod@gmail.com"
+                ])
+            );
+        }
+
 
         if (Config::Value("mail_driver") == "smtp") {
             $mailer->isSMTP();

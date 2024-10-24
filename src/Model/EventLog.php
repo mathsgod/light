@@ -11,7 +11,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "class", outputType: "String")]
 #[MagicField(name: "id", outputType: "Int!")]
 #[MagicField(name: "action", outputType: "String")]
-#[MagicField(name: "source", outputType: "mixed")]
 #[MagicField(name: "user_id", outputType: "Int!")]
 #[MagicField(name: "created_time", outputType: "String!")]
 #[MagicField(name: "status", outputType: "Int")]

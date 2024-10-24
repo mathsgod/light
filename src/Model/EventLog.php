@@ -12,8 +12,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "id", outputType: "Int!")]
 #[MagicField(name: "action", outputType: "String")]
 #[MagicField(name: "source", outputType: "mixed")]
-#[MagicField(name: "target", outputType: "mixed")]
-#[MagicField(name: "remark", outputType: "String")]
 #[MagicField(name: "user_id", outputType: "Int!")]
 #[MagicField(name: "created_time", outputType: "String!")]
 #[MagicField(name: "status", outputType: "Int")]
@@ -26,5 +24,29 @@ class EventLog extends \Light\Model
         if ($u = User::Get($this->user)) {
             return $u->username;
         }
+    }
+
+    #[Field]
+    /**
+     * @return mixed
+     */
+    public function  getSource()
+    {
+        if (is_string($this->source)) {
+            return json_decode($this->source, true);
+        }
+        return $this->source;
+    }
+
+    #[Field]
+    /**
+     * @return mixed
+     */
+    public function  getTarget()
+    {
+        if (is_string($this->target)) {
+            return json_decode($this->target, true);
+        }
+        return $this->target;
     }
 }

@@ -26,19 +26,6 @@ class AppController
     }
 
 
-    #[Mutation]
-    public function testFile(UploadedFileInterface $file, #[Autowire] LightApp $app): string
-    {
-
-        //save file
-
-        return "return full path";
-
-
-
-        //return $user->is("Administrators");
-    }
-
 
     #[Query]
     public function getApp(): App

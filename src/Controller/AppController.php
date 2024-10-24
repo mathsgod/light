@@ -21,7 +21,7 @@ class AppController
     #[Query]
     public function getAuthorizationUrl(): string
     {
-
+/* 
         $provider = new Google([
             'clientId' => "790028313082-8qqnoqvkqtqssufto11k6qe6pnievcpv.apps.googleusercontent.com",
             'redirectUri' => "https://raymond4.hostlink.com.hk/light/gmail_notification/redirect.php",
@@ -31,7 +31,7 @@ class AppController
         $url = $provider->getAuthorizationUrl([
             'scope' => ['https://mail.google.com/']
         ]);
-
+ */
         return $url;
     }
 

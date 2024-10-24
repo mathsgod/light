@@ -15,7 +15,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "user_id", outputType: "Int!")]
 #[MagicField(name: "created_time", outputType: "String!")]
 #[MagicField(name: "status", outputType: "Int")]
-#[MagicField(name: "different", outputType: "mixed")]
 class EventLog extends \Light\Model
 {
     #[Field]
@@ -48,5 +47,18 @@ class EventLog extends \Light\Model
             return json_decode($this->target, true);
         }
         return $this->target;
+    }
+
+    #[Field]
+    /**
+     * @return mixed
+     */
+    public function getDifferent()
+    {
+        $source = $this->getSource();
+        $target = $this->getTarget();
+
+        $diff = array_diff_assoc($target, $source);
+        return $diff;
     }
 }

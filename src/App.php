@@ -106,6 +106,13 @@ class App implements MiddlewareInterface
         }
 
         $this->loadMenu();
+
+
+
+        // database column check
+        if (!User::_table()->column("password_dt")) {
+            User::_table()->addColumn(new \Laminas\Db\Sql\Ddl\Column\Date("password_dt", true));
+        }
     }
 
     private function loadMenu()

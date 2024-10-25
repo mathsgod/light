@@ -5,6 +5,7 @@ namespace Light\Controller;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use GraphQL\Error\Error;
+
 use Light\App;
 use Light\Auth\Service;
 use Light\Input\User as InputUser;
@@ -23,6 +24,38 @@ use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 
 class AuthController
 {
+
+
+    #[Mutation]
+    public function changeExpiredPassword(string $username, string $old_password, string $new_password): bool
+    {
+
+        $user = User::Get(["username" => $username]);
+        if (!$user) {
+            throw new Error("User not found");
+        }
+
+        if (!self::PasswordVerify($old_password, $user->password)) {
+            throw new Error("Old password is not correct");
+        }
+
+        $system = new System();
+        if (!$system->isValidPassword($new_password)) {
+            throw new Error("Password is not valid to the password policy");
+        }
+
+  
+
+        User::_table()->update([
+            "password" => password_hash($new_password, PASSWORD_DEFAULT),
+            "password_dt" => date("Y-m-d")
+        ], [
+            "user_id" => $user->user_id
+        ]);
+
+        return true;
+    }
+
 
     #[Mutation]
     #[Logged]
@@ -320,6 +353,15 @@ class AuthController
         if ($app->isTwoFactorAuthentication()) {
             if (!(new TwoFactorAuthentication)->checkCode($user->secret, $code)) {
                 throw new Error("two factor authentication error");
+            }
+        }
+
+
+        if (Config::Value("password_expiration")) {
+            $duration = Config::Value("password_expiration_duration", 90); //90 days
+            $diff = strtotime(date("Y-m-d")) - strtotime($user->password_dt);
+            if ($diff > $duration * 24 * 60 * 60) {
+                throw new Error("password is expired");
             }
         }
 

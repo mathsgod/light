@@ -19,15 +19,6 @@ class AppController
 {
 
     #[Query]
-    public function getAuthorizationUrl(): string
-    {
-        return "";
-
-    }
-
-
-
-    #[Query]
     public function getApp(): App
     {
         return new App();

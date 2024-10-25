@@ -21,6 +21,13 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class App
 {
     #[Field]
+    public function isValidPassword(string $password): bool
+    {
+        return (new System)->isValidPassword($password);
+    }
+
+
+    #[Field]
     public function hasFavorite(#[Autowire] LightApp $app): bool
     {
         return $app->hasFavorite();
@@ -221,6 +228,4 @@ class App
     {
         return Config::Query()->toArray();
     }
-
-    
 }

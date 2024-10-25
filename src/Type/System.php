@@ -199,19 +199,19 @@ class System
                 if (empty($password)) return false;
             }
 
-            if ($rule === "contain_upper") {
+            if ($rule === "contains_uppercase") {
                 if (!preg_match("/[A-Z]/", $password)) return false;
             }
 
-            if ($rule === "contain_lower") {
+            if ($rule === "contains_lowercase") {
                 if (!preg_match("/[a-z]/", $password)) return false;
             }
 
-            if ($rule === "contain_numeric") {
+            if ($rule === "contains_numeric") {
                 if (!preg_match("/[0-9]/", $password)) return false;
             }
 
-            if ($rule === "contain_symbol") {
+            if ($rule === "contains_symbol") {
                 if (!preg_match("/[!@#$%^&*()\-_=+{};:,<.>]/", $password)) return false;
             }
 

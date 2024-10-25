@@ -115,6 +115,8 @@ class App implements MiddlewareInterface
         }
     }
 
+    
+
     private function loadMenu()
     {
         $this->addMenus(Yaml::parseFile(dirname(__DIR__) . '/menus.yml')); //system default

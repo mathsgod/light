@@ -59,7 +59,7 @@ class AuthController
 
         User::_table()->update([
             "password" => password_hash($new_password, PASSWORD_DEFAULT),
-            "password_dt" => date("Y-m-d")
+            "password_dt" => date("Y-m-d H:i:s")
         ], [
             "user_id" => $user->user_id
         ]);

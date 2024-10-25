@@ -111,7 +111,7 @@ class App implements MiddlewareInterface
 
         // database column check
         if (!User::_table()->column("password_dt")) {
-            User::_table()->addColumn(new \Laminas\Db\Sql\Ddl\Column\Date("password_dt", true));
+            User::_table()->addColumn(new \Laminas\Db\Sql\Ddl\Column\Datetime("password_dt", true));
         }
     }
 

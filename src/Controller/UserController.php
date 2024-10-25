@@ -101,6 +101,7 @@ class UserController
 
 
         $user->password = password_hash($new_password, PASSWORD_DEFAULT);
+        $user->password_dt = date("Y-m-d H:i:s");
         $user->save();
         return true;
     }

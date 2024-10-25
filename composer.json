@@ -23,8 +23,7 @@
         "symfony/cache": "^6.0",
         "endroid/qr-code": "^4.8",
         "sebastian/diff": "^4.0",
-        "mathsgod/light-rbac": "^1.0",
-        "league/oauth2-google": "^4.0"
+        "mathsgod/light-rbac": "^1.0"
     },
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*",

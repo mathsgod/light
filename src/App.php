@@ -427,7 +427,46 @@ class App implements MiddlewareInterface
         $this->container->add(ServerRequestInterface::class, $request);
         $this->container->add(Auth\Service::class, $auth_service);
 
+        if ($request->getMethod() == "GET" && $auth_service->isLogged()) {
+
+            $base_path = $_ENV["BASE_PATH"];
+            $path = $request->getUri()->getPath();
+            //real path - base path
+            $path = substr($path, strlen($base_path));
+            //trim / from start
+            $path = ltrim($path, "/");
+
+            //split 3 parts
+            $parts = explode("/", $path, 3);
+
+            if ($parts[0] == "drive") {
+                return $this->getDriveResponse($request, $parts[1], $parts[2]);
+            }
+        }
+
+
         return $handler->handle($request);
+    }
+
+    public function getDriveResponse(ServerRequestInterface $requeset, int $index, string $path)
+    {
+        $config = json_decode(Config::Value("fs", "[]"), true);
+        if (count($config) == 0) {
+            $config[] = ["name" => "default"];
+        }
+
+        if ($index > count($config)) {
+            return new \Laminas\Diactoros\Response\EmptyResponse(404);
+        }
+
+        $drive = $config[$index]["name"];
+        $fs = $this->getFS($drive);
+
+        $file = $fs->read($path);;
+
+        $response = new \Laminas\Diactoros\Response();
+        $response->getBody()->write($file);
+        return $response;
     }
 
     public function execute(ServerRequestInterface $request)

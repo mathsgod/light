@@ -115,7 +115,7 @@ class App implements MiddlewareInterface
         }
     }
 
-    
+
 
     private function loadMenu()
     {
@@ -370,16 +370,13 @@ class App implements MiddlewareInterface
 
         //sort
         sort($permissions);
-        return  $permissions;
+        return $permissions;
     }
 
 
     public function isTwoFactorAuthentication(): bool
     {
-        if (!$config = Config::Get(["name" => "two_factor_authentication"])) {
-            return false;
-        }
-        return $config->value;
+        return Config::Value("two_factor_authentication") ? true : false;
     }
 
     public function getRbac()

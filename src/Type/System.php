@@ -17,6 +17,9 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class System
 {
+
+       
+
     #[Field]
     public function time(): string
     {

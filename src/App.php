@@ -151,7 +151,7 @@ class App implements MiddlewareInterface
 
     public function getMailer()
     {
-        $mailer = new Mailer();
+        $mailer = new Mailer(true);
 
         if (Config::Value("mail_driver") == "gmail") {
             $mailer->isSMTP();
@@ -160,25 +160,6 @@ class App implements MiddlewareInterface
             $mailer->Host = "smtp.gmail.com";
             $mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
             $mailer->AuthType = 'XOAUTH2';
-
-            $provider = new Google([
-                'clientId' => '588911816574-tufei2kd5l23kj2sulucqutj28qghqqq.apps.googleusercontent.com',
-                'clientSecret' => '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',
-            ], [
-                "httpClient" => new \GuzzleHttp\Client([
-                    "verify" => false
-                ])
-            ]);
-
-            $mailer->setOAuth(
-                new OAuth([
-                    'provider' => $provider,
-                    'clientId' => '588911816574-tufei2kd5l23kj2sulucqutj28qghqqq.apps.googleusercontent.com',
-                    "clientSecret" => "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",
-                    'refreshToken' => Config::Value("mail_google_refresh_token"),
-                    'userName' => "mathsgod@gmail.com"
-                ])
-            );
         }
 
 

@@ -2,7 +2,9 @@
 
 namespace Light\Controller;
 
+use Exception;
 use Firebase\JWT\JWT;
+use GraphQL\Error\Error;
 use Light\App;
 use Light\Type\System;
 use Ramsey\Uuid\Uuid;
@@ -16,6 +18,7 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 
 class SystemController
 {
+
     #[Mutation]
     #[Right("mail.send")]
     public function sendMail(#[Autowire] App $app, string $email, string $subject, string $message): bool
@@ -36,7 +39,13 @@ class SystemController
         $mailer->addAddress($email);
         $mailer->Subject = $subject;
         $mailer->msgHTML($content);
-        $mailer->send();
+        try {
+            $mailer->send();
+        } catch (Exception $e) {
+            throw new Error($e->getMessage());
+        }
+
+
         return true;
     }
 

@@ -35,6 +35,18 @@ class AuthController
             throw new Error("User not found");
         }
 
+        //check password is expired ?
+        if (!Config::Value("password_expiration")) {
+            throw new Error("Password expiration is not enabled");
+        }
+
+        //check duration of password
+        $duration = Config::Value("password_expiration_duration", 90); //90 days
+        $diff = strtotime(date("Y-m-d")) - strtotime($user->password_dt);
+        if ($diff < $duration * 24 * 60 * 60) {
+            throw new Error("Password is not expired");
+        }
+
         if (!self::PasswordVerify($old_password, $user->password)) {
             throw new Error("Old password is not correct");
         }
@@ -44,7 +56,6 @@ class AuthController
             throw new Error("Password is not valid to the password policy");
         }
 
-  
 
         User::_table()->update([
             "password" => password_hash($new_password, PASSWORD_DEFAULT),

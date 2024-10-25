@@ -81,6 +81,7 @@ class UserController
         }
 
         $obj->password = password_hash($password, PASSWORD_DEFAULT);
+        $obj->password_dt = date("Y-m-d H:i:s");
         $obj->save();
         return true;
     }
@@ -133,6 +134,7 @@ class UserController
         }
 
         $user->password = password_hash($data->password, PASSWORD_DEFAULT);
+        $user->password_dt = date("Y-m-d H:i:s");
 
         //check is user exist
 

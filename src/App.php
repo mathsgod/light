@@ -462,12 +462,16 @@ class App implements MiddlewareInterface
         $drive = $config[$index]["name"];
         $fs = $this->getFS($drive);
 
-        $file = $fs->read($path);;
+        if (!$fs->fileExists($path)) {
+            return new \Laminas\Diactoros\Response\EmptyResponse(404);
+        }
 
         $response = new \Laminas\Diactoros\Response();
-        $response->getBody()->write($file);
+        $response = $response->withHeader("Content-Type", $fs->mimeType($path));
+        $response->getBody()->write($fs->read($path));
         return $response;
     }
+
 
     public function execute(ServerRequestInterface $request)
     {

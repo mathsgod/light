@@ -162,7 +162,17 @@ class App implements MiddlewareInterface
     {
         $mailer = new Mailer(true);
 
-        if (Config::Value("mail_driver") == "gmail") {
+        $driver = Config::Value("mail_driver");
+
+        if ($driver == "sendmail") {
+            $mailer->isSendmail();
+        }
+
+        if ($driver = "qmail") {
+            $mailer->isQmail();
+        }
+
+        if ($driver == "gmail") {
             $mailer->isSMTP();
             $mailer->SMTPAuth = true;
             $mailer->Port = 465;
@@ -172,7 +182,7 @@ class App implements MiddlewareInterface
         }
 
 
-        if (Config::Value("mail_driver") == "smtp") {
+        if ($driver == "smtp") {
             $mailer->isSMTP();
             $mailer->SMTPAuth = true;
             $mailer->Host = Config::Value("mail_host");

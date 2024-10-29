@@ -238,4 +238,42 @@ class App
     {
         return $app->getCustomMenus();
     }
+
+    #[Field(name: "fs")]
+    #[Logged]
+    /**
+     * @return \Light\Type\FS[]
+     */
+    function getFS(#[Autowire] LightApp $app)
+    {
+
+        $config = Config::Get(["name" => "fs"]);
+
+        if (!$config) {
+            $fss = [];
+        } else {
+            $fss = json_decode($config->value, true);
+        }
+
+
+        //map name to index
+        $fss = array_combine(array_column($fss, "name"), $fss);
+
+        //push default if not exists
+        if (!isset($fss["default"])) {
+            $fss["default"] = [
+                "name" => "default",
+                "type" => "local",
+                "data" => [
+                    "location" => getcwd() . "/uploads"
+                ]
+            ];
+        }
+
+        $result = [];
+        foreach ($fss as $fs) {
+            $result[] = new FS($fs["name"], $app->getFS($fs["name"]));
+        }
+        return $result;
+    }
 }

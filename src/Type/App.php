@@ -7,6 +7,7 @@ use Light\Rbac\Rbac;
 use Light\App as LightApp;
 use Light\Input\Table\Column;
 use Light\Model\Config;
+use Light\Model\MailLog;
 use Light\Model\MyFavorite;
 use Light\Model\Translate;
 use Light\Model\User;
@@ -305,5 +306,16 @@ class App
             $result[] = new FS($fs["name"], $app->getFS($fs["name"]));
         }
         return $result;
+    }
+
+    #[Field]
+    /**
+     * @return \Light\Model\MailLog[]
+     * @param ?mixed $filters
+     */
+    #[Right("maillog.list")]
+    public function getMailLogs($filters = [],  ?string $sort = ''): \R\DB\Query
+    {
+        return MailLog::Query()->filters($filters)->sort($sort);
     }
 }

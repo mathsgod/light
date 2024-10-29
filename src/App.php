@@ -12,6 +12,7 @@ use Light\Rbac\Rbac;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use League\OAuth2\Client\Provider\Google;
 use Light\Model\Config;
+use Light\Model\MailLog;
 use Light\Model\MyFavorite;
 use Light\Model\Permission;
 use Light\Model\Role;
@@ -30,7 +31,9 @@ use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Yaml\Yaml;
 use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
+use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
+use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 
 class App implements MiddlewareInterface
@@ -674,4 +677,6 @@ class App implements MiddlewareInterface
 
         return true;
     }
+
+ 
 }

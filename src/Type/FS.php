@@ -80,4 +80,19 @@ class FS
         }
         return $files;
     }
+
+    #[Field]
+    /**
+     * @return \Light\Type\FS\Folder[]
+     */
+    #[Right('fs.folder.list')]
+    public function folders(?string $path = ""): array
+    {
+        $files = [];
+        foreach ($this->fs->listContents($path, false) as $dir) {
+            if (!$dir->isDir()) continue;
+            $files[] = new \Light\Type\FS\Folder($this->fs, $dir);
+        }
+        return $files;
+    }
 }

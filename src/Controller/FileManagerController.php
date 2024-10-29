@@ -68,6 +68,9 @@ class FileManagerController
 
 
     #[Query]
+    /**
+     * @deprecated use app { fs { file } }
+     */
     public function fsFile(string $path): File
     {
 
@@ -83,11 +86,12 @@ class FileManagerController
     #[Query]
     /**
      * @return \Light\Type\FS\File[]
+     * @deprecated use app { fs { files } }
      */
     #[Right('fs.file.list')]
     public function fsListFiles(?string $path = "", ?string $type = null, ?string $search = null): array
     {
-    
+
         $TYPES = [
             "image" => ["jpg", "jpeg", "png", "gif", "svg", "webp", "bmp", "ico"],
             "video" => ["mp4", "webm", "ogg", "avi", "mov", "flv", "wmv", "mkv"],

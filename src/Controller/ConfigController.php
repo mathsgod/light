@@ -13,19 +13,6 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 class ConfigController
 {
     #[Query]
-    #[Logged]
-    /**
-     * @return mixed
-     */
-    public function getConfig(string $name)
-    {
-        if (!$config = Config::Get(["name" => $name])) {
-            return null;
-        }
-        return $config->value;
-    }
-
-    #[Query]
     #[Right('config.list')]
     #[Logged]
     /**

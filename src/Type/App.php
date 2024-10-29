@@ -241,12 +241,42 @@ class App
 
     #[Field(name: "fs")]
     #[Logged]
+    function getFS(?string $name = "default", #[Autowire] LightApp $app): FS
+    {
+        $config = Config::Get(["name" => "fs"]);
+
+        if (!$config) {
+            $fss = [];
+        } else {
+            $fss = json_decode($config->value, true);
+        }
+
+        //map name to index
+        $fss = array_combine(array_column($fss, "name"), $fss);
+
+        //push default if not exists
+        if (!isset($fss["default"])) {
+            $fss["default"] = [
+                "name" => "default",
+                "type" => "local",
+                "data" => [
+                    "location" => getcwd() . "/uploads"
+                ]
+            ];
+        }
+
+        $fs = $fss[$name] ?? $fss["default"];
+
+        return new FS($fs["name"], $app->getFS($fs["name"]));
+    }
+
+    #[Field(name: "fss")]
+    #[Logged]
     /**
      * @return \Light\Type\FS[]
      */
-    function getFS(#[Autowire] LightApp $app)
+    function getFSS(#[Autowire] LightApp $app)
     {
-
         $config = Config::Get(["name" => "fs"]);
 
         if (!$config) {

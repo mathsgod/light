@@ -86,6 +86,7 @@ class AppController
     #[Logged]
     /**
      * @return mixed
+     * @deprecated  Use app{ customMenus } instead
      */
     function getAppMenus(#[Autowire] LightApp $app): array
     {

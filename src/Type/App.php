@@ -228,4 +228,14 @@ class App
     {
         return Config::Query()->toArray();
     }
+
+    #[Field]
+    #[Logged]
+    /**
+     * @return mixed
+     */
+    function getCustomMenus(#[Autowire] LightApp $app): array
+    {
+        return $app->getCustomMenus();
+    }
 }

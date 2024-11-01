@@ -7,6 +7,7 @@ use Light\Rbac\Rbac;
 use Light\App as LightApp;
 use Light\Input\Table\Column;
 use Light\Model\Config;
+use Light\Model\EventLog;
 use Light\Model\MailLog;
 use Light\Model\MyFavorite;
 use Light\Model\Translate;
@@ -310,12 +311,23 @@ class App
 
     #[Field]
     /**
-     * @return \Light\Model\MailLog[]
      * @param ?mixed $filters
+     * @return \Light\Model\MailLog[]
      */
     #[Right("maillog.list")]
     public function getMailLogs($filters = [],  ?string $sort = ''): \R\DB\Query
     {
         return MailLog::Query()->filters($filters)->sort($sort);
+    }
+
+    #[Field]
+    /**
+     * @param ?mixed $filters
+     * @return \Light\Model\EventLog[]
+     */
+    #[Right("eventlog.list")]
+    public function getEventLogs($filters = [],  ?string $sort = ''): \R\DB\Query
+    {
+        return EventLog::Query()->filters($filters)->sort($sort);
     }
 }

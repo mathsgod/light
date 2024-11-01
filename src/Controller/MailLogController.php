@@ -17,6 +17,7 @@ class MailLogController
     /**
      * @return \Light\Model\MailLog[]
      * @param ?mixed $filters
+     * @deprecated use app.mailLogs instead
      */
     #[Right("maillog.list")]
     public function listMailLog(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query

@@ -242,7 +242,7 @@ class App
 
     #[Field(name: "fs")]
     #[Logged]
-    function getFS(?string $name = "default", #[Autowire] LightApp $app): FS
+    function getFS(#[Autowire] LightApp $app, ?string $name = "default"): FS
     {
         $config = Config::Get(["name" => "fs"]);
 

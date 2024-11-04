@@ -2,6 +2,7 @@
 
 namespace Light\Type;
 
+use Exception;
 use GraphQL\Error\Error;
 use Light\App;
 use Light\Model\Config;
@@ -64,35 +65,18 @@ class Auth
         return Config::Value("authentication_google_client_id");
     }
 
-    public function getWebAuthnServer()
-    {
-        $name = $_SERVER["SERVER_NAME"];
-        if ($name == "0.0.0.0") {
-            $name = "localhost";
-            $id = "localhost";
-        } else {
-            $name = $_SERVER["SERVER_NAME"];
-            if (!$_ENV["RP_ID"]) {
-                throw new Error("RP_ID is not set in .env file");
-            }
-        }
-
-
-        $rp = new PublicKeyCredentialRpEntity($name, $id);
-        $source = new PublicKeyCredentialSourceRepository();
-        $server = new \Webauthn\Server($rp, $source);
-        $server->setSecuredRelyingPartyId(["localhost"]);
-        return $server;
-    }
-
-
     #[Field]
     /**
      * @return mixed
      */
     public function getWebAuthnRequestOptions(string $username, #[Autowire] App $app)
     {
-        $server = $this->getWebAuthnServer();
+        try {
+            $server = $app->getWebAuthnServer();
+        } catch (Exception $e) {
+            throw new Error($e->getMessage());
+        }
+
         $source = new PublicKeyCredentialSourceRepository();
         if (!$user = User::Get(["username" => $username])) {
             throw new \Exception("Invalid user");
@@ -127,8 +111,13 @@ class Auth
      */
     public function getWebAuthnCreationOptions(#[InjectUser] User $user, #[Autowire] App $app)
     {
+        try {
+            $server = $app->getWebAuthnServer();
+        } catch (Exception $e) {
+            throw new Error($e->getMessage());
+        }
 
-        $server = $this->getWebAuthnServer();
+
         $userEntity = new PublicKeyCredentialUserEntity($user->username, $user->user_id, $user->getName());
 
         // Convert the Credential Sources into Public Key Credential Descriptors

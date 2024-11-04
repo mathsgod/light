@@ -19,6 +19,7 @@ use Light\Model\Role;
 use Light\Model\User;
 use Light\Model\UserLog;
 use Light\Model\UserRole;
+use Light\WebAuthn\PublicKeyCredentialSourceRepository;
 use PHPMailer\PHPMailer\OAuth;
 use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Http\Message\ServerRequestInterface;
@@ -35,6 +36,7 @@ use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\SchemaFactory;
+use Webauthn\PublicKeyCredentialRpEntity;
 
 class App implements MiddlewareInterface
 {
@@ -678,5 +680,24 @@ class App implements MiddlewareInterface
         return true;
     }
 
- 
+    public function getWebAuthnServer()
+    {
+        $name = $_SERVER["SERVER_NAME"];
+        if ($name == "0.0.0.0") {
+            $name = "localhost";
+            $id = "localhost";
+        } else {
+            $name = $_SERVER["SERVER_NAME"];
+            if (!$_ENV["RP_ID"]) {
+                throw new Exception("RP_ID is not set in .env file");
+            }
+        }
+
+
+        $rp = new PublicKeyCredentialRpEntity($name, $id);
+        $source = new PublicKeyCredentialSourceRepository();
+        $server = new \Webauthn\Server($rp, $source);
+        $server->setSecuredRelyingPartyId(["localhost"]);
+        return $server;
+    }
 }

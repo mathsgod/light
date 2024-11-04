@@ -12,6 +12,7 @@ use Light\Model\MailLog;
 use Light\Model\MyFavorite;
 use Light\Model\Translate;
 use Light\Model\User;
+use Light\Model\UserLog;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -350,5 +351,17 @@ class App
     public function getConfigs(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = '',): \R\DB\Query
     {
         return Config::Query()->filters($filters)->sort($sort);
+    }
+
+    #[Field]
+    #[Logged]
+    /**
+     * @return \Light\Model\UserLog[]
+     * @param ?mixed $filters
+     */
+    #[Right("userlog.list")]
+    public function getUserLogs(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
+    {
+        return UserLog::Query()->filters($filters)->sort($sort);
     }
 }

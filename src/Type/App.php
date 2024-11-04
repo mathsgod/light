@@ -339,4 +339,16 @@ class App
     {
         return EventLog::Query()->filters($filters)->sort($sort);
     }
+
+    #[Field]
+    #[Right('config.list')]
+    #[Logged]
+    /**
+     * @return \Light\Model\Config[]
+     * @param ?mixed $filters
+     */
+    public function getConfigs(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = '',): \R\DB\Query
+    {
+        return Config::Query()->filters($filters)->sort($sort);
+    }
 }

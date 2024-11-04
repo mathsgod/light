@@ -364,4 +364,24 @@ class App
     {
         return UserLog::Query()->filters($filters)->sort($sort);
     }
+
+    #[Field]
+    #[Logged]
+    /**
+     * @return \Light\Model\User[]
+     * @param ?mixed $filters
+     */
+    #[Right("user.list")]
+    public function getUsers(#[InjectUser] \Light\Model\User $user, $filters = [], ?string $sort = ""): \R\DB\Query
+    {
+        //only administrators can list administrators
+        $q = User::Query()->filters($filters)->sort($sort);
+        if (!$user->is("Administrators")) {
+
+            //filter out administrators
+            $q->where("user_id NOT IN (SELECT user_id FROM UserRole WHERE role = 'Administrators')");
+        }
+
+        return $q;
+    }
 }

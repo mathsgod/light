@@ -384,4 +384,10 @@ class App
 
         return $q;
     }
+
+    #[Field]
+    public function getAuth(): Auth
+    {
+        return new Auth;
+    }
 }

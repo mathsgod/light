@@ -23,6 +23,15 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class App
 {
     #[Field]
+    public function getVersion(): string
+    {
+        if (!\Composer\InstalledVersions::isInstalled("hostlink/light")) {
+            return "dev";
+        }
+        return \Composer\InstalledVersions::getVersion("hostlink/light");
+    }
+
+    #[Field]
     public function isValidPassword(string $password): bool
     {
         return (new System)->isValidPassword($password);

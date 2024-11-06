@@ -618,7 +618,6 @@ class App implements MiddlewareInterface
                 ],
             ]);
 
-
             $location = $data["location"];
             $adapter = new \League\Flysystem\Local\LocalFilesystemAdapter($location, $visibilityConverter);
             $filesystem = new \League\Flysystem\Filesystem($adapter);
@@ -629,7 +628,7 @@ class App implements MiddlewareInterface
             return (new \AlphaSnow\Flysystem\Aliyun\AliyunFactory())->createFilesystem($fs["data"]);
         }
 
-        if ($fs["type"] == "S3") {
+        if ($fs["type"] == "s3") {
             $data = $fs["data"];
             $client = new \Aws\S3\S3Client([
                 'version' => 'latest',

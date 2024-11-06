@@ -253,6 +253,30 @@ class App
 
     #[Field]
     #[Logged]
+    /**
+     * @return string[]
+     */
+    function getDriveTypes(): array
+    {
+        $type = [];
+        $type = ["local"];
+
+        if (\Composer\InstalledVersions::isInstalled("league/flysystem-aws-s3-v3")) {
+            $type[] = "s3";
+        }
+
+        if (\Composer\InstalledVersions::isInstalled("hostlink/hostlink-storage-adapter")) {
+            $type[] = "hostlink";
+        }
+
+        if (\Composer\InstalledVersions::isInstalled("alphasnow/aliyun-oss-flysystem")) {
+            $type[] = "aliyun-oss";
+        }
+        return $type;
+    }
+
+    #[Field]
+    #[Logged]
     function getDrive(#[Autowire] LightApp $app, ?int $index = 0): Drive
     {
         $config = $app->getFSConfig();

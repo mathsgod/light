@@ -42,7 +42,7 @@ class Drive
 
 
     #[Field]
-    public function file(string $path): File
+    public function file(string $path): ?File
     {
         $list = $this->filesystem->listContents(dirname($path), false);
         foreach ($list as $file) {

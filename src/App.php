@@ -85,6 +85,7 @@ class App implements MiddlewareInterface
         $this->container->add(Controller\FileSystemController::class);
         $this->container->add(Controller\RevisionController::class);
         $this->container->add(Controller\DatabaseController::class);
+        $this->container->add(Controller\DriveController::class);
 
         /*        $this->container->delegate(
             new \League\Container\ReflectionContainer()

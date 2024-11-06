@@ -24,7 +24,7 @@ class DriveController
     const DISALLOW_EXT = ['zip', 'js', 'jsp', 'jsb', 'mhtml', 'mht', 'xhtml', 'xht', 'php', 'phtml', 'php3', 'php4', 'php5', 'phps', 'shtml', 'jhtml', 'pl', 'sh', 'py', 'cgi', 'exe', 'application', 'gadget', 'hta', 'cpl', 'msc', 'jar', 'vb', 'jse', 'ws', 'wsf', 'wsc', 'wsh', 'ps1', 'ps2', 'psc1', 'psc2', 'msh', 'msh1', 'msh2', 'inf', 'reg', 'scf', 'msp', 'scr', 'dll', 'msi', 'vbs', 'bat', 'com', 'pif', 'cmd', 'vxd', 'cpl', 'htpasswd', 'htaccess'];
 
     #[Mutation]
-    public function lightDriveCreateFolder(int $index = 0, string $path, #[Autowire] App $app): bool
+    public function lightDriveCreateFolder(#[Autowire] App $app, int $index, string $path): bool
     {
         $drive = $app->getDrive($index);
         $drive->getFilesystem()->createDirectory($path);
@@ -32,7 +32,7 @@ class DriveController
     }
 
     #[Mutation]
-    public function lightDriveDeleteFolder(int $index = 0, string $path, #[Autowire] App $app): bool
+    public function lightDriveDeleteFolder(#[Autowire] App $app, int $index, string $path): bool
     {
         $drive = $app->getDrive($index);
         $drive->getFilesystem()->deleteDirectory($path);
@@ -40,7 +40,7 @@ class DriveController
     }
 
     #[Mutation]
-    public function lightDriveRenameFolder(int $index = 0, string $path, string $name, #[Autowire] App $app): bool
+    public function lightDriveRenameFolder(#[Autowire] App $app, int $index, string $path, string $name): bool
     {
         $drive = $app->getDrive($index);
         $drive->getFilesystem()->move($path, dirname($path) . "/" . $name);
@@ -49,7 +49,7 @@ class DriveController
 
     //lightDriveWriteFile
     #[Mutation]
-    public function lightDriveWriteFile(int $index = 0, string $path, string $content, #[Autowire] App $app): bool
+    public function lightDriveWriteFile(#[Autowire] App $app, int $index, string $path, string $content): bool
     {
         $drive = $app->getDrive($index);
         $drive->getFilesystem()->write($path, $content);
@@ -58,7 +58,7 @@ class DriveController
 
     //lightDriveDeleteFile
     #[Mutation]
-    public function lightDriveDeleteFile(int $index = 0, string $path, #[Autowire] App $app): bool
+    public function lightDriveDeleteFile(#[Autowire] App $app, int $index, string $path): bool
     {
         $drive = $app->getDrive($index);
         $drive->getFilesystem()->delete($path);
@@ -67,7 +67,7 @@ class DriveController
 
     //lightDriveRenameFile
     #[Mutation]
-    public function lightDriveRenameFile(int $index = 0, string $path, string $name, #[Autowire] App $app): bool
+    public function lightDriveRenameFile(#[Autowire] App $app, int $index, string $path, string $name): bool
     {
         //check extension
         $ext = pathinfo($name, PATHINFO_EXTENSION);
@@ -80,7 +80,7 @@ class DriveController
 
     //lightDriveMoveFile
     #[Mutation]
-    public function lightDriveMoveFile(int $index = 0, string $source, string $destination, #[Autowire] App $app): bool
+    public function lightDriveMoveFile(#[Autowire] App $app, int $index, string $source, string $destination): bool
     {
         $drive = $app->getDrive($index);
         $basename = basename($source);

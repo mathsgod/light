@@ -19,11 +19,11 @@ class Folder
 
 
     protected $dir = null;
-    protected $fs = null;
+    protected $drive = null;
 
-    public function __construct(Filesystem $fs, DirectoryAttributes $dir)
+    public function __construct(\Light\Type\Drive $drive, DirectoryAttributes $dir)
     {
-        $this->fs = $fs;
+        $this->drive = $drive;
         $this->dir = $dir;
         $this->path =  $dir->path();
         $this->name = basename($dir->path());
@@ -36,9 +36,9 @@ class Folder
     public function getFiles(): array
     {
         $files = [];
-        foreach ($this->fs->listContents($this->path, false) as $file) {
+        foreach ($this->drive->getFilesystem()->listContents($this->path, false) as $file) {
             if (!$file->isFile()) continue;
-            $files[] = new File($this->fs, $file);
+            $files[] = new File($this->drive, $file);
         }
         return $files;
     }

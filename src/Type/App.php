@@ -251,35 +251,13 @@ class App
         return $app->getCustomMenus();
     }
 
-    #[Field(name: "fs")]
+    #[Field]
     #[Logged]
-    function getFS(#[Autowire] LightApp $app, ?string $name = "default"): FS
+    function getDrive(#[Autowire] LightApp $app, ?int $index = 0): Drive
     {
-        $config = Config::Get(["name" => "fs"]);
-
-        if (!$config) {
-            $fss = [];
-        } else {
-            $fss = json_decode($config->value, true);
-        }
-
-        //map name to index
-        $fss = array_combine(array_column($fss, "name"), $fss);
-
-        //push default if not exists
-        if (!isset($fss["default"])) {
-            $fss["default"] = [
-                "name" => "default",
-                "type" => "local",
-                "data" => [
-                    "location" => getcwd() . "/uploads"
-                ]
-            ];
-        }
-
-        $fs = $fss[$name] ?? $fss["default"];
-
-        return new FS($fs["name"], $app->getFS($fs["name"]));
+        $config = $app->getFSConfig();
+        $fs = $config[$index] ?? $config[0];
+        return new Drive($fs["name"], $app->getFS($index), $index, $fs["data"]);
     }
 
     #[Field(name: "fss")]
@@ -289,32 +267,11 @@ class App
      */
     function getFSS(#[Autowire] LightApp $app)
     {
-        $config = Config::Get(["name" => "fs"]);
-
-        if (!$config) {
-            $fss = [];
-        } else {
-            $fss = json_decode($config->value, true);
-        }
-
-
-        //map name to index
-        $fss = array_combine(array_column($fss, "name"), $fss);
-
-        //push default if not exists
-        if (!isset($fss["default"])) {
-            $fss["default"] = [
-                "name" => "default",
-                "type" => "local",
-                "data" => [
-                    "location" => getcwd() . "/uploads"
-                ]
-            ];
-        }
+        $config = $app->getFSConfig();
 
         $result = [];
-        foreach ($fss as $fs) {
-            $result[] = new FS($fs["name"], $app->getFS($fs["name"]));
+        foreach ($config as $key => $fs) {
+            $result[] = new FS($fs["name"], $app->getFS($key), $key, $fs["data"]);
         }
         return $result;
     }

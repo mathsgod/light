@@ -574,31 +574,33 @@ class App implements MiddlewareInterface
         return true;
     }
 
-    public function getFS(string $name = "default")
+    public function getFSConfig()
     {
         $config = Config::Get(["name" => "fs"]);
-
         if (!$config) {
             $fss = [];
         } else {
             $fss = json_decode($config->value, true);
         }
-
-        //map name to index
-        $fss = array_combine(array_column($fss, "name"), $fss);
-
         //push default if not exists
-        if (!isset($fss["default"])) {
-            $fss["default"] = [
+        if (count($fss) == 0) {
+            $fss[] = [
                 "name" => "default",
                 "type" => "local",
                 "data" => [
-                    "location" => getcwd() . "/uploads"
+                    "location" => getcwd() . "/uploads",
+                    "url" => "/uploads/"
                 ]
             ];
         }
+        return $fss;
+    }
 
-        $fs = $fss[$name];
+    public function getFS(int $index = 0)
+    {
+        $fss = $this->getFSConfig();
+
+        $fs = $fss[$index];
 
         if ($fs["type"] == "local") {
             $data = $fs["data"];

@@ -1,26 +1,26 @@
 <?php
 
-
 namespace Light\Type;
 
+use League\Flysystem\DirectoryListing;
 use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemOperator;
 use Light\Type\FS\File;
 use TheCodingMachine\GraphQLite\Annotations\Field;
-use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type]
-class FS
+class Drive
 {
-    public Filesystem $filesystem;
-    private array $data;
 
     #[Field]
     public string $name;
     #[Field]
     public int $index;
 
+    protected Filesystem $filesystem;
+    private array $data;
 
     public function __construct(string $name, Filesystem $filesystem, int $index, array $data = [])
     {
@@ -29,6 +29,17 @@ class FS
         $this->index = $index;
         $this->data = $data;
     }
+
+    public function getFilesystem(): Filesystem
+    {
+        return $this->filesystem;
+    }
+
+    public function getFileUrl(string $path): string
+    {
+        return $this->data["url"] . $path;
+    }
+
 
     #[Field]
     public function file(string $path): File

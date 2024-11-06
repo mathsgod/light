@@ -37,7 +37,11 @@ class Drive
 
     public function getFileUrl(string $path): string
     {
-        return $this->data["url"] . $path;
+        if ($this->data["url"]) {
+            return $this->data["url"] . $path;
+        }
+
+        return "/api/drive/$this->index/$path";
     }
 
 

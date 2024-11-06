@@ -3,6 +3,7 @@
 namespace Light\Controller;
 
 use GraphQL\Error\Error;
+use League\Flysystem\Filesystem;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\App;
 use Light\Model\EventLog;
@@ -22,6 +23,47 @@ class DriveController
 {
 
     const DISALLOW_EXT = ['zip', 'js', 'jsp', 'jsb', 'mhtml', 'mht', 'xhtml', 'xht', 'php', 'phtml', 'php3', 'php4', 'php5', 'phps', 'shtml', 'jhtml', 'pl', 'sh', 'py', 'cgi', 'exe', 'application', 'gadget', 'hta', 'cpl', 'msc', 'jar', 'vb', 'jse', 'ws', 'wsf', 'wsc', 'wsh', 'ps1', 'ps2', 'psc1', 'psc2', 'msh', 'msh1', 'msh2', 'inf', 'reg', 'scf', 'msp', 'scr', 'dll', 'msi', 'vbs', 'bat', 'com', 'pif', 'cmd', 'vxd', 'cpl', 'htpasswd', 'htaccess'];
+
+    private function getNextFilename(Filesystem $fs, string $path, $filename)
+    {
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        $filename = pathinfo($filename, PATHINFO_FILENAME);
+
+        $i = 1;
+        while ($fs->fileExists($path . "/" . $filename . "($i)." . $ext)) {
+            $i++;
+        }
+        return $filename . "($i)." . $ext;
+    }
+
+    #[Mutation]
+    public function lightDriveUploadFile(#[Autowire] App $app, int $index, string $path, UploadedFileInterface $file, ?bool $rename = false): string
+    {
+        //get path extension
+        $filename = $file->getClientFilename();
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+
+        //check if extension is allowed
+        if (in_array($ext, self::DISALLOW_EXT)) throw new Error("File type not allowed");
+
+        $drive = $app->getDrive($index);
+        $fs = $drive->getFilesystem();
+
+        //check if file already exists
+        if ($fs->fileExists($path . "/" . $filename)) {
+
+            if ($rename) {
+                $filename = $this->getNextFilename($fs, $path, $filename);
+            } else {
+                throw new Error("File already exists");
+            }
+        }
+
+        //move file
+        $fs->write($path . "/" . $filename, $file->getStream()->getContents());
+
+        return $path . "/" . $filename;
+    }
 
     #[Mutation]
     public function lightDriveCreateFolder(#[Autowire] App $app, int $index, string $path): bool

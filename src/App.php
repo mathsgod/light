@@ -587,7 +587,7 @@ class App implements MiddlewareInterface
         //push default if not exists
         if (count($fss) == 0) {
             $fss[] = [
-                "name" => "default",
+                "name" => "local",
                 "type" => "local",
                 "data" => [
                     "location" => getcwd() . "/uploads",

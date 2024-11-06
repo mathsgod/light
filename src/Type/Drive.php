@@ -115,4 +115,17 @@ class Drive
         }
         return $files;
     }
+
+
+    #[Field]
+    public function folder(string $path): ?\Light\Type\FS\Folder
+    {
+        $list = $this->filesystem->listContents(dirname($path), false);
+        foreach ($list as $dir) {
+            if (!$dir->isDir()) continue;
+            if ($dir->path() === $path)
+                return new \Light\Type\FS\Folder($this, $dir);
+        }
+        return null;
+    }
 }

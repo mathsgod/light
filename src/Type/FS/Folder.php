@@ -42,4 +42,16 @@ class Folder
         }
         return $files;
     }
+
+    #[Field]
+    public function getTotalSize(): int
+    {
+        $size = 0;
+        foreach ($this->drive->getFilesystem()->listContents($this->path, true) as $file) {
+            if ($file instanceof FileAttributes) {
+                $size += intval($file->fileSize());
+            }
+        }
+        return $size;
+    }
 }

@@ -19,6 +19,7 @@ use Light\Model\Role;
 use Light\Model\User;
 use Light\Model\UserLog;
 use Light\Model\UserRole;
+use Light\Type\Drive;
 use Light\WebAuthn\PublicKeyCredentialSourceRepository;
 use PHPMailer\PHPMailer\OAuth;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -701,5 +702,12 @@ class App implements MiddlewareInterface
         $server = new \Webauthn\Server($rp, $source);
         $server->setSecuredRelyingPartyId(["localhost"]);
         return $server;
+    }
+
+    public function getDrive(int $index)
+    {
+        $config = $this->getFSConfig();
+        $fs = $config[$index] ?? $config[0];
+        return new Drive($fs["name"], $this->getFS($index), $index, $fs["data"]);
     }
 }

@@ -260,18 +260,18 @@ class App
         return new Drive($fs["name"], $app->getFS($index), $index, $fs["data"]);
     }
 
-    #[Field(name: "fss")]
+    #[Field]
     #[Logged]
     /**
-     * @return \Light\Type\FS[]
+     * @return \Light\Type\Drive[]
      */
-    function getFSS(#[Autowire] LightApp $app)
+    function getDrives(#[Autowire] LightApp $app)
     {
         $config = $app->getFSConfig();
 
         $result = [];
         foreach ($config as $key => $fs) {
-            $result[] = new FS($fs["name"], $app->getFS($key), $key, $fs["data"]);
+            $result[] = new Drive($fs["name"], $app->getFS($key), $key, $fs["data"]);
         }
         return $result;
     }

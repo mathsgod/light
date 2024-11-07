@@ -17,6 +17,7 @@ class SystemValueController
     /**
      * @return \Light\Model\SystemValue[]
      * @param ?mixed $filters
+     * @deprecated use { app { listSystemvalues }}
      */
     #[Right('systemvalue.list')]
     public function listSystemValue(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query

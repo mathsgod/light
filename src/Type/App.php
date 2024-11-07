@@ -11,6 +11,7 @@ use Light\Model\EventLog;
 use Light\Model\MailLog;
 use Light\Model\MyFavorite;
 use Light\Model\Role;
+use Light\Model\SystemValue;
 use Light\Model\Translate;
 use Light\Model\User;
 use Light\Model\UserLog;
@@ -414,5 +415,17 @@ class App
             return [];
         }
         return json_decode($config->value);
+    }
+
+    #[Field]
+    #[Logged]
+    /**
+     * @return \Light\Model\SystemValue[]
+     * @param ?mixed $filters
+     */
+    #[Right('systemvalue.list')]
+    public function listSystemValue($filters = [],  ?string $sort = ''): \R\DB\Query
+    {
+        return SystemValue::Query()->filters($filters)->sort($sort);
     }
 }

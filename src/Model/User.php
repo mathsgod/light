@@ -3,6 +3,7 @@
 namespace Light\Model;
 
 use Light\App;
+use Light\Type\WebAuthn;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -32,6 +33,21 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 class User extends \Light\Model
 {
+
+    #[Field]
+    /**
+     * @return \Light\Type\WebAuthn[]
+     */
+    public function getWebAuthn(): array
+    {
+        $data = [];
+        foreach ($this->credential as $credential) {
+            $data[] = new WebAuthn($credential);
+        }
+        return $data;
+    }
+
+
     #[Field]
     public function has2FA(): bool
     {

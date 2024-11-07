@@ -39,6 +39,9 @@ class FileSystemController
 
     #[Query(outputType: "mixed")]
     #[Right("filesystem.list")]
+    /**
+     * @deprecated use app { listFileSystem } instead
+     */
     public function listFileSystem(): array
     {
         if (!$config = Config::Get(["name" => "fs"])) {

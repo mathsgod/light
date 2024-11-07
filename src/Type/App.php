@@ -396,4 +396,16 @@ class App
 
         return $rs;
     }
+
+    #[Field(outputType: "mixed")]
+    #[Right("filesystem.list")]
+    public function listFileSystem(): array
+    {
+        if (!$config = Config::Get(["name" => "fs"])) {
+            return [];
+        }
+        return json_decode($config->value);
+    }
+
+
 }

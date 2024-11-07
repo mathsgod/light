@@ -27,6 +27,7 @@ class UserController
     /**
      * @return \Light\Model\User[]
      * @param ?mixed $filters
+     * @deprecated use { app { users }}
      */
     #[Right("user.list")]
     public function listUser(#[InjectUser] \Light\Model\User $user, $filters = [], ?string $sort = ""): DBQuery

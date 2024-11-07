@@ -20,6 +20,7 @@ class PermissionController
     /**
      * @param string[] $rights
      * @return string[]
+     * @deprecated use my { grantedRights }
      */
     public function granted(#[Autowire] App $app, #[InjectUser] ?User $user, array $rights): array
     {
@@ -42,6 +43,7 @@ class PermissionController
     #[Right("permission.all")]
     /**
      * @return string[]
+     * @deprecated use app { permissions }
      */
     public function allPermission(#[Autowire] App $app): array
     {
@@ -53,6 +55,7 @@ class PermissionController
     /**
      * @return \Light\Model\Permission[]
      * @param ?mixed $filters
+     * @deprecated use { app { permissions }}
      */
     #[Right("permission.list")]
     public function listPermission(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query

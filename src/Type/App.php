@@ -347,7 +347,7 @@ class App
      * @return \Light\Model\Config[]
      * @param ?mixed $filters
      */
-    public function getConfigs(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = '',): \R\DB\Query
+    public function listConfig($filters = [],  ?string $sort = '',): \R\DB\Query
     {
         return Config::Query()->filters($filters)->sort($sort);
     }
@@ -427,7 +427,7 @@ class App
      * @param ?mixed $filters
      */
     #[Right("userlog.list")]
-    public function listUserLog(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
+    public function listUserLog($filters = [],  ?string $sort = ''): \R\DB\Query
     {
         return UserLog::Query()->filters($filters)->sort($sort);
     }

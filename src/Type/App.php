@@ -10,6 +10,7 @@ use Light\Model\Config;
 use Light\Model\EventLog;
 use Light\Model\MailLog;
 use Light\Model\MyFavorite;
+use Light\Model\Role;
 use Light\Model\Translate;
 use Light\Model\User;
 use Light\Model\UserLog;
@@ -370,5 +371,29 @@ class App
     public function getAuth(): Auth
     {
         return new Auth;
+    }
+
+
+    #[Field]
+    #[Logged]
+    /**
+     * @return \Light\Model\Role[]
+     */
+    #[Right("role.list")]
+    public function getRoles(#[Autowire] Rbac $rbac, #[InjectUser] \Light\Model\User $user): array
+    {
+        $rs = [];
+        foreach ($rbac->getRoles() as $role) {
+
+            //only administrators can see administrators
+            if ($role->getName() == "Administrators" && !$user->is("Administrators")) continue;
+
+            //only administrators can see Everyone
+            if ($role->getName() == "Everyone" && !$user->is("Administrators")) continue;
+
+            $rs[] = Role::LoadByRole($role);
+        }
+
+        return $rs;
     }
 }

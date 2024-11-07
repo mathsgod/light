@@ -84,9 +84,9 @@ class AuthController
     }
 
 
-    #[Mutation]
+    #[Mutation(name: "lightAuthRegisterFacebook")]
     #[Logged]
-    public function facebookRegister(string $access_token, #[InjectUser] User $user): bool
+    public function registerFacebook(string $access_token, #[InjectUser] User $user): bool
     {
         $client = new \GuzzleHttp\Client([
             "verify" => false
@@ -115,7 +115,7 @@ class AuthController
         throw new Error("Facebook login error");
     }
 
-    #[Mutation]
+    #[Mutation(name: "lightAuthUnlinkFacebook")]
     #[Logged]
     public function unlinkFacebook(#[InjectUser] User $user): bool
     {
@@ -126,7 +126,7 @@ class AuthController
         return true;
     }
 
-    #[Mutation]
+    #[Mutation(name: "lightAuthUnlinkMicrosoft")]
     #[Logged]
     public function unlinkMicrosoft(#[InjectUser] User $user): bool
     {
@@ -137,7 +137,7 @@ class AuthController
         return true;
     }
 
-    #[Mutation]
+    #[Mutation(name: "lightAuthUnlinkGoogle")]
     #[Logged]
     public function unlinkGoogle(#[InjectUser] User $user): bool
     {
@@ -151,9 +151,9 @@ class AuthController
 
 
     //microsoft register
-    #[Mutation]
+    #[Mutation(name: "lightAuthMicrosoftRegister")]
     #[Logged]
-    function microsoftRegister(string $account_id, #[InjectUser] User $user): bool
+    function registerMicrosoft(string $account_id, #[InjectUser] User $user): bool
     {
         //reset all microsoft
         foreach (User::Query(["microsoft" => $account_id]) as $u) {
@@ -167,9 +167,9 @@ class AuthController
     }
 
     //google register
-    #[Mutation]
+    #[Mutation(name: "lightAuthRegisterGoogle")]
     #[Logged]
-    function googleRegister(string $credential, #[InjectUser] User $user): bool
+    function registerGoogle(string $credential, #[InjectUser] User $user): bool
     {
         if (!\Composer\InstalledVersions::isInstalled("google/apiclient")) {
             throw new Error("google/apiclient is not installed");
@@ -200,8 +200,8 @@ class AuthController
     }
 
     //microsoft login
-    #[Mutation]
-    function microsoftLogin(string $access_token, #[Autowire] App $app): bool
+    #[Mutation(name: "lightAuthLoginMicrosoft")]
+    function loginMicrosoft(string $access_token, #[Autowire] App $app): bool
     {
         if (!Config::Value("authentication_microsoft_client_id")) {
             throw new Error("Microsoft client id is not set");
@@ -233,8 +233,8 @@ class AuthController
     }
 
     //facebook login
-    #[Mutation]
-    public function facebookLogin(string $access_token, #[Autowire] App $app): bool
+    #[Mutation(name: "lightAuthLoginFacebook")]
+    public function loginFacebook(string $access_token, #[Autowire] App $app): bool
     {
         if (!Config::Value("authentication_facebook_app_id")) {
             throw new Error("Facebook app id is not set");
@@ -266,7 +266,8 @@ class AuthController
     }
 
     // google login
-    #[Mutation] function googleLogin(string $credential, #[Autowire] App $app): bool
+    #[Mutation(name: "lightAuthLoginGoogle")]
+    function loginGoogle(string $credential, #[Autowire] App $app): bool
     {
         if (!\Composer\InstalledVersions::isInstalled("google/apiclient")) {
             throw new Error("google/apiclient is not installed");

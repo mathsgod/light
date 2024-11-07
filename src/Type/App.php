@@ -10,6 +10,7 @@ use Light\Model\Config;
 use Light\Model\EventLog;
 use Light\Model\MailLog;
 use Light\Model\MyFavorite;
+use Light\Model\Permission;
 use Light\Model\Role;
 use Light\Model\SystemValue;
 use Light\Model\Translate;
@@ -248,6 +249,7 @@ class App
     }
 
 
+
     #[Field]
     #[Logged]
     #[Right("config")]
@@ -430,5 +432,16 @@ class App
     public function listUserLog($filters = [],  ?string $sort = ''): \R\DB\Query
     {
         return UserLog::Query()->filters($filters)->sort($sort);
+    }
+
+    #[Field]
+    #[Right("permission.list")]
+    /**
+     * @param ?mixed $filters
+     * @return \Light\Model\Permission[]
+     */
+    public function listPermission($filters = [],  ?string $sort = ''): \R\DB\Query
+    {
+        return Permission::Query()->filters($filters)->sort($sort);
     }
 }

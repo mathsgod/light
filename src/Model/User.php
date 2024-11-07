@@ -34,6 +34,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class User extends \Light\Model
 {
 
+
     #[Field]
     /**
      * @return \Light\Type\WebAuthn[]
@@ -148,6 +149,25 @@ class User extends \Light\Model
             return true;
         }
         return false;
+    }
+
+    #[Field]
+    /**
+     * @param string[] $rights
+     * @return string[]
+     */
+    public function isGrantedRights(#[Autowire] App $app, array $rights): array
+    {
+        $result = [];
+        $rbac = $app->getRbac();
+        if ($user = $rbac->getUser($this->user_id)) {
+            foreach ($rights as $right) {
+                if ($user->can($right)) {
+                    $result[] = $right;
+                }
+            }
+        }
+        return $result;
     }
 
     #[Field]

@@ -42,6 +42,7 @@ class WebAuthnController
     #[Logged]
     /**
      * @return \Light\Type\WebAuthn[]
+     * @deprecated use my{ webAuthn } instead
      */
     public function listWebAuthn(#[InjectUser] User $user): array
     {

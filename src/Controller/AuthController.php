@@ -151,7 +151,7 @@ class AuthController
 
 
     //microsoft register
-    #[Mutation(name: "lightAuthMicrosoftRegister")]
+    #[Mutation(name: "lightAuthRegisterMicrosoft")]
     #[Logged]
     function registerMicrosoft(string $account_id, #[InjectUser] User $user): bool
     {

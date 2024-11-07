@@ -26,6 +26,13 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class App
 {
     #[Field]
+    public function getAuth(): Auth
+    {
+        return new Auth;
+    }
+
+
+    #[Field]
     #[Logged]
     public function getRole(#[Autowire] Rbac $rbac, string $name): ?Role
     {
@@ -317,7 +324,7 @@ class App
      * @return \Light\Model\MailLog[]
      */
     #[Right("maillog.list")]
-    public function getMailLogs($filters = [],  ?string $sort = ''): \R\DB\Query
+    public function listMailLog($filters = [],  ?string $sort = ''): \R\DB\Query
     {
         return MailLog::Query()->filters($filters)->sort($sort);
     }
@@ -328,7 +335,7 @@ class App
      * @return \Light\Model\EventLog[]
      */
     #[Right("eventlog.list")]
-    public function getEventLogs($filters = [],  ?string $sort = ''): \R\DB\Query
+    public function listEventLog($filters = [],  ?string $sort = ''): \R\DB\Query
     {
         return EventLog::Query()->filters($filters)->sort($sort);
     }
@@ -345,17 +352,6 @@ class App
         return Config::Query()->filters($filters)->sort($sort);
     }
 
-    #[Field]
-    #[Logged]
-    /**
-     * @return \Light\Model\UserLog[]
-     * @param ?mixed $filters
-     */
-    #[Right("userlog.list")]
-    public function getUserLogs(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
-    {
-        return UserLog::Query()->filters($filters)->sort($sort);
-    }
 
     #[Field]
     #[Logged]
@@ -364,7 +360,7 @@ class App
      * @param ?mixed $filters
      */
     #[Right("user.list")]
-    public function getUsers(#[InjectUser] \Light\Model\User $user, $filters = [], ?string $sort = ""): \R\DB\Query
+    public function listUser(#[InjectUser] \Light\Model\User $user, $filters = [], ?string $sort = ""): \R\DB\Query
     {
         //only administrators can list administrators
         $q = User::Query()->filters($filters)->sort($sort);
@@ -377,11 +373,6 @@ class App
         return $q;
     }
 
-    #[Field]
-    public function getAuth(): Auth
-    {
-        return new Auth;
-    }
 
 
     #[Field]
@@ -427,5 +418,17 @@ class App
     public function listSystemValue($filters = [],  ?string $sort = ''): \R\DB\Query
     {
         return SystemValue::Query()->filters($filters)->sort($sort);
+    }
+
+    #[Field]
+    #[Logged]
+    /**
+     * @return \Light\Model\UserLog[]
+     * @param ?mixed $filters
+     */
+    #[Right("userlog.list")]
+    public function listUserLog(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
+    {
+        return UserLog::Query()->filters($filters)->sort($sort);
     }
 }

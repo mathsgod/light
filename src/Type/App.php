@@ -25,6 +25,15 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class App
 {
     #[Field]
+    #[Logged]
+    public function getRole(#[Autowire] Rbac $rbac, string $name): ?Role
+    {
+        if (!$rbac->hasRole($name)) return null;
+        return Role::LoadByRole($rbac->getRole($name));
+    }
+
+
+    #[Field]
     public function getVersion(): string
     {
         if (!\Composer\InstalledVersions::isInstalled("hostlink/light")) {
@@ -406,6 +415,4 @@ class App
         }
         return json_decode($config->value);
     }
-
-
 }

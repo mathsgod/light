@@ -28,6 +28,7 @@ class ConfigController
     #[Query]
     /**
      * @return \Light\Model\Config[]
+     * @deprecated use { app { company companyLogo }}
      */
     public function listConfigBasic(): array
     {

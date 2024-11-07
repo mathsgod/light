@@ -16,6 +16,9 @@ class RoleController
 {
     #[Query]
     #[Logged]
+    /**
+     * @deprecated use { app { role }}
+     */
     public function getRole(#[Autowire] Rbac $rbac, string $name): ?Role
     {
         if (!$rbac->hasRole($name)) return null;
@@ -27,6 +30,7 @@ class RoleController
     /**
      * @return \Light\Model\Role[]
      * @param ?mixed $filters
+     * @deprecated use { app { roles }}
      */
     #[Right("role.list")]
     public function listRole(#[Autowire] Rbac $rbac, #[InjectUser] \Light\Model\User $user): array

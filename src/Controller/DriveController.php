@@ -4,19 +4,10 @@ namespace Light\Controller;
 
 use GraphQL\Error\Error;
 use League\Flysystem\Filesystem;
-use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\App;
-use Light\Model\EventLog;
-use Light\Type\FS\File;
 use Psr\Http\Message\UploadedFileInterface;
-use Ramsey\Uuid\Uuid;
-use TheCodingMachine\GraphQLite\Annotations\InjectUser;
-use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
-use TheCodingMachine\GraphQLite\Annotations\Logged;
-use TheCodingMachine\GraphQLite\Annotations\UseInputType;
-use Light\Model\Config;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 
 class DriveController
@@ -37,6 +28,7 @@ class DriveController
     }
 
     #[Mutation]
+    #[Right("fs.file.upload")]
     public function lightDriveUploadFile(#[Autowire] App $app, int $index, string $path, UploadedFileInterface $file, ?bool $rename = false): string
     {
         //get path extension
@@ -65,7 +57,9 @@ class DriveController
         return $path . "/" . $filename;
     }
 
+
     #[Mutation]
+    #[Right("fs.folder.create")]
     public function lightDriveCreateFolder(#[Autowire] App $app, int $index, string $path): bool
     {
         $drive = $app->getDrive($index);
@@ -74,6 +68,7 @@ class DriveController
     }
 
     #[Mutation]
+    #[Right("fs.folder.delete")]
     public function lightDriveDeleteFolder(#[Autowire] App $app, int $index, string $path): bool
     {
         $drive = $app->getDrive($index);
@@ -82,6 +77,7 @@ class DriveController
     }
 
     #[Mutation]
+    #[Right("fs.folder.rename")]
     public function lightDriveRenameFolder(#[Autowire] App $app, int $index, string $path, string $name): bool
     {
         $drive = $app->getDrive($index);
@@ -91,6 +87,7 @@ class DriveController
 
     //lightDriveWriteFile
     #[Mutation]
+    #[Right("fs.file.write")]
     public function lightDriveWriteFile(#[Autowire] App $app, int $index, string $path, string $content): bool
     {
         $drive = $app->getDrive($index);
@@ -100,6 +97,7 @@ class DriveController
 
     //lightDriveDeleteFile
     #[Mutation]
+    #[Right("fs.file.delete")]
     public function lightDriveDeleteFile(#[Autowire] App $app, int $index, string $path): bool
     {
         $drive = $app->getDrive($index);
@@ -109,6 +107,7 @@ class DriveController
 
     //lightDriveRenameFile
     #[Mutation]
+    #[Right("fs.file.rename")]
     public function lightDriveRenameFile(#[Autowire] App $app, int $index, string $path, string $name): bool
     {
         //check extension
@@ -122,6 +121,7 @@ class DriveController
 
     //lightDriveMoveFile
     #[Mutation]
+    #[Right("fs.file.move")]
     public function lightDriveMoveFile(#[Autowire] App $app, int $index, string $source, string $destination): bool
     {
         $drive = $app->getDrive($index);

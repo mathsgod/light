@@ -2,7 +2,10 @@
 
 namespace Light\Model;
 
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 use Light\App;
+use Light\Security\TwoFactorAuthentication;
 use Light\Type\WebAuthn;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
@@ -33,6 +36,26 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 class User extends \Light\Model
 {
+
+    /**
+     * @return mixed
+     */
+    #[Field]
+    public function getMy2FA()
+    {
+        $secret = (new TwoFactorAuthentication())->generateSecret();
+
+        $host = $_SERVER["HTTP_HOST"];
+        $url = sprintf("otpauth://totp/%s@%s?secret=%s", $this->username, $host, $secret);
+
+        $writer = new PngWriter();
+        $png = $writer->write(QrCode::create($url));
+        return [
+            "secret" => $secret,
+            "host" => $host,
+            "image" => $png->getDataUri()
+        ];
+    }
 
 
     #[Field]

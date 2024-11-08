@@ -66,13 +66,6 @@ class TwoFactorAuthentication
         return $val2[1];
     }
 
-    public function getUrl($user, $hostname, $secret)
-    {
-        $url =  sprintf("otpauth://totp/%s@%s?secret=%s", $user, $hostname, $secret);
-        $url = urlencode($url);
-        return "https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl=" . $url;
-    }
-
     public function generateSecret()
     {
         $secret = "";

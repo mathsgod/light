@@ -54,6 +54,13 @@ class App implements MiddlewareInterface
 
     public function __construct()
     {
+
+        //check time zone from config
+
+        if ($tz = $_ENV["TZ"]) {
+            date_default_timezone_set($tz);
+        }
+
         $this->container = new \League\Container\Container();
         $this->cache = new Psr16Cache(new FilesystemAdapter());
         $this->factory = new SchemaFactory($this->cache, $this->container);

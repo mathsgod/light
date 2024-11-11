@@ -169,13 +169,14 @@ abstract class Model extends \R\DB\Model
                 }
 
                 $container = self::GetSchema()->getContainer();
-
+                /* 
                 if ($container && $app = $container->get(App::class)) {
                     assert($app instanceof App);
                     if ($app->isRevisionEnabled(static::class)) {
                         Revision::Insert($user_id, static::class, $this->$key, $source, $this);
                     }
                 }
+ */
                 $source = json_encode(Util::Sanitize($source->jsonSerialize()), JSON_UNESCAPED_UNICODE);
             }
 

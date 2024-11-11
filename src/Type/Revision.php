@@ -1,12 +1,13 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Type;
 
 use Error;
 use Exception;
 use Laminas\Db\Sql\Insert;
 use Laminas\Permissions\Rbac\Role as RbacRole;
 use Light\Model;
+use Light\Model\User;
 use Light\Util;
 use SebastianBergmann\Diff\Differ;
 use SebastianBergmann\Diff\Output\StrictUnifiedDiffOutputBuilder;
@@ -16,14 +17,24 @@ use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type]
-#[MagicField(name: "revision_id", outputType: "Int")]
-#[MagicField(name: "user_id", outputType: "Int")]
-class Revision extends \Light\Model
+class Revision
 {
+    public $eventlog;
+    public function __construct(\Light\Model\EventLog $eventlog)
+    {
+        $this->eventlog = $eventlog;
+    }
+
+    #[Field]
+    public function getCreatedTime(): string
+    {
+        return $this->eventlog->created_time;
+    }
+
     public function retoreFields(array $fields)
     {
-        $class = $this->model_class;
-        $model_object = $class::Get($this->model_id);
+        $class = $this->eventlog->class;
+        $model_object = $class::Get($this->eventlog->id);
         if ($model_object) {
             foreach ($fields as $field) {
                 assert($model_object instanceof \Light\Model);
@@ -38,11 +49,17 @@ class Revision extends \Light\Model
         return false;
     }
 
+    #[Field(name: "revision_id")]
+    public function getRevisionId(): int
+    {
+        return $this->eventlog->eventlog_id;
+    }
+
     #[Field]
     public function getRevisionBy(): ?string
     {
-        if ($this->user_id) {
-            $user = User::Get($this->user_id);
+        if ($this->eventlog->user_id) {
+            $user = User::Get($this->eventlog->user_id);
             if ($user) {
                 return $user->getName();
             }
@@ -88,7 +105,7 @@ class Revision extends \Light\Model
     #[Field(outputType: "mixed")]
     public function getContent()
     {
-        $data = $this->model_content;
+        $data = $this->eventlog->source;
         //sort by key
         ksort($data);
         return $data;
@@ -97,7 +114,15 @@ class Revision extends \Light\Model
     #[Field(outputType: "mixed")]
     public function getDelta()
     {
-        $delta = $this->delta;
+        $source_array = Util::Sanitize($this->eventlog->source);
+        $target_array = Util::Sanitize($this->eventlog->target);
+        //find delta
+        $delta = [];
+        foreach ($source_array as $k => $v) {
+            if ($source_array[$k] != $target_array[$k]) {
+                $delta[$k] = $target_array[$k];
+            }
+        }
         //sort by key
         ksort($delta);
         return $delta;

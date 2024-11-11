@@ -5,7 +5,9 @@ namespace Light\Controller;
 use GraphQL\Error\Error;
 use League\Flysystem\Filesystem;
 use Light\App;
+use Light\Type\FS\File;
 use Psr\Http\Message\UploadedFileInterface;
+use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
@@ -14,6 +16,36 @@ class DriveController
 {
 
     const DISALLOW_EXT = ['zip', 'js', 'jsp', 'jsb', 'mhtml', 'mht', 'xhtml', 'xht', 'php', 'phtml', 'php3', 'php4', 'php5', 'phps', 'shtml', 'jhtml', 'pl', 'sh', 'py', 'cgi', 'exe', 'application', 'gadget', 'hta', 'cpl', 'msc', 'jar', 'vb', 'jse', 'ws', 'wsf', 'wsc', 'wsh', 'ps1', 'ps2', 'psc1', 'psc2', 'msh', 'msh1', 'msh2', 'inf', 'reg', 'scf', 'msp', 'scr', 'dll', 'msi', 'vbs', 'bat', 'com', 'pif', 'cmd', 'vxd', 'cpl', 'htpasswd', 'htaccess'];
+
+
+    #[Mutation(name: "lightDriveUploadTempFile")]
+    #[Right("fs.file.upload")]
+    public function uploadTempFile(#[Autowire] App $app, int $index, UploadedFileInterface $file): File
+    {
+        //get path extension
+        $filename = $file->getClientFilename();
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+
+        //check if extension is allowed
+        if (in_array($ext, self::DISALLOW_EXT)) throw new Error("File type not allowed");
+
+        //random name
+        $filename = Uuid::uuid4()->toString() . "." . $ext;
+
+        //move file
+
+        $drive = $app->getDrive($index);
+        $drive->getFilesystem()->write("temp/" . $filename, $file->getStream()->getContents());
+
+        $list = $drive->getFilesystem()->listContents("temp", false);
+        foreach ($list as $file) {
+            if ($file->path() === "temp/" . $filename) {
+                return new File($drive, $file);
+            }
+        }
+
+        throw new Error("File not found");
+    }
 
     private function getNextFilename(Filesystem $fs, string $path, $filename)
     {

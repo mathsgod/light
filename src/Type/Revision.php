@@ -2,18 +2,11 @@
 
 namespace Light\Type;
 
-use Error;
-use Exception;
-use Laminas\Db\Sql\Insert;
-use Laminas\Permissions\Rbac\Role as RbacRole;
-use Light\Model;
 use Light\Model\User;
 use Light\Util;
 use SebastianBergmann\Diff\Differ;
 use SebastianBergmann\Diff\Output\StrictUnifiedDiffOutputBuilder;
-use SebastianBergmann\Diff\Output\UnifiedDiffOutputBuilder;
 use TheCodingMachine\GraphQLite\Annotations\Field;
-use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type]
@@ -65,41 +58,6 @@ class Revision
             }
         }
         return null;
-    }
-
-    public static function Remove(string $model_class, int $model_id)
-    {
-        try {
-            return self::_table()->delete([
-                "model_class" => $model_class,
-                "model_id" => $model_id
-            ]);
-        } catch (Exception $e) {
-        }
-    }
-
-
-    public static function Insert(int $user_id, string $model_class, int $model_id, Model $model, Model $target)
-    {
-
-        $source_array = Util::Sanitize($model->jsonSerialize());
-        $target_array = Util::Sanitize($target->jsonSerialize());
-        //find delta
-        $delta = [];
-        foreach ($source_array as $k => $v) {
-            if ($source_array[$k] != $target_array[$k]) {
-                $delta[$k] = $target_array[$k];
-            }
-        }
-
-        return self::_table()->insert([
-            "user_id" => $user_id,
-            "model_id" => $model_id,
-            "model_class" => $model_class,
-            "model_content" =>  json_encode(Util::Sanitize($model->jsonSerialize()), JSON_UNESCAPED_UNICODE),
-            "created_time" => date("Y-m-d H:i:s"),
-            "delta" => json_encode($delta, JSON_UNESCAPED_UNICODE),
-        ]);
     }
 
     #[Field(outputType: "mixed")]

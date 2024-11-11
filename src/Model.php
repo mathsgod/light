@@ -167,9 +167,9 @@ abstract class Model extends \R\DB\Model
                         $source->$field = null;
                     }
                 }
-
-                $container = self::GetSchema()->getContainer();
                 /* 
+                $container = self::GetSchema()->getContainer();
+               
                 if ($container && $app = $container->get(App::class)) {
                     assert($app instanceof App);
                     if ($app->isRevisionEnabled(static::class)) {

@@ -45,10 +45,10 @@ class App
     #[Field]
     public function getVersion(): string
     {
-        if (!\Composer\InstalledVersions::isInstalled("hostlink/light")) {
+        if (!\Composer\InstalledVersions::isInstalled("mathsgod/light")) {
             return "dev";
         }
-        return \Composer\InstalledVersions::getVersion("hostlink/light");
+        return \Composer\InstalledVersions::getVersion("mathsgod/light");
     }
 
     #[Field]

@@ -26,12 +26,12 @@ class Drive
         $this->data = $data;
     }
 
-    public function getFilesystem(): Filesystem
+    public function getFilesystem()
     {
         return $this->filesystem;
     }
 
-    public function getFileUrl(string $path): string
+    public function getFileUrl(string $path)
     {
         if ($this->data["url"]) {
             return $this->data["url"] . $path;
@@ -58,7 +58,7 @@ class Drive
      * @return File[]
      */
     #[Right('fs.file.list')]
-    public function getFiles(?string $path = "", ?string $type = null, ?string $search = null): array
+    public function getFiles(?string $path = "", ?string $type = null, ?string $search = null)
     {
 
         $TYPES = [
@@ -102,7 +102,7 @@ class Drive
      * @return Folder[]
      */
     #[Right('fs.folder.list')]
-    public function folders(?string $path = ""): array
+    public function folders(?string $path = "")
     {
         $files = [];
         foreach ($this->filesystem->listContents($path, false) as $dir) {

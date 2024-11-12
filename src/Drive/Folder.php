@@ -4,11 +4,10 @@ namespace Light\Drive;
 
 use League\Flysystem\DirectoryAttributes;
 use League\Flysystem\FileAttributes;
-use League\Flysystem\Filesystem;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-#[Type(name: "FSFolder")]
+#[Type(name: "LightDriveFolder")]
 class Folder
 {
     #[Field]
@@ -16,7 +15,6 @@ class Folder
 
     #[Field]
     public string $path;
-
 
     protected $dir = null;
     protected $drive = null;
@@ -33,7 +31,7 @@ class Folder
     /**
      * @return File[]
      */
-    public function getFiles(): array
+    public function getFiles()
     {
         $files = [];
         foreach ($this->drive->getFilesystem()->listContents($this->path, false) as $file) {

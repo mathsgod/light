@@ -6,7 +6,7 @@ use League\Flysystem\FileAttributes;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
-#[Type(name: "FSFile")]
+#[Type(name: "LightDriveFile")]
 class File
 {
     #[Field]

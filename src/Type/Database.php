@@ -3,6 +3,7 @@
 namespace Light\Type;
 
 use Light\App;
+use Light\Database\Table;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -46,15 +47,7 @@ class Database
     {
         $db = $app->getDatabase();
         $result = $db->query("SHOW TABLE STATUS")->fetchAll();
-        return $result;;
-
-        //map to table name
-        /*       $tables = [];
-        foreach ($result as $row) {
-            $tables[$row["Name"]] = $row;
-        }
- */
-        return $tables;
+        return $result;
     }
 
     #[Field(outputType: "mixed")]

@@ -67,8 +67,6 @@ class File
     public function getImagePath(): string
     {
         return "/drive/" . $this->drive->index . "/" . $this->path;
-
-        return "/api/uploads/$this->path";
     }
 
     #[Field]

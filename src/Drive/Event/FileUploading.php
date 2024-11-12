@@ -3,16 +3,18 @@
 namespace Light\Drive\Event;
 
 use Light\Drive\Drive;
-use Light\Drive\File;
+use Psr\Http\Message\UploadedFileInterface;
 
 class FileUploading
 {
     public Drive $drive;
-    public File $file;
+    public string $path;
+    public UploadedFileInterface $file;
 
-    public function __construct(Drive $drive, File $file)
+    public function __construct(Drive $drive, string $path, UploadedFileInterface $file)
     {
         $this->drive = $drive;
+        $this->path = $path;
         $this->file = $file;
     }
 }

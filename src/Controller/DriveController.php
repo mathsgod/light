@@ -5,6 +5,7 @@ namespace Light\Controller;
 use GraphQL\Error\Error;
 use League\Flysystem\Filesystem;
 use Light\App;
+use Light\Drive\Event\FileUploading;
 use Light\Drive\File;
 use Psr\Http\Message\UploadedFileInterface;
 use Ramsey\Uuid\Uuid;
@@ -63,8 +64,6 @@ class DriveController
     #[Right("fs.file.upload")]
     public function uploadFile(#[Autowire] App $app, int $index, string $path, UploadedFileInterface $file, ?bool $rename = false): string
     {
-        //$app->eventDispatcher()->dispatch(new FileUploaded($file));
-        //get path extension
         $filename = $file->getClientFilename();
         $ext = pathinfo($filename, PATHINFO_EXTENSION);
 
@@ -72,7 +71,16 @@ class DriveController
         if (in_array($ext, self::DISALLOW_EXT)) throw new Error("File type not allowed");
 
         $drive = $app->getDrive($index);
-        $fs = $drive->getFilesystem();
+
+        /** @var FileUploading $event **/
+        $event = $app->eventDispatcher()->dispatch(new FileUploading($drive, $path, $file));
+
+        $filename = $event->file->getClientFilename();
+        $path = $event->path;
+        $file = $event->file;
+
+        $fs = $event->drive->getFilesystem();
+
 
         //check if file already exists
         if ($fs->fileExists($path . "/" . $filename)) {

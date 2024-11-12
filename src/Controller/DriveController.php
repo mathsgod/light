@@ -2,6 +2,7 @@
 
 namespace Light\Controller;
 
+use FolderCreating;
 use GraphQL\Error\Error;
 use League\Flysystem\Filesystem;
 use Light\App;
@@ -104,6 +105,13 @@ class DriveController
     public function createFolder(#[Autowire] App $app, int $index, string $path): bool
     {
         $drive = $app->getDrive($index);
+
+        /** @var FolderCreating $event **/
+        $event = $app->eventDispatcher()->dispatch(new FolderCreating($drive, $path));
+
+        $drive = $event->drive;
+        $path = $event->path;
+
         $drive->getFilesystem()->createDirectory($path);
         return true;
     }

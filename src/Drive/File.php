@@ -3,10 +3,7 @@
 namespace Light\Drive;
 
 use League\Flysystem\FileAttributes;
-use League\Flysystem\Filesystem;
-use Light\Model\User;
 use TheCodingMachine\GraphQLite\Annotations\Field;
-use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type(name: "FSFile")]

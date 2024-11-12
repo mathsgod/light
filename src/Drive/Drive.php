@@ -55,7 +55,7 @@ class Drive
 
     #[Field]
     /**
-     * @return \Light\Drive\File[]
+     * @return File[]
      */
     #[Right('fs.file.list')]
     public function getFiles(?string $path = "", ?string $type = null, ?string $search = null): array

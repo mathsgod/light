@@ -355,6 +355,16 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware
             }
         }
 
+        foreach (glob(__DIR__ . "/Database/*.php") as $file) {
+            $class = "Light\\Database\\" . basename($file, ".php");
+            $rc = new \ReflectionClass($class);
+            foreach ($rc->getMethods() as $method) {
+                foreach ($method->getAttributes("TheCodingMachine\GraphQLite\Annotations\Right") as $attr) {
+                    $permissions[] = $attr->getArguments()[0];
+                }
+            }
+        }
+
         foreach (glob(__DIR__ . "/Type/*.php") as $file) {
             $class = "Light\\Type\\" . basename($file, ".php");
             $rc = new \ReflectionClass($class);

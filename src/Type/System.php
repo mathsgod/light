@@ -3,6 +3,7 @@
 namespace Light\Type;
 
 use Light\App;
+use Light\Database\Schema;
 use Light\Model\Config;
 use Light\Type\Database;
 use Light\Util;
@@ -18,7 +19,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class System
 {
 
-       
+
 
     #[Field]
     public function time(): string
@@ -102,9 +103,9 @@ class System
 
     #[Field]
     #[Right("system.database")]
-    public function getDatabase(): Database
+    public function getDatabase(): Schema
     {
-        return new Database;
+        return new Schema;
     }
 
     #[Field]

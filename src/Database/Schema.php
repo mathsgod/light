@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Type;
+namespace Light\Database;
 
 use Light\App;
 use Light\Database\Table;
@@ -14,9 +14,8 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 
 #[Type]
-class Database
+class Schema
 {
-
     #[Field(outputType: "[Table]")]
     #[Right("system.database.table")]
     public function getTables(#[Autowire] App $app)

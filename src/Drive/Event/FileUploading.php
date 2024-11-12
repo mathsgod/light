@@ -2,10 +2,10 @@
 
 namespace Light\Drive\Event;
 
-use Light\Drive;
+use Light\Drive\Drive;
 use Light\Drive\File;
 
-class FileUploaded
+class FileUploading
 {
     public Drive $drive;
     public File $file;

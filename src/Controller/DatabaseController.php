@@ -2,7 +2,9 @@
 
 namespace Light\Controller;
 
+use Exception;
 use Firebase\JWT\JWT;
+use GraphQL\Error\Error;
 use Laminas\Db\Sql\Ddl\CreateTable;
 use Light\App;
 use Light\Type\System;
@@ -17,21 +19,79 @@ use Laminas\Db\Sql\Ddl\Column;
 
 class DatabaseController
 {
-    
+
+    #[Mutation(name: "lightDatabaseTruncateTable")]
+    #[Right("system.database.table.truncate")]
+    public function truncateDatabaseTable(#[Autowire] App $app, string $table): bool
+    {
+        $db = $app->getDatabase();
+        try {
+            $db->exec("TRUNCATE TABLE $table");
+        } catch (Exception $e) {
+            throw new Error($e->getMessage());
+        }
+        return true;
+    }
+
+    #[Mutation(name: "lightDatabaseRemoveTable")]
+    #[Right("system.database.table.remove")]
+    public function removeDatabaseTable(#[Autowire] App $app, string $table): bool
+    {
+        $db = $app->getDatabase();
+        try {
+            $db->exec("DROP TABLE $table");
+        } catch (Exception $e) {
+            throw new Error($e->getMessage());
+        }
+        return true;
+    }
 
 
-    #[Mutation]
+    #[Mutation(name: "lightDatabaseAddField")]
+    #[Right("system.database.field.add")]
+    public function addDatabaseField(#[Autowire] App $app, string $table, string $field, string $type, string $length, string $default, bool $nullable, bool $autoincrement): bool
+    {
+        $db = $app->getDatabase();
+        try {
+            $db->exec("ALTER TABLE $table ADD $field $type($length) DEFAULT '$default' " . ($nullable ? "NULL" : "NOT NULL") . " " . ($autoincrement ? "AUTO_INCREMENT" : ""));
+        } catch (Exception $e) {
+            throw new Error($e->getMessage());
+        }
+        return true;
+    }
+
+
+    #[Mutation(name: "lightDatabaseRemoveFields")]
+    #[Right("system.database.field.remove")]
+    /**
+     * @param string[] $fields
+     */
+    public function removeDatabaseFields(#[Autowire] App $app, string $table, array $fields): bool
+    {
+        $db = $app->getDatabase();
+        foreach ($fields as $field) {
+            try {
+                $db->exec("ALTER TABLE $table DROP COLUMN $field");
+            } catch (Exception $e) {
+                throw new Error($e->getMessage());
+            }
+        }
+        return true;
+    }
+
+
+    #[Mutation(name: "lightDatabaseCreateTable")]
     #[Right("system.database.table.create")]
     #[Logged]
     /**
-     * @param \Light\Input\Table\Column[] $columns
+     * @param \Light\Input\Table\Column[] $fields
      */
-    public function createDatabaseTable(#[Autowire] App $app, string $name, array $columns): bool
+    public function createDatabaseTable(#[Autowire] App $app, string $name, array $fields): bool
     {
         $db = $app->getDatabase();
 
         $t = new CreateTable($name);
-        foreach ($columns as $column) {
+        foreach ($fields as $column) {
             if ($column->type == "int") {
                 $t->addColumn(new Column\Integer($column->name, $column->nullable ?? false));
             }
@@ -54,10 +114,11 @@ class DatabaseController
             }
         }
 
-        $db->exec($t->getSqlString($db->getAdapter()->getPlatform()));
-
-
-
-        return false;
+        try {
+            $db->exec($t->getSqlString($db->getAdapter()->getPlatform()));
+        } catch (\Exception $e) {
+            throw new Error($e->getMessage());
+        }
+        return true;
     }
 }

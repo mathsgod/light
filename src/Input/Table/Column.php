@@ -22,4 +22,7 @@ class Column
 
     #[Field]
     public ?bool $auto_increment;
+
+    #[Field]
+    public ?string $default;
 }

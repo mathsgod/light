@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Type\FS;
+namespace Light\Drive;
 
 use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
@@ -22,7 +22,7 @@ class File
     protected $file = null;
     protected $drive = null;
 
-    public function __construct(\Light\Type\Drive $drive, FileAttributes $file)
+    public function __construct(Drive $drive, FileAttributes $file)
     {
         $this->drive = $drive;
         $this->file = $file;

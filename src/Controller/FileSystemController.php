@@ -6,7 +6,7 @@ use GraphQL\Error\Error;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\App;
 use Light\Model\EventLog;
-use Light\Type\FS\File;
+use Light\Drive\File;
 use Psr\Http\Message\UploadedFileInterface;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;

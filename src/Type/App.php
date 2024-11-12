@@ -45,9 +45,6 @@ class App
     #[Field]
     public function getVersion(): string
     {
-        if (!\Composer\InstalledVersions::isInstalled("mathsgod/light")) {
-            return "dev";
-        }
         return \Composer\InstalledVersions::getVersion("mathsgod/light");
     }
 
@@ -297,17 +294,17 @@ class App
 
     #[Field]
     #[Logged]
-    function getDrive(#[Autowire] LightApp $app, ?int $index = 0): Drive
+    function getDrive(#[Autowire] LightApp $app, ?int $index = 0): \Light\Drive\Drive
     {
         $config = $app->getFSConfig();
         $fs = $config[$index] ?? $config[0];
-        return new Drive($fs["name"], $app->getFS($index), $index, $fs["data"]);
+        return new \Light\Drive\Drive($fs["name"], $app->getFS($index), $index, $fs["data"]);
     }
 
     #[Field]
     #[Logged]
     /**
-     * @return \Light\Type\Drive[]
+     * @return \Light\Drive\Drive[]
      */
     function getDrives(#[Autowire] LightApp $app)
     {
@@ -315,7 +312,7 @@ class App
 
         $result = [];
         foreach ($config as $key => $fs) {
-            $result[] = new Drive($fs["name"], $app->getFS($key), $key, $fs["data"]);
+            $result[] = new \Light\Drive\Drive($fs["name"], $app->getFS($key), $key, $fs["data"]);
         }
         return $result;
     }

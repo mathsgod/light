@@ -19,7 +19,7 @@ use Light\Model\Role;
 use Light\Model\User;
 use Light\Model\UserLog;
 use Light\Model\UserRole;
-use Light\Type\Drive;
+use Light\Drive\Drive;
 use Light\WebAuthn\PublicKeyCredentialSourceRepository;
 use PHPMailer\PHPMailer\OAuth;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -39,8 +39,11 @@ use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use Webauthn\PublicKeyCredentialRpEntity;
 
-class App implements MiddlewareInterface
+class App implements MiddlewareInterface, \League\Event\EventDispatcherAware
 {
+
+    use \League\Event\EventDispatcherAwareBehavior;
+
     protected $container;
     protected $factory;
 
@@ -69,6 +72,7 @@ class App implements MiddlewareInterface
         $this->factory->addTypeNamespace("\\Light\\Model\\");
         $this->factory->addTypeNamespace("\\Light\\Input\\");
         $this->factory->addTypeNamespace("\\Light\\Type\\");
+        $this->factory->addTypeNamespace("\\Light\\");
 
         $this->container->add(App::class, $this);
         $this->container->add(Controller\AppController::class);

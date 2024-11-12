@@ -5,7 +5,7 @@ namespace Light\Controller;
 use GraphQL\Error\Error;
 use League\Flysystem\Filesystem;
 use Light\App;
-use Light\Type\FS\File;
+use Light\Drive\File;
 use Psr\Http\Message\UploadedFileInterface;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -63,6 +63,7 @@ class DriveController
     #[Right("fs.file.upload")]
     public function uploadFile(#[Autowire] App $app, int $index, string $path, UploadedFileInterface $file, ?bool $rename = false): string
     {
+        //$app->eventDispatcher()->dispatch(new FileUploaded($file));
         //get path extension
         $filename = $file->getClientFilename();
         $ext = pathinfo($filename, PATHINFO_EXTENSION);

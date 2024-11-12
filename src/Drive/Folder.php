@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Type\FS;
+namespace Light\Drive;
 
 use League\Flysystem\DirectoryAttributes;
 use League\Flysystem\FileAttributes;
@@ -21,7 +21,7 @@ class Folder
     protected $dir = null;
     protected $drive = null;
 
-    public function __construct(\Light\Type\Drive $drive, DirectoryAttributes $dir)
+    public function __construct(Drive $drive, DirectoryAttributes $dir)
     {
         $this->drive = $drive;
         $this->dir = $dir;

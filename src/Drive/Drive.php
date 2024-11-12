@@ -1,11 +1,8 @@
 <?php
 
-namespace Light\Type;
+namespace Light\Drive;
 
-use League\Flysystem\DirectoryListing;
 use League\Flysystem\Filesystem;
-use League\Flysystem\FilesystemOperator;
-use Light\Type\FS\File;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
@@ -13,7 +10,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class Drive
 {
-
     #[Field]
     public string $name;
     #[Field]
@@ -51,7 +47,7 @@ class Drive
         $list = $this->filesystem->listContents(dirname($path), false);
         foreach ($list as $file) {
             if ($file->path() === $path) {
-                return new \Light\Type\FS\File($this, $file);
+                return new File($this, $file);
             }
         }
         return null;
@@ -59,7 +55,7 @@ class Drive
 
     #[Field]
     /**
-     * @return \Light\Type\FS\File[]
+     * @return \Light\Drive\File[]
      */
     #[Right('fs.file.list')]
     public function getFiles(?string $path = "", ?string $type = null, ?string $search = null): array
@@ -96,14 +92,14 @@ class Drive
                 if (strpos($filename, $search) === false) continue;
             }
 
-            $files[] = new \Light\Type\FS\File($this, $file);
+            $files[] = new File($this, $file);
         }
         return $files;
     }
 
     #[Field]
     /**
-     * @return \Light\Type\FS\Folder[]
+     * @return Folder[]
      */
     #[Right('fs.folder.list')]
     public function folders(?string $path = ""): array
@@ -111,20 +107,20 @@ class Drive
         $files = [];
         foreach ($this->filesystem->listContents($path, false) as $dir) {
             if (!$dir->isDir()) continue;
-            $files[] = new \Light\Type\FS\Folder($this, $dir);
+            $files[] = new Folder($this, $dir);
         }
         return $files;
     }
 
 
     #[Field]
-    public function folder(string $path): ?\Light\Type\FS\Folder
+    public function folder(string $path): ?Folder
     {
         $list = $this->filesystem->listContents(dirname($path), false);
         foreach ($list as $dir) {
             if (!$dir->isDir()) continue;
             if ($dir->path() === $path)
-                return new \Light\Type\FS\Folder($this, $dir);
+                return new Folder($this, $dir);
         }
         return null;
     }

@@ -33,7 +33,7 @@ class Database
     }
 
     #[Field]
-    #[Right("system.database")]
+    #[Right("system.database.version")]
     public function getVersion(#[Autowire] App $app): string
     {
         $db = $app->getDatabase();

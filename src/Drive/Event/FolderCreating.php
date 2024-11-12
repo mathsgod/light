@@ -1,8 +1,8 @@
 <?php
 
+namespace Light\Drive\Event;
+
 use Light\Drive\Drive;
-use Light\Drive\Event;
-use Psr\EventDispatcher\StoppableEventInterface;
 
 class FolderCreating
 {

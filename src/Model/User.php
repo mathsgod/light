@@ -41,9 +41,8 @@ class User extends \Light\Model
      * @return ?mixed
      */
     #[Field]
-    public function getMy2FA(#[InjectUser] $user)
+    public function getMy2FA()
     {
-        //only the user can see his own 2FA
 
         $secret = (new TwoFactorAuthentication())->generateSecret();
 

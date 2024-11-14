@@ -38,11 +38,13 @@ class User extends \Light\Model
 {
 
     /**
-     * @return mixed
+     * @return ?mixed
      */
     #[Field]
-    public function getMy2FA()
+    public function getMy2FA(#[InjectUser] $user)
     {
+        //only the user can see his own 2FA
+
         $secret = (new TwoFactorAuthentication())->generateSecret();
 
         $host = $_SERVER["HTTP_HOST"];

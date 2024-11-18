@@ -20,7 +20,43 @@ use TheCodingMachine\GraphQLite\Annotations\Autowire;
 
 class FileSystemController
 {
-    #[Mutation]
+
+    #[Mutation(name: "lightFSupdate")]
+    #[Right("filesystem.update")]
+    /**
+     * @param mixed $data
+     */
+    public function updateFileSystem($data, #[Autowire] App $app): bool
+    {
+        if (!$config = Config::Get(["name" => "fs"])) {
+            return false;
+        }
+        $fs = json_decode($config->value);
+
+        // find the file system by uuid
+        $found = false;
+        foreach ($fs as $k => $f) {
+            if ($f->uuid == $data["uuid"]) {
+                $fs[$k] = (array)$data;
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            return false;
+        }
+
+        // save the file system
+        $config->value = json_encode($fs, JSON_UNESCAPED_UNICODE);
+        $config->save();
+        return true;
+    }
+
+
+
+
+    #[Mutation(name: "lightFSadd")]
     #[Right("filesystem.add")]
     /**
      * @param mixed $data
@@ -31,6 +67,9 @@ class FileSystemController
             $config = Config::Create(["name" => "fs", "value" => "[]"]);
         }
         $fs = json_decode($config->value);
+
+        $data["uuid"] = Uuid::uuid4()->toString();
+
         $fs[] = (array)$data;
         $config->value = json_encode($fs, JSON_UNESCAPED_UNICODE);
         $config->save();
@@ -50,9 +89,9 @@ class FileSystemController
         return json_decode($config->value);
     }
 
-    #[Mutation]
+    #[Mutation(name: "lightFSdelete")]
     #[Right("filesystem.delete")]
-    public function deleteFileSystem(string $name): bool
+    public function deleteFileSystem(string $uuid): bool
     {
         if (!$config = Config::Get(["name" => "fs"])) {
             return false;
@@ -60,7 +99,7 @@ class FileSystemController
         $fs = json_decode($config->value);
         $newFs = [];
         foreach ($fs as $f) {
-            if ($f->name != $name) {
+            if ($f->uuid != $uuid) {
                 $newFs[] = $f;
             }
         }

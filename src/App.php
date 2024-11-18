@@ -69,7 +69,8 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware
         $this->factory->addTypeNamespace("\\Light\\Model\\");
         $this->factory->addTypeNamespace("\\Light\\Input\\");
         $this->factory->addTypeNamespace("\\Light\\Type\\");
-        $this->factory->addTypeNamespace("\\Light\\");
+        $this->factory->addTypeNamespace("\\Light\\Drive\\");
+        $this->factory->addTypeNamespace("\\Light\\Database\\");
 
         $this->container->add(App::class, $this);
         $this->container->add(Controller\AppController::class);

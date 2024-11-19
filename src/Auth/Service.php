@@ -5,8 +5,10 @@ namespace Light\Auth;
 use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Light\Model\Config;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use Light\Model\User;
+use Light\Model\UserLog;
 use Psr\Http\Message\ServerRequestInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 
@@ -39,6 +41,19 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
 
                 if ($cache->get("logout_" . $payload->jti)) {
                     return;
+                }
+
+                //get last Login jti
+
+                if (Config::Value("concurrent_login_disabled", false)) {
+                    $ul = UserLog::Query(["result" => "SUCCESS", "user_id" => $payload->id])
+                        ->sort("login_dt:desc")->first();
+                    if ($ul) {
+                        if ($ul->jti != $this->jti) {
+                            $cache->set("logout_" . $this->jti, true, 60 * 60 * 24);
+                            return;
+                        }
+                    }
                 }
 
 

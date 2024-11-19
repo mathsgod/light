@@ -184,7 +184,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware
             $mailer->isSendmail();
         }
 
-        if ($driver = "qmail") {
+        if ($driver == "qmail") {
             $mailer->isQmail();
         }
 

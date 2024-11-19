@@ -475,6 +475,10 @@ class AuthController
             }
         }
 
+
+        //remove cache
+        $cache->delete("forget_password_" . $user->user_id);
+
         return false;
     }
 
@@ -488,12 +492,12 @@ class AuthController
 
         $cache = $app->getCache();
         if (!$cache->has("forget_password_" . $user->user_id)) {
-            throw new Error("Code is expired");
+            throw new Error("Code is expired or not valid");
         }
 
         $cache_code = $cache->get("forget_password_" . $user->user_id);
         if ($cache_code != $code) {
-            throw new Error("Code is not valid");
+            throw new Error("Code is expired or not valid");
         }
 
         $system = new System();
@@ -524,6 +528,13 @@ class AuthController
             return true;
         }
 
+        $cache = $app->getCache();
+
+        // check if code is already sent to user
+        if ($cache->has("forget_password_limit_" . $user->user_id)) {
+            throw new Error("OTP code is already sent to your email, please check your email.");
+        }
+
         $code = rand(100000, 999999);
 
 
@@ -542,10 +553,11 @@ class AuthController
             throw new Error($e->getMessage());
         }
 
-        $cache = $app->getCache();
 
         //10 minutes
         $cache->set("forget_password_" . $user->user_id, $code, 600);
+
+        $cache->set("forget_password_limit_" . $user->user_id, 1, 600);
 
 
         return true;

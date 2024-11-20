@@ -13,6 +13,7 @@ use Light\Model\Config;
 use Light\Type\System;
 use Light\Model\User;
 use Light\Model\UserLog;
+use Light\Model\UserRole;
 use Light\Security\TwoFactorAuthentication;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -328,6 +329,28 @@ class AuthController
     #[Mutation]
     public function login(#[Autowire] App $app, string $username, string $password, ?string $code = null): bool
     {
+
+        //check no users, create first user
+        if (User::Query()->count() == 0) {
+            $user = User::Create([
+                "username" => $username,
+                "first_name" => "Admin",
+                "email" => "admin@localhost",
+                "password" => password_hash($password, PASSWORD_DEFAULT),
+                "join_date" => date("Y-m-d"),
+                "status" => 0,
+                "language" => "en",
+                "password_dt" => date("Y-m-d H:i:s")
+            ]);
+            //add user to admin group
+            UserRole::Create([
+                "user_id" => $user->user_id,
+                "role" => "Administrators"
+            ])->save();
+        }
+
+
+
         $user = User::Get(["username" => $username]);
         if (!$user) {
             throw new Error("user not found or password error");

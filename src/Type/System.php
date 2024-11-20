@@ -317,6 +317,7 @@ class System
         if ($c = Config::Get(["name" => "company_logo"])) {
             return $c->value;
         }
+        return null;
     }
 
     #[Field]

@@ -715,6 +715,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware
 
     public function getWebAuthnServer()
     {
+        $id = null;
         $name = $_SERVER["SERVER_NAME"];
         if ($name == "0.0.0.0") {
             $name = "localhost";

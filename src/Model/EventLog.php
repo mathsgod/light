@@ -22,6 +22,7 @@ class EventLog extends \Light\Model
         if ($u = User::Get($this->user)) {
             return $u->username;
         }
+        return null;
     }
 
     #[Field]

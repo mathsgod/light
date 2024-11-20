@@ -26,5 +26,6 @@ class UserLog extends \Light\Model
         if ($u = User::Get($this->user_id)) {
             return $u->username;
         }
+        return null;
     }
 }

@@ -5,9 +5,11 @@ namespace Light;
 use Exception;
 use Firebase\JWT\JWT;
 use GQL\Type\MixedTypeMapperFactory;
+use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
 use GraphQL\Upload\UploadMiddleware;
 use Laminas\Diactoros\Response\EmptyResponse;
+use Laminas\Diactoros\Response\JsonResponse;
 use Light\Rbac\Rbac;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\Model\Config;
@@ -36,7 +38,7 @@ use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use Webauthn\PublicKeyCredentialRpEntity;
 
-class App implements MiddlewareInterface, \League\Event\EventDispatcherAware
+class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, RequestHandlerInterface
 {
 
     use \League\Event\EventDispatcherAwareBehavior;
@@ -128,6 +130,25 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware
         // database column check
         if (!User::_table()->column("password_dt")) {
             User::_table()->addColumn(new \Laminas\Db\Sql\Ddl\Column\Datetime("password_dt", true));
+        }
+    }
+
+    public function handle(ServerRequestInterface $request): ResponseInterface
+    {
+        $result = $this->execute($request);
+        try {
+
+            //return new JsonResponse($result->toArray());
+
+            if ($this->isDevMode()) {
+                return new JsonResponse($result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE));
+            } else {
+                return new JsonResponse($result->toArray());
+            }
+        } catch (\Exception $e) {
+            return new JsonResponse(['errors' => [
+                ["message" => $e->getMessage()]
+            ]]);
         }
     }
 
@@ -490,10 +511,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware
                 return $this->getDriveResponse($request, $parts[1], $parts[2]);
             }
         }
-
-
         return $handler->handle($request);
     }
+
 
     public function getDriveResponse(ServerRequestInterface $requeset, int $index, string $path)
     {

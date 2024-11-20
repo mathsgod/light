@@ -142,9 +142,12 @@ class App
     {
         $result = [];
         foreach ($menus as $menu) {
+            if (!$menu["icon"]) {
+                $menu["icon"] = "sym_o_circle";
+            }
+
             if ($menu["children"]) {
                 $menu["children"] = $this->filterMenus($menu["children"], $rbac, $roles);
-
 
                 if (!$menu["to"] && empty($menu["children"])) {
                     continue;

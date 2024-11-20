@@ -5,7 +5,6 @@ namespace Light\Type;
 use Light\App;
 use Light\Database\Schema;
 use Light\Model\Config;
-use Light\Type\Database;
 use Light\Util;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;

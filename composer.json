@@ -24,7 +24,8 @@
         "endroid/qr-code": "^4.8",
         "sebastian/diff": "^4.0",
         "mathsgod/light-rbac": "^1.0",
-        "league/event": "^3.0"
+        "league/event": "^3.0",
+        "utopia-php/system": "^0.9.0"
     },
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*",

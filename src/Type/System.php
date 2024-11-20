@@ -19,7 +19,70 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class System
 {
 
+    #[Field]
+    public function getArch(): string
+    {
+        $system = new \Utopia\System\System();
+        return $system->getArch();
+    }
 
+    #[Field(name: "os")]
+    public function getOS(): string
+    {
+        $system = new \Utopia\System\System();
+        return $system->getOS();
+    }
+
+    #[Field(name: "CPUCores")]
+    public function getCPUCores(): ?int
+    {
+        try {
+            $system = new \Utopia\System\System();
+            return $system->getCPUCores();
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    #[Field]
+    public function getHostname(): string
+    {
+        $system = new \Utopia\System\System();
+        return $system->getHostname();
+    }
+
+    #[Field]
+    public function getMemoryTotal(): ?int
+    {
+        try {
+            $system = new \Utopia\System\System();
+            return $system->getMemoryTotal();
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    #[Field]
+    public function getMemoryFree(): ?int
+    {
+        try {
+            $system = new \Utopia\System\System();
+            return $system->getMemoryFree();
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    #[Field]
+    public function getMemoryAvailable(): ?int
+    {
+        try {
+            $system = new \Utopia\System\System();
+            return $system->getMemoryAvailable();
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
 
     #[Field]
     public function time(): string
@@ -53,6 +116,8 @@ class System
         }
         return $max_size;
     }
+
+
 
     #[Field]
     #[Right("system.storage")]
@@ -101,12 +166,17 @@ class System
         return Util::Size(disk_total_space(getcwd()));
     }
 
+
+
+
+
     #[Field]
     #[Right("system.database")]
     public function getDatabase(): Schema
     {
         return new Schema;
     }
+
 
     #[Field]
     /**

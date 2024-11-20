@@ -20,6 +20,7 @@ class System
 {
 
     #[Field]
+    #[Logged]
     public function getArch(): string
     {
         $system = new \Utopia\System\System();
@@ -27,6 +28,7 @@ class System
     }
 
     #[Field(name: "os")]
+    #[Logged]
     public function getOS(): string
     {
         $system = new \Utopia\System\System();
@@ -34,6 +36,7 @@ class System
     }
 
     #[Field(name: "CPUCores")]
+    #[Logged]
     public function getCPUCores(): ?int
     {
         try {
@@ -45,6 +48,7 @@ class System
     }
 
     #[Field]
+    #[Logged]
     public function getHostname(): string
     {
         $system = new \Utopia\System\System();
@@ -52,6 +56,7 @@ class System
     }
 
     #[Field]
+    #[Logged]
     public function getMemoryTotal(): ?int
     {
         try {
@@ -63,6 +68,7 @@ class System
     }
 
     #[Field]
+    #[Logged]
     public function getMemoryFree(): ?int
     {
         try {
@@ -74,6 +80,7 @@ class System
     }
 
     #[Field]
+    #[Logged]
     public function getMemoryAvailable(): ?int
     {
         try {

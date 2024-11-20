@@ -270,15 +270,6 @@ CREATE TABLE `User` (
 ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `User`
---
-
-LOCK TABLES `User` WRITE;
-/*!40000 ALTER TABLE `User` DISABLE KEYS */;
-INSERT INTO `User` VALUES (1,'admin','$2y$10$aMsME6flIYToLIEDd7YATOnbxWhvAMG86J0wN9udjVEbxnvu2.TFy','admin',NULL,'raymond@hostlink.com.hk','27717387',NULL,'','','',0,0,1,'zh-hk',NULL,NULL,'2023-08-31',0,0,NULL,NULL,'null',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'null','raymond@hostlink.com.hk');
-/*!40000 ALTER TABLE `User` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `UserLog`

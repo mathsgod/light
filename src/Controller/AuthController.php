@@ -406,6 +406,10 @@ class AuthController
 
     private static function PasswordVerify(string $password, string $hash)
     {
+        $p = substr($hash, 0, 2);
+        if ($p == '$5' || $p == '$6') {
+            throw new Error("Password is created with old system, please contact your administrator to reset your password");
+        }
         return password_verify($password, $hash);
     }
 

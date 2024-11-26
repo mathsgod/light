@@ -15,6 +15,16 @@ use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
+/**
+ * @property int $user_id
+ * @property string $username
+ * @property string $first_name
+ * @property string $last_name
+ * @property array $credential
+ * @property string $secret
+ * @property array $style
+ */
+
 #[Type]
 #[MagicField(name: "user_id", outputType: "Int")]
 #[MagicField(name: "username", outputType: "String")]
@@ -33,6 +43,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "google", outputType: "String")]
 #[MagicField(name: "microsoft", outputType: "String")]
 #[MagicField(name: "facebook", outputType: "String")]
+
 
 class User extends \Light\Model
 {

@@ -6,6 +6,10 @@ use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
+/**
+ * @property mixed $source
+ * @property mixed $target
+ */
 #[Type]
 #[MagicField(name: "eventlog_id", outputType: "Int!")]
 #[MagicField(name: "class", outputType: "String")]

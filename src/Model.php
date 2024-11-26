@@ -33,7 +33,6 @@ abstract class Model extends \R\DB\Model
 
     #[Field] public function createdBy(): string
     {
-
         if ($this->created_by) {
             if ($user = User::Get($this->created_by)) {
                 return $user->getName();

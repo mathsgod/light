@@ -2,6 +2,7 @@
 
 namespace Light\Drive;
 
+use GraphQL\Error\Error;
 use League\Flysystem\Filesystem;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Right;
@@ -79,6 +80,11 @@ class Drive
         $files = [];
         foreach ($this->filesystem->listContents($path, $deep) as $file) {
             if (!$file->isFile()) continue;
+
+            //skip hidden files
+            if (strpos($file->path(), ".") !== false) continue;
+
+
             $path = $file->path();
             $ext = pathinfo($path, PATHINFO_EXTENSION);
 

@@ -16,7 +16,7 @@ class CustomFieldController
     #[Query]
     #[Logged]
     /**
-     * @return \Model\CustomField[]
+     * @return \Light\Model\CustomField[]
      * @param ?mixed $filters
      */
     public function listCustomField($filters = [],  ?string $sort = '', #[InjectUser] \Light\Model\User $user): \R\DB\Query

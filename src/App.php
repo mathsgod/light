@@ -97,6 +97,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->container->add(Controller\RevisionController::class);
         $this->container->add(Controller\DatabaseController::class);
         $this->container->add(Controller\DriveController::class);
+        $this->container->add(Controller\CustomFieldController::class);
 
         /*        $this->container->delegate(
             new \League\Container\ReflectionContainer()

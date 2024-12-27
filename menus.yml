@@ -139,5 +139,8 @@
       to: /System/fs
       permission: filesystem.list
 
-    
+    - label: Custom Field
+      icon: sym_o_deployed_code
+      to: /CustomField
+      permission: customfield.list
       

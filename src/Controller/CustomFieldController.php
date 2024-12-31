@@ -21,6 +21,7 @@ class CustomFieldController
      * @return \Light\Model\CustomField[]
      * @param ?mixed $filters
      */
+    #[Right("customfield.list")]
     public function listCustomField($filters = [],  ?string $sort = '', #[InjectUser] \Light\Model\User $user): \R\DB\Query
     {
         return CustomField::Query()->filters($filters)->sort($sort);
@@ -28,6 +29,7 @@ class CustomFieldController
 
     #[Mutation]
     #[Logged]
+    #[Right("customfield.add")]
     public function addCustomField(\Light\Input\CustomField $data, #[InjectUser] \Light\Model\User $user): int
     {
         $obj = CustomField::Create();
@@ -38,6 +40,7 @@ class CustomFieldController
 
     #[Mutation]
     #[Logged]
+    #[Right("customfield.update")]
     public function updateCustomField(int $id, #[UseInputType(inputType: "UpdateCustomFieldInput")] \Light\Input\CustomField $data, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = CustomField::Get($id)) return false;
@@ -49,6 +52,7 @@ class CustomFieldController
 
     #[Mutation]
     #[Logged]
+    #[Right("customfield.delete")]
     public function deleteCustomField(int $id, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = CustomField::Get($id)) return false;

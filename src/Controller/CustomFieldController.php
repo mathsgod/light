@@ -13,6 +13,8 @@ use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 
 class CustomFieldController
 {
+
+
     #[Query]
     #[Logged]
     /**

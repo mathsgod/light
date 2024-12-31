@@ -31,11 +31,15 @@ class CustomField
     public $options;
 
     #[Field]
-    public ?bool $required;
+    public ?string $validation;
 
     #[Field]
     public ?string $default_value;
 
     #[Field]
     public ?int $order;
+
+    #[Field]
+    public ?string $help;
+
 }

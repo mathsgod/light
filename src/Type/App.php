@@ -7,6 +7,7 @@ use Light\Rbac\Rbac;
 use Light\App as LightApp;
 use Light\Input\Table\Column;
 use Light\Model\Config;
+use Light\Model\CustomField;
 use Light\Model\EventLog;
 use Light\Model\MailLog;
 use Light\Model\MyFavorite;
@@ -26,6 +27,41 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class App
 {
+
+    #[Field(outputType: "[mixed]")]
+    public function getCustomFieldSchema(string $model)
+    {
+
+        $schemas = [];
+        foreach (CustomField::Query(["model" => $model]) as $cf) {
+            $schemas[] = $cf->getFormKitSchema();
+        }
+
+        return $schemas;
+
+
+
+        return [
+            [
+                '$formkit' => 'l-input',
+                'name' => 'name',
+                'label' => 'Name',
+            ]
+
+        ];
+    }
+
+
+    #[Field(outputType: "[String]")]
+    public function getCustomFieldModels()
+    {
+        $v = Config::Value("custom_field_models");
+        if (!$v) return [];
+
+        //explode by comma
+        return explode(",", $v);
+    }
+
     #[Field]
     public function getAuth(): Auth
     {

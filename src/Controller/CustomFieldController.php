@@ -2,7 +2,9 @@
 
 namespace Light\Controller;
 
+use Light\App;
 use Light\Model\CustomField;
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -13,6 +15,32 @@ use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 
 class CustomFieldController
 {
+
+    #[Mutation]
+    #[Logged]
+    #[Right("#Administrators")]
+    public function createCustomFieldTable(#[Autowire] App $app): bool
+    {
+        $sql = "CREATE TABLE `CustomField` (
+  `custom_field_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) DEFAULT NULL,
+  `label` varchar(100) DEFAULT NULL,
+  `model` varchar(45) DEFAULT NULL,
+  `type` varchar(45) DEFAULT NULL,
+  `placeholder` varchar(100) DEFAULT NULL,
+  `options` json DEFAULT NULL,
+  `validation` varchar(100) DEFAULT NULL,
+  `default_value` json DEFAULT NULL,
+  `order` int(11) DEFAULT '0',
+  `help` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`custom_field_id`),
+  KEY `model` (`model`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+        )";
+
+        return $app->getDatabase()->exec($sql) ?? false;
+    }
 
 
     #[Query]

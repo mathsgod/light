@@ -81,8 +81,11 @@ class Drive
         foreach ($this->filesystem->listContents($path, $deep) as $file) {
             if (!$file->isFile()) continue;
 
-            //skip hidden files
-            if (strpos($file->path(), ".") !== false) continue;
+           //skip hidden files
+            //if start with . 
+            $name = basename($file->path());
+            if (strpos($name, ".") === 0) continue;
+
 
 
             $path = $file->path();

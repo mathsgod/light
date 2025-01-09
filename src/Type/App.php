@@ -182,6 +182,14 @@ class App
                 $menu["icon"] = "sym_o_circle";
             }
 
+            if($menu["to"]=="/CustomField"){
+                if(!Config::Value("custom_field_models")){
+                    continue;
+                }
+
+            }
+
+
             if ($menu["children"]) {
                 $menu["children"] = $this->filterMenus($menu["children"], $rbac, $roles);
 

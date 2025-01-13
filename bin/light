@@ -208,6 +208,9 @@ if ($command == "make:model") {
             case "tinyint":
                 $gql_type = "Boolean";
                 break;
+            case "decimal":
+                $gql_type = "Float";
+                break;
             default:
                 $gql_type = "String";
         }

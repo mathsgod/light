@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9622105cf24a6f4b3b797e599a1b5bcb",
+    "content-hash": "41639d06ecfcaa26838b36c82ba3530a",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1808,16 +1808,16 @@
         },
         {
             "name": "mathsgod/r-db",
-            "version": "5.9.3",
+            "version": "5.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mathsgod/r-db.git",
-                "reference": "25b39d33f1aeeda143f48accaf1806634dc0786e"
+                "reference": "ad9335b98f729a38bc8c0bf9535f33ee4491d0eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mathsgod/r-db/zipball/25b39d33f1aeeda143f48accaf1806634dc0786e",
-                "reference": "25b39d33f1aeeda143f48accaf1806634dc0786e",
+                "url": "https://api.github.com/repos/mathsgod/r-db/zipball/ad9335b98f729a38bc8c0bf9535f33ee4491d0eb",
+                "reference": "ad9335b98f729a38bc8c0bf9535f33ee4491d0eb",
                 "shasum": ""
             },
             "require": {
@@ -1838,8 +1838,7 @@
             "require-dev": {
                 "league/container": "^4.2",
                 "phpstan/phpstan": "^2.0",
-                "phpunit/phpunit": "^9.6",
-                "thecodingmachine/graphqlite": "^5.0 | ^6.0"
+                "phpunit/phpunit": "^9.6"
             },
             "type": "library",
             "autoload": {
@@ -1862,9 +1861,52 @@
             "description": "A lightweight orm library for mysql",
             "support": {
                 "issues": "https://github.com/mathsgod/r-db/issues",
-                "source": "https://github.com/mathsgod/r-db/tree/5.9.3"
+                "source": "https://github.com/mathsgod/r-db/tree/5.10.0"
             },
-            "time": "2025-02-06T08:15:25+00:00"
+            "time": "2025-02-07T09:25:27+00:00"
+        },
+        {
+            "name": "mathsgod/r-db-graphqlite-mappers",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mathsgod/r-db-graphqlite-mappers.git",
+                "reference": "a14edd91c94a02842c2748dae4030090398c0593"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mathsgod/r-db-graphqlite-mappers/zipball/a14edd91c94a02842c2748dae4030090398c0593",
+                "reference": "a14edd91c94a02842c2748dae4030090398c0593",
+                "shasum": ""
+            },
+            "require": {
+                "thecodingmachine/graphqlite": "^8.0"
+            },
+            "require-dev": {
+                "mathsgod/r-db": "^5.9",
+                "php": ">=8.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "R\\DB\\GraphQLite\\Mappers\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Raymond Chong",
+                    "email": "mathsgod@yahoo.com"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/mathsgod/r-db-graphqlite-mappers/issues",
+                "source": "https://github.com/mathsgod/r-db-graphqlite-mappers/tree/1.0.0"
+            },
+            "time": "2025-02-07T09:35:05+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",

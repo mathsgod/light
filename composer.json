@@ -10,7 +10,7 @@
     "require": {
         "php": ">=8.1",
         "laminas/laminas-code": "^4.7",
-        "mathsgod/r-db": "^5.0",
+        "mathsgod/r-db": "^5.10",
         "league/container": "^4.2",
         "firebase/php-jwt": "^6.8",
         "laminas/laminas-diactoros": "^3.1",
@@ -26,7 +26,8 @@
         "league/event": "^3.0",
         "utopia-php/system": "^0.9.0",
         "thecodingmachine/graphqlite": "^8.0",
-        "mathsgod/graphqlite-mixed-type": "^2.3"
+        "mathsgod/graphqlite-mixed-type": "^2.3",
+        "mathsgod/r-db-graphqlite-mappers": "^1.0"
     },
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*",

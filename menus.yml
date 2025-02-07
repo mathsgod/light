@@ -42,7 +42,7 @@
         - label: All
           icon: sym_o_add
           to: /Permission/all
-          permission: [permission.list, permission.add, permission:remove].
+          permission: [permission.list, permission.add, permission:remove]
 
         - label: Add
           icon: sym_o_add

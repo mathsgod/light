@@ -19,6 +19,18 @@ class AppController
 {
 
     #[Query]
+    /** 
+     * @return mixed
+     */
+    public function test()
+    {
+        return [
+            "a"=>1
+        ];
+
+    }
+
+    #[Query]
     public function getApp(): App
     {
         return new App();

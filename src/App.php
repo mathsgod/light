@@ -65,15 +65,12 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
         $this->container = new \League\Container\Container();
         $this->cache = new Psr16Cache(new FilesystemAdapter());
+
         $this->factory = new SchemaFactory($this->cache, $this->container);
+        
 
-        $this->factory->addControllerNamespace("\\Light\\Controller\\");
-        $this->factory->addTypeNamespace("\\Light\\Model\\");
-        $this->factory->addTypeNamespace("\\Light\\Input\\");
-        $this->factory->addTypeNamespace("\\Light\\Type\\");
-        $this->factory->addTypeNamespace("\\Light\\Drive\\");
-        $this->factory->addTypeNamespace("\\Light\\Database\\");
-
+        $this->factory->addNamespace("Light");
+        
         $this->container->add(App::class, $this);
         $this->container->add(Controller\AppController::class);
         $this->container->add(Controller\SystemController::class);
@@ -118,6 +115,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                     $this->factory->prodMode();
                 } else {
                     $this->factory->devMode();
+                    $this->cache->clear();
                 }
             }
         } catch (Exception $e) {

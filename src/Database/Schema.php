@@ -16,6 +16,22 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class Schema
 {
+
+
+    #[Field]
+    /**
+     * @return mixed
+     */
+    #[Right("system.database.process")]
+    public function getProcessList(#[Autowire] App $app)
+    {
+        $db = $app->getDatabase();
+        $result = $db->query("SHOW FULL PROCESSLIST");
+        return $result->fetchAll();
+    }
+
+
+
     #[Field(outputType: "[Table]")]
     #[Right("system.database.table")]
     public function getTables(#[Autowire] App $app)

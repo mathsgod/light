@@ -105,6 +105,11 @@
               icon: sym_o_database
               to: /System/database/backup
               permission: system.database.backup
+
+            - label: Process
+              icon: sym_o_memory
+              to: /System/database/process
+              permission: system.database.process
           
     - label: User log
       icon: sym_o_description

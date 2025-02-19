@@ -8,6 +8,7 @@ use GQL\Type\MixedTypeMapperFactory;
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
 use GraphQL\Upload\UploadMiddleware;
+use Kcs\ClassFinder\Finder\ComposerFinder;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Light\Rbac\Rbac;
@@ -67,10 +68,10 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->cache = new Psr16Cache(new FilesystemAdapter());
 
         $this->factory = new SchemaFactory($this->cache, $this->container);
-        
+
 
         $this->factory->addNamespace("Light");
-        
+
         $this->container->add(App::class, $this);
         $this->container->add(Controller\AppController::class);
         $this->container->add(Controller\SystemController::class);
@@ -396,23 +397,18 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             }
         }
 
-
-        $explorer = new GlobClassExplorer("Controller", $this->getCache());
-        foreach ($explorer->getClasses() as $class) {
-            $rc = new \ReflectionClass($class);
-            foreach ($rc->getMethods() as $method) {
+        $finder = new ComposerFinder();
+        foreach ($finder->inNamespace("Controller") as $className => $reflector) {
+            $reflector = new \ReflectionClass($class);
+            foreach ($reflector->getMethods() as $method) {
                 foreach ($method->getAttributes("TheCodingMachine\GraphQLite\Annotations\Right") as $attr) {
                     $permissions[] = $attr->getArguments()[0];
                 }
             }
         }
-
-
-
-        $explorer = new GlobClassExplorer("Model", $this->getCache());
-        foreach ($explorer->getClasses() as $class) {
-            $rc = new \ReflectionClass($class);
-            foreach ($rc->getMethods() as $method) {
+        foreach ($finder->inNamespace("Model") as $className => $reflector) {
+            $reflector = new \ReflectionClass($class);
+            foreach ($reflector->getMethods() as $method) {
                 foreach ($method->getAttributes("TheCodingMachine\GraphQLite\Annotations\Right") as $attr) {
                     $permissions[] = $attr->getArguments()[0];
                 }

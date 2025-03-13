@@ -65,12 +65,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         }
 
         $this->container = new \League\Container\Container();
-        $this->cache = new Psr16Cache(new FilesystemAdapter());
 
-        $this->factory = new SchemaFactory($this->cache, $this->container);
-
-
-        $this->factory->addNamespace("Light");
 
         $this->container->add(App::class, $this);
         $this->container->add(Controller\AppController::class);
@@ -102,26 +97,32 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         );
  */
         Model::GetSchema()->setContainer($this->container);
-
-        $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
-        $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
-
-        $this->rbac = new Rbac();
-        $this->loadRbac();
-
+        $defaultLifetime = 0;
         try {
             if ($config = Config::Get(["name" => "mode"])) {
                 $this->mode = $config->value;
                 if ($this->mode === "prod") {
-                    $this->factory->prodMode();
+                    $defaultLifetime = 0;
                 } else {
-                    $this->factory->devMode();
-                    $this->cache->clear();
+                    $defaultLifetime = 15;
                 }
             }
         } catch (Exception $e) {
-            $this->factory->devMode();
-        }
+            $this->mode = "dev";
+            $defaultLifetime = 15;
+            
+        } 
+
+        $this->cache = new Psr16Cache(new FilesystemAdapter("light", $defaultLifetime));
+
+
+        $this->factory = new SchemaFactory($this->cache, $this->container);
+        $this->factory->addNamespace("Light");
+        $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
+        $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
+        $this->rbac = new Rbac();
+        $this->loadRbac();
+        $this->factory->prodMode();
 
         $this->loadMenu();
 

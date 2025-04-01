@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b9c8e98315b0300cd17071815c518838",
+    "content-hash": "0c8f4d5078a16926656927c73920a4e8",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2110,6 +2110,53 @@
             "time": "2025-02-07T04:54:21+00:00"
         },
         {
+            "name": "mathsgod/light-graphql",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mathsgod/light-graphql.git",
+                "reference": "86005fa24eda514367300e5b6ca0027569c2b94c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mathsgod/light-graphql/zipball/86005fa24eda514367300e5b6ca0027569c2b94c",
+                "reference": "86005fa24eda514367300e5b6ca0027569c2b94c",
+                "shasum": ""
+            },
+            "require": {
+                "ecodev/graphql-upload": "^7.0",
+                "laminas/laminas-diactoros": "^3.5",
+                "league/container": "^4.2",
+                "mathsgod/graphqlite-mixed-type": "^2.3",
+                "php": "^8.1",
+                "symfony/cache": "^6.4",
+                "thecodingmachine/graphqlite": "^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Controllers\\": "test/",
+                    "Light\\GraphQL\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Raymond Chong",
+                    "email": "mathsgod@yahoo.com"
+                }
+            ],
+            "description": "Simple graphql server",
+            "support": {
+                "issues": "https://github.com/mathsgod/light-graphql/issues",
+                "source": "https://github.com/mathsgod/light-graphql/tree/1.2.0"
+            },
+            "time": "2025-04-01T10:04:24+00:00"
+        },
+        {
             "name": "mathsgod/light-rbac",
             "version": "1.0.3",
             "source": {
@@ -2160,16 +2207,16 @@
         },
         {
             "name": "mathsgod/light-server",
-            "version": "1.0.2",
+            "version": "1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mathsgod/light-server.git",
-                "reference": "2cc8bc9746f7c23ad523c77f93e3474a48a0cdf3"
+                "reference": "0942d0ffc582335c2bec9c8fc6f84340404dd612"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mathsgod/light-server/zipball/2cc8bc9746f7c23ad523c77f93e3474a48a0cdf3",
-                "reference": "2cc8bc9746f7c23ad523c77f93e3474a48a0cdf3",
+                "url": "https://api.github.com/repos/mathsgod/light-server/zipball/0942d0ffc582335c2bec9c8fc6f84340404dd612",
+                "reference": "0942d0ffc582335c2bec9c8fc6f84340404dd612",
                 "shasum": ""
             },
             "require": {
@@ -2197,9 +2244,9 @@
             ],
             "support": {
                 "issues": "https://github.com/mathsgod/light-server/issues",
-                "source": "https://github.com/mathsgod/light-server/tree/1.0.2"
+                "source": "https://github.com/mathsgod/light-server/tree/1.0.3"
             },
-            "time": "2025-03-27T08:31:43+00:00"
+            "time": "2025-03-28T04:37:09+00:00"
         },
         {
             "name": "mathsgod/r-db",

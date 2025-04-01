@@ -28,7 +28,8 @@
         "thecodingmachine/graphqlite": "^8.0",
         "mathsgod/graphqlite-mixed-type": "^2.3",
         "mathsgod/r-db-graphqlite-mappers": "^1.0",
-        "mathsgod/light-server": "^1.0"
+        "mathsgod/light-server": "^1.0",
+        "mathsgod/light-graphql": "^1.2"
     },
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*",

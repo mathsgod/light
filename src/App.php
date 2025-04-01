@@ -65,6 +65,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->container = new \League\Container\Container();
 
         $this->server = new \Light\Server($this->container);
+
         $this->server->pipe($this);
 
         $this->container->add(App::class, $this);
@@ -98,10 +99,12 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
  */
         Model::GetSchema()->setContainer($this->container);
         $defaultLifetime = 0;
+        $debug = true;
         try {
             if ($config = Config::Get(["name" => "mode"])) {
                 $this->mode = $config->value;
                 if ($this->mode === "prod") {
+                    $debug = false;
                     $defaultLifetime = 0;
                 } else {
                     $defaultLifetime = 15;
@@ -112,23 +115,16 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             $defaultLifetime = 15;
         }
 
-        $this->cache = new Psr16Cache(new FilesystemAdapter("light", $defaultLifetime));
+        $gql = new \Light\GraphQL\Server($defaultLifetime, $debug, $this->container);
 
-
-        $this->factory = new SchemaFactory($this->cache, $this->container);
+        $this->cache = $gql->getCache();
+        $this->factory = $gql->getSchemaFactory();
         $this->factory->addNamespace("Light");
-        $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
-
-
 
         $this->rbac = new Rbac();
         $this->loadRbac();
-        $this->factory->prodMode();
-
         $this->loadMenu();
-
-
 
         // database column check
         if (!User::_table()->column("password_dt")) {

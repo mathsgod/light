@@ -2,23 +2,21 @@
 
 namespace Light\Attributes;
 
+use Attribute;
 use Laminas\Diactoros\Response\TextResponse;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use ReflectionAttribute;
 use Psr\Http\Message\ResponseInterface;
-use TheCodingMachine\GraphQLite\Annotations\Logged as AnnotationsLogged;
+use Psr\Http\Server\MiddlewareInterface;
 
-class Logged implements \PUXT\AttributeMiddlewareInterface
+#[Attribute()]
+class Logged implements MiddlewareInterface
 {
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler, ReflectionAttribute $attribute): ResponseInterface
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-
-        if ($attribute->getName() == AnnotationsLogged::class) {
-            $auth_service = new \Light\Auth\Service($request);
-            if ($auth_service->isLogged() == false) {
-                return new TextResponse("You are not logged in", 403);
-            }
+        $auth_service = new \Light\Auth\Service($request);
+        if ($auth_service->isLogged() == false) {
+            return new TextResponse("You are not logged in", 403);
         }
 
         return $handler->handle($request);

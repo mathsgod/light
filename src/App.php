@@ -32,10 +32,6 @@ use Ramsey\Uuid\Uuid;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Yaml\Yaml;
-use TheCodingMachine\ClassExplorer\Glob\GlobClassExplorer;
-use TheCodingMachine\GraphQLite\Annotations\Field;
-use TheCodingMachine\GraphQLite\Annotations\InjectUser;
-use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\SchemaFactory;
 use Webauthn\PublicKeyCredentialRpEntity;
 
@@ -55,6 +51,8 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     protected $menus = [];
 
+    protected $server;
+
     public function __construct()
     {
 
@@ -66,6 +64,8 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
         $this->container = new \League\Container\Container();
 
+        $this->server = new \Light\Server($this->container);
+        $this->server->pipe($this);
 
         $this->container->add(App::class, $this);
         $this->container->add(Controller\AppController::class);
@@ -110,8 +110,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         } catch (Exception $e) {
             $this->mode = "dev";
             $defaultLifetime = 15;
-            
-        } 
+        }
 
         $this->cache = new Psr16Cache(new FilesystemAdapter("light", $defaultLifetime));
 
@@ -120,6 +119,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->factory->addNamespace("Light");
         $this->factory->addRootTypeMapperFactory(new MixedTypeMapperFactory);
         $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
+
+
+
         $this->rbac = new Rbac();
         $this->loadRbac();
         $this->factory->prodMode();
@@ -136,7 +138,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+
         $result = $this->execute($request);
+
         try {
 
             //return new JsonResponse($result->toArray());
@@ -474,13 +478,13 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
         $request = $request->withAttribute(self::class, $this);
 
-        $puxt = $request->getAttribute(\PUXT\App::class);
+        /*         $puxt = $request->getAttribute(\PUXT\App::class);
 
         if (assert($puxt instanceof \PUXT\App)) {
             $puxt->addAttributeMiddleware(new \Light\Attributes\Logged);
             $puxt->addParameterHandler(InjectUser::class, new \Light\ParameterHandlers\InjectedUser);
         }
-
+ */
 
         $auth_service = new Auth\Service($request);
 
@@ -493,15 +497,18 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
         if ($request->getMethod() == "GET" && $auth_service->isLogged()) {
 
-            $base_path = $_ENV["BASE_PATH"];
+            $base_path = $this->server->getBasePath($request);
+
             $path = $request->getUri()->getPath();
+
             //real path - base path
-            $path = substr($path, strlen($base_path));
+            $path = substr($path, strlen($base_path ?? ""));
             //trim / from start
             $path = ltrim($path, "/");
 
             //split 3 parts
             $parts = explode("/", $path, 3);
+
 
             if ($parts[0] == "drive") {
                 return $this->getDriveResponse($request, $parts[1], $parts[2]);
@@ -538,7 +545,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function execute(ServerRequestInterface $request)
     {
-        $body = $request->getParsedBody();
+        $body = json_decode($request->getBody()->getContents(), true);
+
+
         $query = $body["query"];
         $variableValues = $body["variables"] ?? null;
 
@@ -756,5 +765,10 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $config = $this->getFSConfig();
         $fs = $config[$index] ?? $config[0];
         return new Drive($fs["name"], $this->getFS($index), $index, $fs["data"]);
+    }
+
+    public function run()
+    {
+        $this->server->run();
     }
 }

@@ -13,6 +13,8 @@ use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Type;
+use Webauthn\AttestationStatement\AttestationStatementSupportManager;
+use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialRpEntity;
@@ -71,11 +73,6 @@ class Auth
      */
     public function getWebAuthnRequestOptions(string $username, #[Autowire] App $app)
     {
-        try {
-            $server = $app->getWebAuthnServer();
-        } catch (Exception $e) {
-            throw new Error($e->getMessage());
-        }
 
         $source = new PublicKeyCredentialSourceRepository();
         if (!$user = User::Get(["username" => $username])) {
@@ -85,23 +82,29 @@ class Auth
         $userEntity = new PublicKeyCredentialUserEntity($user->username, $user->user_id, $user->getName());
 
         // Get the list of authenticators associated to the user
-        $credentialSources = $source->findAllForUserEntity($userEntity);
+        $registeredAuthenticators  = $source->findAllForUserEntity($userEntity);
 
         // Convert the Credential Sources into Public Key Credential Descriptors
-        $allowedCredentials = array_map(function (PublicKeyCredentialSource $credential) {
-            return $credential->getPublicKeyCredentialDescriptor();
-        }, $credentialSources);
+        $allowedCredentials = array_map(
+            static function (PublicKeyCredentialSource $credential) {
+                return $credential->getPublicKeyCredentialDescriptor();
+            },
+            $registeredAuthenticators
+        );
 
-        // We generate the set of options.
-        $option = $server->generatePublicKeyCredentialRequestOptions(
-            PublicKeyCredentialRequestOptions::USER_VERIFICATION_REQUIREMENT_PREFERRED, // Default value
-            $allowedCredentials
+
+        $challenge = random_bytes(32);
+        $publicKeyCredentialRequestOptions = PublicKeyCredentialRequestOptions::create(
+            $challenge, // Challenge
+            $app->getRpId(), // Relying party ID
+            allowCredentials: $allowedCredentials
+
         );
 
         $cache = $app->getCache();
-        $cache->set("webauthn_request_" . $user->user_id, json_encode($option), 60 * 5);
+        $cache->set("webauthn_request_" . $user->user_id, serialize($publicKeyCredentialRequestOptions), 60 * 5);
 
-        return $option->jsonSerialize();
+        return $publicKeyCredentialRequestOptions->jsonSerialize();
     }
 
     #[Field]
@@ -112,23 +115,33 @@ class Auth
     public function getWebAuthnCreationOptions(#[InjectUser] User $user, #[Autowire] App $app)
     {
         try {
-            $server = $app->getWebAuthnServer();
+            $rpEntity = $app->getRpEntity();
+
+            $challenge = random_bytes(16);
+
+            //            $server = $app->getWebAuthnServer();
+
+            $userEntity = PublicKeyCredentialUserEntity::create($user->username, $user->user_id, $user->getName());
+            $option =
+                PublicKeyCredentialCreationOptions::create(
+                    $rpEntity,
+                    $userEntity,
+                    $challenge,
+                    []
+                );
         } catch (Exception $e) {
             throw new Error($e->getMessage());
         }
 
 
-        $userEntity = new PublicKeyCredentialUserEntity($user->username, $user->user_id, $user->getName());
-
-        // Convert the Credential Sources into Public Key Credential Descriptors
+        /*      // Convert the Credential Sources into Public Key Credential Descriptors
         $option = $server->generatePublicKeyCredentialCreationOptions(
             $userEntity,
             PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE
         );
-
-        //save the challenge to cache
+ */        //save the challenge to cache
         $cache = $app->getCache();
-        $cache->set("webauthn_creation_" . $user->user_id, json_encode($option), 60 * 5);
+        $cache->set("webauthn_creation_" . $user->user_id, base64_encode($challenge), 60 * 5);
 
         return $option->jsonSerialize();
     }

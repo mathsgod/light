@@ -12,12 +12,11 @@
         "laminas/laminas-code": "^4.7",
         "mathsgod/r-db": "^5.10",
         "league/container": "^4.2",
-        "firebase/php-jwt": "^6.8",
-        "laminas/laminas-diactoros": "^3.1",
-        "symfony/yaml": "^6.0",
+        "firebase/php-jwt": "^6.11",
+        "laminas/laminas-diactoros": "^3.5",
+        "symfony/yaml": "^6.4",
         "ramsey/uuid": "^4.7",
         "league/flysystem": "^3.15",
-        "ecodev/graphql-upload": "^7.0",
         "phpmailer/phpmailer": "^6.8",
         "symfony/cache": "^6.0",
         "endroid/qr-code": "^4.8",
@@ -25,20 +24,21 @@
         "mathsgod/light-rbac": "^1.0",
         "league/event": "^3.0",
         "utopia-php/system": "^0.9.0",
-        "thecodingmachine/graphqlite": "^8.0",
-        "mathsgod/graphqlite-mixed-type": "^2.3",
         "mathsgod/r-db-graphqlite-mappers": "^1.0",
         "mathsgod/light-server": "^1.0",
-        "mathsgod/light-graphql": "^1.2"
+        "mathsgod/light-graphql": "^1.2",
+        "symfony/serializer": "^6.3",
+        "symfony/property-info": "^6.4",
+        "symfony/property-access": "^6.4"
     },
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*",
-        "web-auth/webauthn-lib": "^3.3",
         "google/apiclient": "^2.15",
         "league/flysystem-aws-s3-v3": "^3.24",
         "hostlink/hostlink-storage-adapter": "^1.0",
         "alphasnow/aliyun-oss-flysystem": "^3.4",
-        "phpstan/phpstan": "^2.0"
+        "phpstan/phpstan": "^2.0",
+        "web-auth/webauthn-lib": "^4.9"
     },
     "autoload": {
         "psr-4": {

@@ -734,6 +734,41 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return true;
     }
 
+    public function getRpId()
+    {
+        $name = $_SERVER["SERVER_NAME"];
+        if ($name == "0.0.0.0") {
+            $name = "localhost";
+        }
+        if ($_ENV["RP_ID"]) {
+            return $_ENV["RP_ID"];
+        }
+        return $name;
+    }
+
+    public function getRpEntity()
+    {
+        $id = null;
+        $name = $_SERVER["SERVER_NAME"];
+        if ($name == "0.0.0.0") {
+            $name = "localhost";
+            $id = "localhost";
+        } else {
+            $name = $_SERVER["SERVER_NAME"];
+            if (!$_ENV["RP_ID"]) {
+                throw new Exception("RP_ID is not set in .env file");
+            }
+        }
+
+        $rpEntity = PublicKeyCredentialRpEntity::create(
+            $name, //Name
+            $id,              //ID
+            null                            //Icon
+        );
+
+        return $rpEntity;
+    }
+
     public function getWebAuthnServer()
     {
         $id = null;

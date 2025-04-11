@@ -6,21 +6,23 @@ use Light\Model\User;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialSourceRepository as WebauthnPublicKeyCredentialSourceRepository;
 use Webauthn\PublicKeyCredentialUserEntity;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 class PublicKeyCredentialSourceRepository implements WebauthnPublicKeyCredentialSourceRepository
 {
 
     public function findOneByCredentialId(string $publicKeyCredentialId): ?PublicKeyCredentialSource
     {
-
         foreach (User::Query() as $user) {
             foreach ($user->credential as $credential) {
 
-                $s = PublicKeyCredentialSource::createFromArray($credential["credential"]);
+                if ($credential["credential"]["publicKeyCredentialId"] == $publicKeyCredentialId) {
 
-                if ($s->getPublicKeyCredentialId() == $publicKeyCredentialId) {
+
+                    $s= PublicKeyCredentialSource::createFromArray($credential["credential"]);
 
                     return $s;
+
                 }
             }
         }
@@ -43,7 +45,5 @@ class PublicKeyCredentialSourceRepository implements WebauthnPublicKeyCredential
         return $sources;
     }
 
-    public function saveCredentialSource(PublicKeyCredentialSource $publicKeyCredentialSource): void
-    {
-    }
+    public function saveCredentialSource(PublicKeyCredentialSource $publicKeyCredentialSource): void {}
 }

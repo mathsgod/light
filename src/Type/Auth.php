@@ -15,6 +15,7 @@ use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
+use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialRpEntity;
@@ -74,35 +75,37 @@ class Auth
     public function getWebAuthnRequestOptions(string $username, #[Autowire] App $app)
     {
 
-        $source = new PublicKeyCredentialSourceRepository();
+        /*      $source = new PublicKeyCredentialSourceRepository();
         if (!$user = User::Get(["username" => $username])) {
             throw new \Exception("Invalid user");
         }
 
         $userEntity = new PublicKeyCredentialUserEntity($user->username, $user->user_id, $user->getName());
-
+ */
         // Get the list of authenticators associated to the user
-        $registeredAuthenticators  = $source->findAllForUserEntity($userEntity);
+        //$registeredAuthenticators  = $source->findAllForUserEntity($userEntity);
 
         // Convert the Credential Sources into Public Key Credential Descriptors
-        $allowedCredentials = array_map(
+        /*         $allowedCredentials = array_map(
             static function (PublicKeyCredentialSource $credential) {
                 return $credential->getPublicKeyCredentialDescriptor();
             },
             $registeredAuthenticators
         );
-
+ */
 
         $challenge = random_bytes(32);
         $publicKeyCredentialRequestOptions = PublicKeyCredentialRequestOptions::create(
             $challenge, // Challenge
             $app->getRpId(), // Relying party ID
-            allowCredentials: $allowedCredentials
-
+            [],
+            PublicKeyCredentialRequestOptions::USER_VERIFICATION_REQUIREMENT_REQUIRED,
         );
 
         $cache = $app->getCache();
-        $cache->set("webauthn_request_" . $user->user_id, serialize($publicKeyCredentialRequestOptions), 60 * 5);
+        $cache->set("webauthn_request", serialize($publicKeyCredentialRequestOptions), 60 * 5);
+        //$cache->set("webauthn_request_" . $user->user_id, serialize($publicKeyCredentialRequestOptions), 60 * 5);
+        //$cache->set("webauthn_request_" . base64_encode($challenge), serialize($publicKeyCredentialRequestOptions), 60 * 5);
 
         return $publicKeyCredentialRequestOptions->jsonSerialize();
     }
@@ -114,32 +117,28 @@ class Auth
      */
     public function getWebAuthnCreationOptions(#[InjectUser] User $user, #[Autowire] App $app)
     {
+
+        $authenticatorSelectionCriteria = AuthenticatorSelectionCriteria::create(
+            userVerification: AuthenticatorSelectionCriteria::USER_VERIFICATION_REQUIREMENT_REQUIRED,
+            residentKey: AuthenticatorSelectionCriteria::RESIDENT_KEY_REQUIREMENT_REQUIRED,
+        );
+
+
         try {
             $rpEntity = $app->getRpEntity();
-
             $challenge = random_bytes(16);
-
-            //            $server = $app->getWebAuthnServer();
-
             $userEntity = PublicKeyCredentialUserEntity::create($user->username, $user->user_id, $user->getName());
-            $option =
-                PublicKeyCredentialCreationOptions::create(
-                    $rpEntity,
-                    $userEntity,
-                    $challenge,
-                    []
-                );
+            $option = PublicKeyCredentialCreationOptions::create(
+                $rpEntity,
+                $userEntity,
+                $challenge,
+                [],
+                $authenticatorSelectionCriteria,
+            );
         } catch (Exception $e) {
             throw new Error($e->getMessage());
         }
 
-
-        /*      // Convert the Credential Sources into Public Key Credential Descriptors
-        $option = $server->generatePublicKeyCredentialCreationOptions(
-            $userEntity,
-            PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE
-        );
- */        //save the challenge to cache
         $cache = $app->getCache();
         $cache->set("webauthn_creation_" . $user->user_id, base64_encode($challenge), 60 * 5);
 

@@ -2,12 +2,10 @@
 
 namespace Light\Controller;
 
-use Cose\Algorithms;
 use Exception;
 use GraphQL\Error\Error;
 use Light\App;
 use Light\Model\User;
-use Light\WebAuthn\PublicKeyCredentialSourceRepository;
 use Light\Type\WebAuthn;
 use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
@@ -16,12 +14,7 @@ use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
-use Webauthn\AttestationStatement\AttestationObject;
-use Webauthn\AttestationStatement\AttestationStatement;
 use Webauthn\PublicKeyCredentialCreationOptions;
-use Webauthn\PublicKeyCredentialRequestOptions;
-use Webauthn\PublicKeyCredentialRpEntity;
-use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialUserEntity;
 
 
@@ -31,13 +24,10 @@ use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
-use Webauthn\AuthenticatorData;
 use Webauthn\CeremonyStep\CeremonyStepManagerFactory;
-use Webauthn\CollectedClientData;
 use Webauthn\Denormalizer\WebauthnSerializerFactory;
 use Webauthn\PublicKeyCredential;
-use Webauthn\PublicKeyCredentialOptions;
-use Webauthn\PublicKeyCredentialParameters;
+use Webauthn\PublicKeyCredentialSource;
 
 class WebAuthnController
 {
@@ -72,18 +62,34 @@ class WebAuthnController
     }
 
 
+    private function getSerializer()
+    {
+        $attestationStatementSupportManager = AttestationStatementSupportManager::create();
+        $attestationStatementSupportManager->add(NoneAttestationStatementSupport::create());
+        $factory = new WebauthnSerializerFactory($attestationStatementSupportManager);
+        return $factory->create();
+    }
+
+    private function getPublicKeyCredentialSourceById(string $publicKeyCredentialId): ?PublicKeyCredentialSource
+    {
+        $serializer = $this->getSerializer();
+        foreach (User::Query() as $user) {
+            foreach ($user->credential as $credential) {
+                if ($credential["credential"]["publicKeyCredentialId"] == $publicKeyCredentialId) {
+                    return $serializer->deserialize(json_encode($credential["credential"]), PublicKeyCredentialSource::class, "json");
+                }
+            }
+        }
+        return null;
+    }
+
     #[Mutation]
     /**
      * @param mixed $assertion
      */
-    public function webAuthnAssertion(string $username, $assertion, #[Autowire] App $app, #[Autowire] ServerRequestInterface $request): bool
+    public function webAuthnAssertion(?string $username, $assertion, #[Autowire] App $app, #[Autowire] ServerRequestInterface $request): bool
     {
-
-
-        $attestationStatementSupportManager = AttestationStatementSupportManager::create();
-        $attestationStatementSupportManager->add(NoneAttestationStatementSupport::create());
-        $factory = new WebauthnSerializerFactory($attestationStatementSupportManager);
-        $serializer = $factory->create();
+        $serializer = $this->getSerializer();
 
         $publicKeyCredential  = $serializer->deserialize(json_encode($assertion), PublicKeyCredential::class, 'json');
 
@@ -92,19 +98,16 @@ class WebAuthnController
             return false;
         }
 
-
-
-        $publicKeyCredentialSourceRepository = new PublicKeyCredentialSourceRepository();
-        $publicKeyCredentialSource  = $publicKeyCredentialSourceRepository->findOneByCredentialId($publicKeyCredential->id);
+        $publicKeyCredentialSource  = $this->getPublicKeyCredentialSourceById($publicKeyCredential->id);
 
         if (!$publicKeyCredentialSource) {
-            throw new Error("Invalid credential");
+            throw new Error("Invalid credential1");
             return false;
         }
 
         //load back the challenge from the cache
         $cache = $app->getCache();
-        $request_options = $cache->get("webauthn_request_" . $publicKeyCredentialSource->userHandle);
+        $request_options = $cache->get("webauthn_request");
         if (!$request_options) {
             throw new Error("Invalid challenge");
             return false;
@@ -127,10 +130,15 @@ class WebAuthnController
             $publicKeyCredentialSource->userHandle
         );
 
-        $user = User::Get(["user_id" => $publicKeyCredentialSource->userHandle]);
-
         //remove the challenge from cache
-        $cache->delete("webauthn_request_" . $user->user_id);
+        $cache->delete("webauthn_request");
+
+
+        $user = User::Get(["user_id" => $publicKeyCredentialSource->userHandle]);
+        if (!$user) {
+            throw new Error("Invalid user");
+            return false;
+        }
 
         //login 
         $app->userLogin($user);

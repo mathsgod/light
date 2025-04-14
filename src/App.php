@@ -4,7 +4,6 @@ namespace Light;
 
 use Exception;
 use Firebase\JWT\JWT;
-use GQL\Type\MixedTypeMapperFactory;
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
 use GraphQL\Upload\UploadMiddleware;
@@ -21,7 +20,6 @@ use Light\Model\User;
 use Light\Model\UserLog;
 use Light\Model\UserRole;
 use Light\Drive\Drive;
-use Light\WebAuthn\PublicKeyCredentialSourceRepository;
 use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -29,10 +27,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use R\DB\Schema;
 use Ramsey\Uuid\Uuid;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\Yaml\Yaml;
-use TheCodingMachine\GraphQLite\SchemaFactory;
 use Webauthn\PublicKeyCredentialRpEntity;
 
 class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, RequestHandlerInterface
@@ -767,28 +762,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         );
 
         return $rpEntity;
-    }
-
-    public function getWebAuthnServer()
-    {
-        $id = null;
-        $name = $_SERVER["SERVER_NAME"];
-        if ($name == "0.0.0.0") {
-            $name = "localhost";
-            $id = "localhost";
-        } else {
-            $name = $_SERVER["SERVER_NAME"];
-            if (!$_ENV["RP_ID"]) {
-                throw new Exception("RP_ID is not set in .env file");
-            }
-        }
-
-
-        $rp = new PublicKeyCredentialRpEntity($name, $id);
-        $source = new PublicKeyCredentialSourceRepository();
-        $server = new \Webauthn\Server($rp, $source);
-        $server->setSecuredRelyingPartyId(["localhost"]);
-        return $server;
     }
 
     public function getDrive(int $index)

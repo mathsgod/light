@@ -394,7 +394,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         }
 
         $finder = new ComposerFinder();
-        foreach ($finder->inNamespace("Controller") as $className => $reflector) {
+        foreach ($finder->inNamespace("Controller") as $class => $reflector) {
             $reflector = new \ReflectionClass($class);
             foreach ($reflector->getMethods() as $method) {
                 foreach ($method->getAttributes("TheCodingMachine\GraphQLite\Annotations\Right") as $attr) {
@@ -402,7 +402,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                 }
             }
         }
-        foreach ($finder->inNamespace("Model") as $className => $reflector) {
+        foreach ($finder->inNamespace("Model") as $class => $reflector) {
             $reflector = new \ReflectionClass($class);
             foreach ($reflector->getMethods() as $method) {
                 foreach ($method->getAttributes("TheCodingMachine\GraphQLite\Annotations\Right") as $attr) {

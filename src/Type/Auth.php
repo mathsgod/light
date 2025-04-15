@@ -72,27 +72,8 @@ class Auth
     /**
      * @return mixed
      */
-    public function getWebAuthnRequestOptions(string $username, #[Autowire] App $app)
+    public function getWebAuthnRequestOptions(#[Autowire] App $app)
     {
-
-        /*      $source = new PublicKeyCredentialSourceRepository();
-        if (!$user = User::Get(["username" => $username])) {
-            throw new \Exception("Invalid user");
-        }
-
-        $userEntity = new PublicKeyCredentialUserEntity($user->username, $user->user_id, $user->getName());
- */
-        // Get the list of authenticators associated to the user
-        //$registeredAuthenticators  = $source->findAllForUserEntity($userEntity);
-
-        // Convert the Credential Sources into Public Key Credential Descriptors
-        /*         $allowedCredentials = array_map(
-            static function (PublicKeyCredentialSource $credential) {
-                return $credential->getPublicKeyCredentialDescriptor();
-            },
-            $registeredAuthenticators
-        );
- */
 
         $challenge = random_bytes(32);
         $publicKeyCredentialRequestOptions = PublicKeyCredentialRequestOptions::create(
@@ -104,8 +85,6 @@ class Auth
 
         $cache = $app->getCache();
         $cache->set("webauthn_request", serialize($publicKeyCredentialRequestOptions), 60 * 5);
-        //$cache->set("webauthn_request_" . $user->user_id, serialize($publicKeyCredentialRequestOptions), 60 * 5);
-        //$cache->set("webauthn_request_" . base64_encode($challenge), serialize($publicKeyCredentialRequestOptions), 60 * 5);
 
         return $publicKeyCredentialRequestOptions->jsonSerialize();
     }

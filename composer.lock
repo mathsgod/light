@@ -2271,16 +2271,16 @@
         },
         {
             "name": "mathsgod/light-server",
-            "version": "1.0.3",
+            "version": "1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mathsgod/light-server.git",
-                "reference": "0942d0ffc582335c2bec9c8fc6f84340404dd612"
+                "reference": "9b9e4454df2fdd425eff07f30fd5913f4a8b2981"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mathsgod/light-server/zipball/0942d0ffc582335c2bec9c8fc6f84340404dd612",
-                "reference": "0942d0ffc582335c2bec9c8fc6f84340404dd612",
+                "url": "https://api.github.com/repos/mathsgod/light-server/zipball/9b9e4454df2fdd425eff07f30fd5913f4a8b2981",
+                "reference": "9b9e4454df2fdd425eff07f30fd5913f4a8b2981",
                 "shasum": ""
             },
             "require": {
@@ -2308,9 +2308,9 @@
             ],
             "support": {
                 "issues": "https://github.com/mathsgod/light-server/issues",
-                "source": "https://github.com/mathsgod/light-server/tree/1.0.3"
+                "source": "https://github.com/mathsgod/light-server/tree/1.0.4"
             },
-            "time": "2025-03-28T04:37:09+00:00"
+            "time": "2025-04-15T04:30:59+00:00"
         },
         {
             "name": "mathsgod/r-db",

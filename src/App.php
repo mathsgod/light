@@ -743,21 +743,16 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function getRpEntity()
     {
-        $id = null;
         $name = $_SERVER["SERVER_NAME"];
         if ($name == "0.0.0.0") {
             $name = "localhost";
-            $id = "localhost";
         } else {
             $name = $_SERVER["SERVER_NAME"];
-            if (!$_ENV["RP_ID"]) {
-                throw new Exception("RP_ID is not set in .env file");
-            }
         }
 
         $rpEntity = PublicKeyCredentialRpEntity::create(
             $name, //Name
-            $id,              //ID
+            $this->getRpId(),              //ID
             null                            //Icon
         );
 

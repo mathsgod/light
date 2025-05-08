@@ -89,7 +89,7 @@ class UserController
 
     #[Mutation]
     #[Logged]
-    public function updatePassword(string $old_password, string $new_password, #[InjectUser] User $user): bool
+    public function changeUserPassword(string $old_password, string $new_password, #[InjectUser] User $user): bool
     {
         if (!password_verify($old_password, $user->password)) {
             return false;

@@ -4,6 +4,8 @@ namespace Light\Controller;
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use GraphQL\Error\Error;
 
 use Light\App;
@@ -479,43 +481,52 @@ class AuthController
     }
 
     #[Mutation]
-    public function forgetPasswordVerifyCode(#[Autowire] App $app, string $username, string $code): bool
+    public function forgetPasswordVerifyCode(#[Autowire] App $app, string $jwt, string $code): bool
     {
-        $user = User::Get(["username" => $username]);
-        if (!$user) {
+        try {
+            $payload = JWT::decode($jwt, new Key($_ENV['JWT_SECRET'], 'HS256'));
+        } catch (\Exception $e) {
             return false;
         }
 
+        // 限制每個 code 最多 5 次驗證
+        $cacheKey = 'reset_code_attempt_' . $payload->code_hash;
         $cache = $app->getCache();
-        if ($cache->has("forget_password_" . $user->user_id)) {
-            $cache_code = $cache->get("forget_password_" . $user->user_id);
-            if ($cache_code == $code) {
-                return true;
-            }
+
+        $attempts = $cache->get($cacheKey) ?? 0;
+        if ($attempts >= 5) {
+            return false; // 超過次數
         }
+        $cache->set($cacheKey, $attempts + 1, 600); // 10分鐘過期
 
-
-        //remove cache
-        $cache->delete("forget_password_" . $user->user_id);
-
-        return false;
+        return ($payload->code_hash == hash('sha256', $code . $_ENV['JWT_SECRET']));
     }
 
     #[Mutation]
-    public function resetPassword(#[Autowire] App $app, string $username, string $password, string $code): bool
+    public function resetPassword(#[Autowire] App $app, string $jwt,  string $password, string $code): bool
     {
-        $user = User::Get(["username" => $username]);
+        try {
+            $payload = JWT::decode($jwt, new Key($_ENV['JWT_SECRET'], 'HS256'));
+        } catch (\Exception $e) {
+            throw new Error("Code is expired or not valid");
+        }
+
+        //verify code
+        if ($payload->type != "reset_password") {
+            throw new Error("Code is expired or not valid");
+        }
+
+        if ($this->forgetPasswordVerifyCode($app, $jwt, $code) == false) {
+            throw new Error("Code is expired or not valid");
+        }
+
+
+        $user = User::Get($payload->user_id);
         if (!$user) {
             throw new Error("User not found");
         }
 
-        $cache = $app->getCache();
-        if (!$cache->has("forget_password_" . $user->user_id)) {
-            throw new Error("Code is expired or not valid");
-        }
-
-        $cache_code = $cache->get("forget_password_" . $user->user_id);
-        if ($cache_code != $code) {
+        if ($payload->code_hash != hash('sha256', $code . $_ENV['JWT_SECRET'])) {
             throw new Error("Code is expired or not valid");
         }
 
@@ -530,55 +541,47 @@ class AuthController
             "user_id" => $user->user_id
         ]);
 
-        //remove cache
-        $cache->delete("forget_password_" . $user->user_id);
         return true;
     }
 
     #[Mutation]
-    public function forgetPassword(#[Autowire] App $app, string $username, string $email): bool
+    public function forgetPassword(#[Autowire] App $app, string $username, string $email): string
     {
-
-        //check if email exists
         if (!$user = User::Get([
             "username" => $username,
             "email" => $email
         ])) {
-            return true;
-        }
-
-        $cache = $app->getCache();
-
-        // check if code is already sent to user
-        if ($cache->has("forget_password_limit_" . $user->user_id)) {
-            throw new Error("OTP code is already sent to your email, please check your email.");
+            return "";
         }
 
         $code = rand(100000, 999999);
 
-
-        //generate a email to send code to user
+        // send email
         $mailer = $app->getMailer();
         $mailer->addAddress($email);
-
         $mailer->Subject = Config::Value("forget_password_email_subject", "Password Reset Code");
-
         $template = Config::Value("forget_password_email_template", "Your password reset code is: {code}");
         $mailer->msgHTML(str_replace("{code}", $code, $template));
-
         try {
             $mailer->send();
         } catch (\Exception $e) {
             throw new Error($e->getMessage());
         }
 
+        // hash code
+        $code_hash = hash('sha256', $code . $_ENV['JWT_SECRET']);
 
-        //10 minutes
-        $cache->set("forget_password_" . $user->user_id, $code, 600);
+        // 產生 JWT
+        $payload = [
+            'user_id' => $user->user_id,
+            'code_hash' => $code_hash,
+            'exp' => time() + 600, // 10分鐘
+            'iat' => time(), // JWT 發行時間
+            'type' => 'reset_password'
+        ];
+        $jwt = JWT::encode($payload, $_ENV['JWT_SECRET'], 'HS256');
 
-        $cache->set("forget_password_limit_" . $user->user_id, 1, 600);
-
-
-        return true;
+        // 前端收到 jwt，之後 resetPassword/verifyCode 時一齊傳返 server
+        return $jwt;
     }
 }

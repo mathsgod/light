@@ -27,7 +27,7 @@ class Schema
     {
         $db = $app->getDatabase();
         $result = $db->query("SHOW FULL PROCESSLIST");
-        return $result->fetchAll();
+        return  iterator_to_array($result->execute());
     }
 
 
@@ -37,7 +37,7 @@ class Schema
     public function getTables(#[Autowire] App $app)
     {
         $db = $app->getDatabase();
-        $result = $db->query("SHOW TABLE STATUS")->fetchAll();
+        $result = $db->query("SHOW TABLE STATUS")->execute();
 
         $data = [];
         foreach ($result as $row) {
@@ -52,7 +52,7 @@ class Schema
     public function getVersion(#[Autowire] App $app): string
     {
         $db = $app->getDatabase();
-        $result = $db->query("SELECT VERSION()")->fetchAll();
+        $result = iterator_to_array($db->query("SELECT VERSION()")->execute());
         return $result[0]["VERSION()"];
     }
 
@@ -61,8 +61,7 @@ class Schema
     public function getTableStatus(#[Autowire] App $app)
     {
         $db = $app->getDatabase();
-        $result = $db->query("SHOW TABLE STATUS")->fetchAll();
-        return $result;
+        return  iterator_to_array($db->query("SHOW TABLE STATUS")->execute());
     }
 
     #[Field(outputType: "mixed")]
@@ -74,10 +73,20 @@ class Schema
         $data = [];
         foreach ($tables as $table) {
 
-            $name = $table->getName();
+            $name = $table->getTable();
             $data[] = [
                 "name" => $name,
-                "columns" => $table->getColumns()
+                "columns" => $table->columns()->map(function (\Laminas\Db\Metadata\Object\ColumnObject $column) {
+                    return [
+                        "name" => $column->getName(),
+                        "type" => $column->getDataType(),
+                        "default" => $column->getColumnDefault(),
+                        "null" => $column->isNullable(),
+                        "length" => $column->getCharacterMaximumLength(),
+                        //"key" => $column->getC
+                        "extra" => $column->getErratas()
+                    ];
+                }),
             ];
         }
         return $data;

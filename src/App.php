@@ -183,7 +183,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function getDatabase()
     {
-        return Schema::Create();
+        return \Light\Db\Adapter::Create();
     }
 
     public function getCache()

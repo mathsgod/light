@@ -9,12 +9,11 @@ use Light\Code\ClassGenerator;
 use Light\Code\MethodGenerator;
 use Light\Code\ParameterGenerator;
 
-use function R\DB\Q;
-
 require_once $_composer_autoload_path ?? __DIR__ . "/../vendor/autoload.php";
 
 $cwd = getcwd();
 
+$adapter = \Light\Db\Adapter::Create();
 
 $command = isset($argv[1]) ? $argv[1] : null;
 
@@ -50,7 +49,7 @@ if ($command == "make:controller") {
 
     // list
     $method = new MethodGenerator("list$name");
-    $method->setReturnType("R\DB\Query");
+    $method->setReturnType("Light\Db\Query");
     $method->addAttribute("#[Query]");
     $method->addAttribute("#[Logged]");
 
@@ -186,9 +185,13 @@ if ($command == "make:model") {
         $class->addPropertyFromGenerator($p);
     }
 
-    foreach (Q($org_name)->getFields() as $field) {
-        $type = $field->getType();
-        $type = explode("(", $type)[0];
+
+
+    foreach ($adapter->getTable($org_name)->columns() as $field) {
+        /**
+         * @var \Laminas\Db\Metadata\Object\ColumnObject $field
+         */
+        $type = $field->getDataType();
         switch ($type) {
             case "timestamp":
             case "int unsigned":
@@ -255,10 +258,27 @@ if ($command == "make:input") {
     $class->addAttribute("#[Input(name: \"Create${name}Input\", default: true)]");
     $class->addAttribute("#[Input(name: \"Update${name}Input\", update: true)]");
 
-    foreach (Q($org_name)->getFields() as $field) {
-        if ($field->isPrimary()) continue;
-        $type = $field->getType();
-        $type = explode("(", $type)[0];
+    $table = $adapter->getTable($org_name);
+    $keys = $table->getPrimaryKey();
+    foreach ($table->columns() as $field) {
+        /**
+         * @var \Laminas\Db\Metadata\Object\ColumnObject $field
+         */
+        if (in_array($field->getName(), $keys)) {
+            continue;
+        }
+
+        //skip created_time and updated_time , created_by and updated_by
+        if (in_array($field->getName(), ['created_time', 'updated_time', 'created_by', 'updated_by'])) {
+            continue;
+        }
+
+        
+
+        
+
+        $type = $field->getDataType();
+
         switch ($type) {
             case "int":
                 $php_type = "int";
@@ -272,6 +292,9 @@ if ($command == "make:input") {
                 break;
             case "tinyint":
                 $php_type = "bool";
+                break;
+            case "json":
+                $php_type = "string";
                 break;
             default:
                 $php_type = "string";
@@ -301,11 +324,12 @@ if ($command == "make:ts") {
     }
 
     $str = "export default {\n";
+    
 
-    foreach (Q($org_name)->getFields() as $field) {
+    foreach ( $adapter->getTable($org_name)->columns() as $field) {
         $name = $field->getName();
-        $type = $field->getType();
-        $type = explode("(", $type)[0];
+        $type = $field->getDataType();
+     
 
         //from snake_case to CamelCase
         $label = str_replace('_', ' ', $name);

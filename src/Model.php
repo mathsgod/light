@@ -2,6 +2,8 @@
 
 namespace Light;
 
+use ArrayObject;
+use Light\Db\Proxy;
 use Light\Model\EventLog;
 use Light\Model\Revision;
 use Light\Model\User;
@@ -13,6 +15,13 @@ abstract class Model extends \Light\Db\Model
 {
 
     static $container;
+
+    public function __fields()
+    {
+        return self::_table()->columns()->map(function ($column) {
+            return $column->getName();
+        })->toArray();
+    }
 
     public function bind($data)
     {
@@ -130,6 +139,21 @@ abstract class Model extends \Light\Db\Model
         return parent::delete();
     }
 
+    function jsonSerialize()
+    {
+        $data = [];
+        foreach ($this->__fields() as $field) {
+            
+            $data[$field] = $this->{$field};
+            if ($data[$field] instanceof ArrayObject) {
+                $data[$field] = $data[$field]->getArrayCopy();
+            }
+        }
+
+
+        return $data;
+    }
+
     public function save()
     {
         $user_id = null;
@@ -162,14 +186,13 @@ abstract class Model extends \Light\Db\Model
             $source = static::get($this->$key);
             if ($source) {
 
-
                 //filter out blob fields
                 $attributes = $this->__attributes();
 
                 foreach ($attributes as $attribute) {
 
-                    if ($attribute["Type"] == "longblob" || $attribute["Type"] == "mediumblob" || $attribute["Type"] == "tinyblob") {
-                        $field = $attribute["Field"];
+                    if ($attribute->getDataType() == "longblob" || $attribute->getDataType() == "mediumblob" || $attribute->getDataType() == "tinyblob") {
+                        $field = $attribute->getName();
                         $source->$field = null;
                     }
                 }
@@ -192,8 +215,8 @@ abstract class Model extends \Light\Db\Model
             $target = $this->jsonSerialize();
 
             foreach ($attributes as $attribute) {
-                if ($attribute["Type"] == "longblob" || $attribute["Type"] == "mediumblob" || $attribute["Type"] == "tinyblob") {
-                    $field = $attribute["Field"];
+                if ($attribute->getDataType() == "longblob" || $attribute->getDataType() == "mediumblob" || $attribute->getDataType() == "tinyblob") {
+                    $field = $attribute->getName();
                     unset($target[$field]);
                 }
             }

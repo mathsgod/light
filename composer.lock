@@ -1948,12 +1948,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/mathsgod/light-db.git",
-                "reference": "941012d7ed5bcb7aa4aae84f2d0fccb48bf9a028"
+                "reference": "2858ce78d4ba5b6abad418ce8870806bd29d1f22"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mathsgod/light-db/zipball/941012d7ed5bcb7aa4aae84f2d0fccb48bf9a028",
-                "reference": "941012d7ed5bcb7aa4aae84f2d0fccb48bf9a028",
+                "url": "https://api.github.com/repos/mathsgod/light-db/zipball/2858ce78d4ba5b6abad418ce8870806bd29d1f22",
+                "reference": "2858ce78d4ba5b6abad418ce8870806bd29d1f22",
                 "shasum": ""
             },
             "require": {
@@ -1989,7 +1989,7 @@
                 "issues": "https://github.com/mathsgod/light-db/issues",
                 "source": "https://github.com/mathsgod/light-db/tree/main"
             },
-            "time": "2025-05-15T04:53:54+00:00"
+            "time": "2025-05-15T10:04:00+00:00"
         },
         {
             "name": "mathsgod/light-db-graphqlite-mappers",

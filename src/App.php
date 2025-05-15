@@ -92,7 +92,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             new \League\Container\ReflectionContainer()
         );
  */
-        Model::GetSchema()->setContainer($this->container);
+        Model::SetContainer($this->container);
         $defaultLifetime = 0;
         $debug = true;
         try {
@@ -115,7 +115,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->cache = $gql->getCache();
         $this->factory = $gql->getSchemaFactory();
         $this->factory->addNamespace("Light");
-        $this->factory->addTypeMapperFactory(new \R\DB\GraphQLite\Mappers\TypeMapperFactory);
+        $this->factory->addTypeMapperFactory(new \Light\Db\GraphQLite\Mappers\TypeMapperFactory);
 
         $this->rbac = new Rbac();
         $this->loadRbac();
@@ -617,7 +617,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     public function hasFavorite(): bool
     {
 
-        $result = MyFavorite::GetSchema()->query("Show tables like 'MyFavorite'")->fetchAll();
+        $result =  iterator_to_array(MyFavorite::GetAdapter()->query("Show tables like 'MyFavorite'")->execute());
         if (count($result) == 0) return false;
         return true;
     }

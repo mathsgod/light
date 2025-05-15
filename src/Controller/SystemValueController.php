@@ -20,7 +20,7 @@ class SystemValueController
      * @deprecated use { app { listSystemvalues }}
      */
     #[Right('systemvalue.list')]
-    public function listSystemValue(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
+    public function listSystemValue(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \Light\Db\Query
     {
         return SystemValue::Query()->filters($filters)->sort($sort);
     }

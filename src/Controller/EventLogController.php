@@ -20,7 +20,7 @@ class EventLogController
      * @deprecated use app.eventLogs instead
      */
     #[Right("eventlog.list")]
-    public function listEventLog(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
+    public function listEventLog(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \Light\Db\Query
     {
         return EventLog::Query()->filters($filters)->sort($sort);
     }

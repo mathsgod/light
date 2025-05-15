@@ -58,7 +58,7 @@ class PermissionController
      * @deprecated use { app { permissions }}
      */
     #[Right("permission.list")]
-    public function listPermission(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
+    public function listPermission(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \Light\Db\Query
     {
         return Permission::Query()->filters($filters)->sort($sort);
     }

@@ -20,7 +20,7 @@ class ConfigController
      * @param ?mixed $filters
      * @deprecated use { app { configs }}
      */
-    public function listConfig(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = '',): \R\DB\Query
+    public function listConfig(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = '',): \Light\Db\Query
     {
         return Config::Query()->filters($filters)->sort($sort);
     }

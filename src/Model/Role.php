@@ -3,7 +3,6 @@
 namespace Light\Model;
 
 use Light\Rbac\Role as RbacRole;
-use R\DB\Model;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -12,7 +11,7 @@ use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type]
-class Role extends Model
+class Role extends \Light\Db\Model
 {
 
 
@@ -70,7 +69,7 @@ class Role extends Model
 
     public static function LoadByRole(RbacRole $role): ?Role
     {
-        $r = new Role();
+        $r = Role::Create();
         $r->setRole($role);
         return $r;
     }

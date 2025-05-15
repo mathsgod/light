@@ -9,8 +9,10 @@ use Light\Rbac\Rbac;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 
-abstract class Model extends \R\DB\Model
+abstract class Model extends \Light\Db\Model
 {
+
+    static $container;
 
     public function bind($data)
     {
@@ -63,6 +65,11 @@ abstract class Model extends \R\DB\Model
         return true;
     }
 
+    public static function SetContainer($container)
+    {
+        self::$container = $container;
+    }
+
     #[Field]
     public function canUpdate(#[InjectUser] ?User $by): bool
     {
@@ -98,12 +105,13 @@ abstract class Model extends \R\DB\Model
         return true;
     }
 
+
     public function delete()
     {
         $key = $this->_key();
 
         $user_id = null;
-        if ($container = self::GetSchema()->getContainer()) {
+        if ($container = self::$container) {
             if ($service = $container->get(Auth\Service::class)) {
                 $user_id = $service->getUser()?->user_id;
             }
@@ -125,7 +133,7 @@ abstract class Model extends \R\DB\Model
     public function save()
     {
         $user_id = null;
-        if ($container = self::GetSchema()->getContainer()) {
+        if ($container = self::$container) {
             if ($service = $container->get(Auth\Service::class)) {
                 $user_id = $service->getUser()?->user_id;
             }

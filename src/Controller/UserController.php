@@ -8,7 +8,7 @@ use Light\Model\User;
 use Light\Model\UserRole;
 use Psr\Http\Message\ServerRequestInterface;
 use TheCodingMachine\GraphQLite\Annotations\Query;
-use R\DB\Query as DBQuery;
+use \Light\Db\Query as DBQuery;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\HideIfUnauthorized;

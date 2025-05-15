@@ -16,7 +16,7 @@ class Config extends \Light\Model
     {
         $config = self::Get(["name" => $name]);
         if ($config) {
-            return $config->value ?? ($default ?? "");
+            return $config->value;
         }
         return $default;
     }

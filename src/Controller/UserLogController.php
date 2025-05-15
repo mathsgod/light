@@ -20,7 +20,7 @@ class UserLogController
      * @deprecated use { app { userlogs }}
      */
     #[Right("userlog.list")]
-    public function listUserLog(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \R\DB\Query
+    public function listUserLog(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \Light\Db\Query
     {
         return UserLog::Query()->filters($filters)->sort($sort);
     }

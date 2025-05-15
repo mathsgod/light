@@ -298,7 +298,7 @@ class User extends \Light\Model
      * @return UserLog[]
      * @param ?mixed $filters
      */
-    public function getUserLog($filters = [],  ?string $sort = ''): \R\DB\Query
+    public function getUserLog($filters = [],  ?string $sort = ''): \Light\Db\Query
     {
         return UserLog::Query(["user_id" => $this->user_id])->filters($filters)->sort($sort);
     }
@@ -308,7 +308,7 @@ class User extends \Light\Model
      * @return EventLog[]
      * @param ?mixed $filters
      */
-    public function getEventLog($filters = [],  ?string $sort = ''): \R\DB\Query
+    public function getEventLog($filters = [],  ?string $sort = ''): \Light\Db\Query
     {
         return EventLog::Query(["user_id" => $this->user_id])->filters($filters)->sort($sort);
     }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6cccdf698b124abd7f36345faea07478",
+    "content-hash": "ee18514bf95427bf3fdaaa983de1eb33",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1944,16 +1944,16 @@
         },
         {
             "name": "mathsgod/light-db",
-            "version": "dev-main",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mathsgod/light-db.git",
-                "reference": "f129508f4a6b63e493a8e28c247c9c0741040ac6"
+                "reference": "b8c1c63c710ad71fd71da2d4da2030536baa9192"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mathsgod/light-db/zipball/f129508f4a6b63e493a8e28c247c9c0741040ac6",
-                "reference": "f129508f4a6b63e493a8e28c247c9c0741040ac6",
+                "url": "https://api.github.com/repos/mathsgod/light-db/zipball/b8c1c63c710ad71fd71da2d4da2030536baa9192",
+                "reference": "b8c1c63c710ad71fd71da2d4da2030536baa9192",
                 "shasum": ""
             },
             "require": {
@@ -1968,7 +1968,6 @@
                 "phpstan/phpstan": "^2.0",
                 "phpunit/phpunit": "^10.5"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -1987,9 +1986,9 @@
             ],
             "support": {
                 "issues": "https://github.com/mathsgod/light-db/issues",
-                "source": "https://github.com/mathsgod/light-db/tree/main"
+                "source": "https://github.com/mathsgod/light-db/tree/1.0.0"
             },
-            "time": "2025-05-16T05:08:18+00:00"
+            "time": "2025-05-16T08:35:12+00:00"
         },
         {
             "name": "mathsgod/light-db-graphqlite-mappers",
@@ -7119,9 +7118,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "mathsgod/light-db": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

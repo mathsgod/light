@@ -1,8 +1,10 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/mathsgod/light)
+
 # light
 
 ## Database setup
 
-config are based on [mathsgod/r-db](https://github.com/mathsgod/r-db)
+config are based on [mathsgod/light-db](https://github.com/mathsgod/light-db)
 
 .env
 ```ini

@@ -39,7 +39,8 @@ class CustomFieldController
 
         )";
 
-        return $app->getDatabase()->exec($sql) ?? false;
+        $app->getDatabase()->query($sql,"execute");
+        return true;
     }
 
 

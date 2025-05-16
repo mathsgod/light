@@ -55,5 +55,8 @@
             "php-http/discovery": true,
             "tbachert/spi": true
         }
+    },
+    "scripts": {
+        "test": "phpunit tests --verbose"
     }
 }

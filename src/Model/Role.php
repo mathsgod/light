@@ -67,7 +67,7 @@ class Role extends \Light\Db\Model
         $this->_role = $role;
     }
 
-    public static function LoadByRole(RbacRole $role): ?Role
+    public static function LoadByRole(RbacRole $role)
     {
         $r = Role::Create();
         $r->setRole($role);

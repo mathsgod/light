@@ -26,7 +26,7 @@ class DatabaseController
     {
         $db = $app->getDatabase();
         try {
-            $db->exec("TRUNCATE TABLE $table");
+            $db->getTable($table)->truncate();
         } catch (Exception $e) {
             throw new Error($e->getMessage());
         }
@@ -39,7 +39,7 @@ class DatabaseController
     {
         $db = $app->getDatabase();
         try {
-            $db->exec("DROP TABLE $table");
+            $db->removeTable($table);
         } catch (Exception $e) {
             throw new Error($e->getMessage());
         }
@@ -53,7 +53,7 @@ class DatabaseController
     {
         $db = $app->getDatabase();
         try {
-            $db->exec("ALTER TABLE $table ADD $field $type($length) DEFAULT '$default' " . ($nullable ? "NULL" : "NOT NULL") . " " . ($autoincrement ? "AUTO_INCREMENT" : ""));
+            $db->query("ALTER TABLE $table ADD $field $type($length) DEFAULT '$default' " . ($nullable ? "NULL" : "NOT NULL") . " " . ($autoincrement ? "AUTO_INCREMENT" : ""), $db::QUERY_MODE_EXECUTE);
         } catch (Exception $e) {
             throw new Error($e->getMessage());
         }
@@ -71,7 +71,7 @@ class DatabaseController
         $db = $app->getDatabase();
         foreach ($fields as $field) {
             try {
-                $db->exec("ALTER TABLE $table DROP COLUMN $field");
+                $db->query("ALTER TABLE $table DROP COLUMN $field", $db::QUERY_MODE_EXECUTE);
             } catch (Exception $e) {
                 throw new Error($e->getMessage());
             }
@@ -115,7 +115,8 @@ class DatabaseController
         }
 
         try {
-            $db->exec($t->getSqlString($db->getAdapter()->getPlatform()));
+            $db->query($t->getSqlString($db->getPlatform()), $db::QUERY_MODE_EXECUTE);
+        
         } catch (\Exception $e) {
             throw new Error($e->getMessage());
         }

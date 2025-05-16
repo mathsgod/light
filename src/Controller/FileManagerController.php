@@ -74,7 +74,7 @@ class FileManagerController
     /**
      * @deprecated use app { drive { file } }
      */
-    public function fsFile(string $path): File
+    public function fsFile(string $path): ?File
     {
 
         $list = $this->drive->getFilesystem()->listContents(dirname($path), false);

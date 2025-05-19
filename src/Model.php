@@ -139,21 +139,6 @@ abstract class Model extends \Light\Db\Model
         return parent::delete();
     }
 
-    function jsonSerialize()
-    {
-        $data = [];
-        foreach ($this->__fields() as $field) {
-            
-            $data[$field] = $this->{$field};
-            if ($data[$field] instanceof ArrayObject) {
-                $data[$field] = $data[$field]->getArrayCopy();
-            }
-        }
-
-
-        return $data;
-    }
-
     public function save()
     {
         $user_id = null;

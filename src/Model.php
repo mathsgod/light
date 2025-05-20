@@ -37,9 +37,9 @@ abstract class Model extends \Light\Db\Model
     }
 
 
-    #[Field] public function createdTime(): string
+    #[Field] public function createdTime(): ?string
     {
-        return $this->created_time ?? "";
+        return $this->created_time;
     }
 
     #[Field] public function createdBy(): string
@@ -52,9 +52,9 @@ abstract class Model extends \Light\Db\Model
         return "";
     }
 
-    #[Field] public function updatedTime(): string
+    #[Field] public function updatedTime(): ?string
     {
-        return $this->updated_time ?? "";
+        return $this->updated_time;
     }
 
     #[Field] public function updatedBy(): string

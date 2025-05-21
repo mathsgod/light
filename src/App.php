@@ -536,10 +536,11 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function execute(ServerRequestInterface $request)
     {
-        $body = json_decode($request->getBody()->getContents(), true);
+        $uploadMiddleware = new UploadMiddleware();
+        $request = $uploadMiddleware->processRequest($request);
 
-
-        $query = $body["query"];
+        $body=$request->getParsedBody();
+        $query = $body["query"] ?? null;
         $variableValues = $body["variables"] ?? null;
 
         $schema = $this->factory->createSchema();

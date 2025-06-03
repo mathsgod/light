@@ -89,7 +89,20 @@ class SystemController
         ];
         $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
         //set cookie
-        setcookie("access_token", $token, time() + $access_token_expire, "/", "", true, true);
+        // setcookie("access_token", $token, time() + $access_token_expire, "/", "", true, true);
+        $samesite = $_ENV["COOKIE_SAMESITE"] ?? "Lax";
+        if ($_SERVER["HTTPS"] == "on" && $_ENV["COOKIE_PARTITIONED"] == "true") {
+            $samesite .= ";Partitioned";
+        }
+        //set cookie
+        setcookie("access_token", $token, [
+            "expires" => time() + $access_token_expire,
+            "path" => "/",
+            "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
+            "secure" => $_ENV["COOKIE_SECURE"] ?? false,
+            "httponly" => true,
+            "samesite" => $samesite
+        ]);
         return true;
     }
 

@@ -113,7 +113,7 @@ class UserController
     public function addUser(InputUser $data, #[InjectUser] \Light\Model\User $user): int
     {
 
-        $user = new User();
+        $user = User::Create();
         $user->bind($data);
 
         if (!$user->join_date) {

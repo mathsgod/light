@@ -13,7 +13,9 @@ use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 
 abstract class Model extends \Light\Db\Model
 {
-
+    public static $_log_insert = true;
+    public static $_log_delete = true;
+    public static $_log_update = true;
     static $container;
 
     public function __fields()
@@ -216,16 +218,22 @@ abstract class Model extends \Light\Db\Model
 
         $result = parent::save();
 
-        EventLog::_table()->insert([
-            "class" => static::class,
-            "id" => $this->$key,
-            "action" => $action,
-            "source" => $source,
-            "target" => $target,
-            "user_id" => $user_id,
-            "created_time" => date("Y-m-d H:i:s"),
-        ]);
+        if (
+            static::$_log_insert && $action == "Insert"
+            || static::$_log_update && $action == "Update"
+            || static::$_log_delete && $action == "Delete"
+        ) {
 
+            EventLog::_table()->insert([
+                "class" => static::class,
+                "id" => $this->$key,
+                "action" => $action,
+                "source" => $source,
+                "target" => $target,
+                "user_id" => $user_id,
+                "created_time" => date("Y-m-d H:i:s"),
+            ]);
+        }
         return $result;
     }
 }

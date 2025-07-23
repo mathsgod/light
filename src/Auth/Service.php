@@ -32,8 +32,17 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
         $cache = $this->app->getCache();
 
         $cookies = $request->getCookieParams();
-        if ($this->token = $cookies["access_token"]) {
 
+        //get Bearer token from Authorization header
+        if ($authHeader = $request->getHeaderLine("Authorization")) {
+            if (preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+                $token = $matches[1];
+            }
+        }
+
+        $this->token = $token ?? $cookies["access_token"] ?? null;
+
+        if ($this->token) {
 
             try {
                 $payload = JWT::decode($this->token, new Key($_ENV["JWT_SECRET"], "HS256"));

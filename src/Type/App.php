@@ -182,11 +182,10 @@ class App
                 $menu["icon"] = "sym_o_circle";
             }
 
-            if($menu["to"]=="/CustomField"){
-                if(!Config::Value("custom_field_models")){
+            if ($menu["to"] == "/CustomField") {
+                if (!Config::Value("custom_field_models")) {
                     continue;
                 }
-
             }
 
 
@@ -383,7 +382,15 @@ class App
     #[Right("eventlog.list")]
     public function listEventLog($filters = [],  ?string $sort = ''): \Light\Db\Query
     {
-        return EventLog::Query()->filters($filters)->sort($sort);
+
+        $q = EventLog::Query();
+
+        if ($filters["username"]["contains"]) {
+            $q->where->expression("user_id IN (SELECT user_id FROM User WHERE username LIKE ?)", ["%" . $filters["username"]["contains"] . "%"]);
+            unset($filters["username"]);
+        }
+
+        return $q->filters($filters)->sort($sort);
     }
 
     #[Field]

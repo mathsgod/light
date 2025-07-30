@@ -2,6 +2,7 @@
 
 namespace Light\Controller;
 
+use Google\Service\AIPlatformNotebooks\Event;
 use Light\Model\EventLog;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -22,6 +23,7 @@ class EventLogController
     #[Right("eventlog.list")]
     public function listEventLog(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \Light\Db\Query
     {
-        return EventLog::Query()->filters($filters)->sort($sort);
+        $app = new \Light\Type\App($filters, $sort);
+        return $app->listEventLog($filters, $sort);
     }
 }

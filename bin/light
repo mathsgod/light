@@ -323,7 +323,10 @@ if ($command == "make:ts") {
         exit;
     }
 
-    $str = "export default {\n";
+    $str = "export default defineLightModel({\n
+\tname: \"{$org_name}\",\n
+\tfields: {\n
+    ";
     
 
     foreach ( $adapter->getTable($org_name)->columns() as $field) {
@@ -353,6 +356,8 @@ if ($command == "make:ts") {
     }
 
     $str .= "}\n";
+
+$str .= "});\n";
 
     echo $str;
     exit;

@@ -205,6 +205,15 @@ class App
                 }
 
                 foreach ($permission as $p) {
+
+                    if (substr($p, 0, 1) == "#") {
+                        if (in_array(substr($p, 1), $roles)) {
+                            $canAccess = true;
+                            break;
+                        }
+                    }
+
+
                     foreach ($roles as $role) {
                         if ($rbac->hasRole($role) && $rbac->getRole($role)->can($p)) {
                             $canAccess = true;

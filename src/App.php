@@ -28,6 +28,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use R\DB\Schema;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Yaml\Yaml;
+use TheCodingMachine\GraphQLite\Context\Context;
 use Webauthn\PublicKeyCredentialRpEntity;
 
 class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, RequestHandlerInterface
@@ -544,7 +545,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $variableValues = $body["variables"] ?? null;
 
         $schema = $this->factory->createSchema();
-        return  GraphQL::executeQuery($schema, $query, null, null, $variableValues);
+        return  GraphQL::executeQuery($schema, $query, null, new Context, $variableValues);
     }
 
     public function isDevMode(): bool

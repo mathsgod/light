@@ -18,16 +18,17 @@ class Mailer extends PHPMailer
 
     public function send()
     {
-        foreach ($this->to as $to) {
-            $l = new MailLog;
-            $l->subject = $this->Subject;
-            $l->from = $this->From;
-            $l->from_name = $this->FromName;
-            $l->to = $to[0];
-            $l->to_name = $to[1];
-            $l->body = $this->Body;
-            $l->altbody = $this->AltBody;
-            $l->host = $this->Host;
+       foreach ($this->to as $to) {
+            $l = MailLog::Create([
+                "subject"=> $this->Subject,
+                "from"=> $this->From,
+                "from_name"=> $this->FromName,
+                "to"=> $to[0],
+                "to_name"=> $to[1],
+                "body"=> $this->Body,
+                "altbody"=> $this->AltBody,
+                "host"=> $this->Host
+            ]);
             $l->save();
         }
 
@@ -51,7 +52,7 @@ class Mailer extends PHPMailer
                     "verify" => false
                 ]);
 
-                $resp = $client->post("https://raymond4.hostlink.com.hk/light/send_gmail.php", [
+                $resp = $client->post("https://raymond.hostlink.com.hk/light/send_gmail.php", [
                     "json" => $data
                 ]);
 

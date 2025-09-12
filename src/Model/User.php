@@ -97,7 +97,7 @@ class User extends \Light\Model
     public function getMyFavorites(#[Autowire] App $app)
     {
         if (!$app->hasFavorite()) return [];
-        return MyFavorite::Query(["user_id" => $this->user_id])->toArray();
+        return MyFavorite::Query(["user_id" => $this->user_id])->sort("sequence:asc")->toArray();
     }
 
     public function addMyFavorite(string $label, string $path)

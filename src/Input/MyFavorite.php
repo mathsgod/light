@@ -17,4 +17,7 @@ class MyFavorite
 
     #[Field]
     public ?string $icon;
+
+    #[Field]
+    public ?int $sequence;
 }

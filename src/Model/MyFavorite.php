@@ -11,7 +11,9 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "path", outputType: "String")]
 #[MagicField(name: "label", outputType: "String")]
 #[MagicField(name: "icon", outputType: "String")]
+#[MagicField(name: "sequence", outputType: "Int")]
+#[MagicField(name: "user_id", outputType: "Int")]
 
-class MyFavorite extends \Light\Model
-{
-}
+
+
+class MyFavorite extends \Light\Model {}

@@ -288,7 +288,7 @@ class AuthController
             throw new Error("Google login error");
         }
 
-        $user = User::Get(["gmail" => $payload["sub"], "status" => 0]);
+        $user = User::Get(["google" => $payload["sub"], "status" => 0]);
         if (!$user) {
             throw new Error("Google login error");
         }

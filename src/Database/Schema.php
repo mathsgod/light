@@ -4,6 +4,7 @@ namespace Light\Database;
 
 use Light\App;
 use Light\Database\Table;
+use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -45,6 +46,36 @@ class Schema
         }
 
         return $data;
+    }
+
+    #[Field]
+    #[Right("system.database.metadata")]
+    public function getType(#[Autowire] App $app): string
+    {
+        $db = $app->getDatabase();
+        $result = $db->query("SELECT @@version_comment as version_comment")->execute();
+        $data = iterator_to_array($result);
+        return (string)$data[0]["version_comment"];
+    }
+
+    #[Field]
+    #[Right("system.database.metadata")]
+    public function getSizeBytes(#[Autowire] App $app): int
+    {
+        $db = $app->getDatabase();
+        $result = $db->query("SELECT SUM(data_length + index_length) AS size FROM information_schema.TABLES WHERE table_schema = DATABASE()")->execute();
+        $data = iterator_to_array($result);
+        return (int)$data[0]["size"];
+    }
+
+    #[Field]
+    #[Right("system.database.metadata")]
+    public function getSize(#[Autowire] App $app): string
+    {
+        $bytes = $this->getSizeBytes($app);
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $power = $bytes > 0 ? floor(log($bytes, 1024)) : 0;
+        return number_format($bytes / (1024 ** $power), 2, '.', ',') . ' ' . $units[(int)$power];
     }
 
     #[Field]
@@ -109,5 +140,26 @@ class Schema
         exec($command, $output);
 
         return implode("\n", $output);
+    }
+
+
+    #[Field()]
+    #[Right("system.database.import")]
+    public function import(#[Autowire] App $app, UploadedFileInterface $file): bool
+    {
+
+        $username = $_ENV["DATABASE_USERNAME"];
+        $password = $_ENV["DATABASE_PASSWORD"];
+        $database = $_ENV["DATABASE_DATABASE"];
+        $host = $_ENV["DATABASE_HOSTNAME"];
+        $port = $_ENV["DATABASE_PORT"];
+
+        $command = "mysql -u $username -p$password --database $database --host $host --port $port < " . $file->getStream()->getMetadata("uri");
+
+        //exec
+        $output = [];
+        exec($command, $output);
+
+        return true;
     }
 }

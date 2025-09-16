@@ -4,6 +4,7 @@ namespace Light\Controller;
 
 use Exception;
 use Firebase\JWT\JWT;
+use Google\Service\MigrationCenterAPI\UploadFileInfo;
 use GraphQL\Error\Error;
 use Laminas\Db\Sql\Ddl\CreateTable;
 use Light\App;
@@ -16,6 +17,7 @@ use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use Laminas\Db\Sql\Ddl\Column;
+use Psr\Http\Message\UploadedFileInterface;
 
 class DatabaseController
 {
@@ -116,11 +118,29 @@ class DatabaseController
 
         try {
             $db->query($t->getSqlString($db->getPlatform()), $db::QUERY_MODE_EXECUTE);
-        
         } catch (\Exception $e) {
             throw new Error($e->getMessage());
         }
         return true;
     }
 
+    #[Mutation]
+    #[Right("system.database.import")]
+    public function restoreDatabase(#[Autowire] App $app, UploadedFileInterface $file): bool
+    {
+
+        $username = $_ENV["DATABASE_USERNAME"];
+        $password = $_ENV["DATABASE_PASSWORD"];
+        $database = $_ENV["DATABASE_DATABASE"];
+        $host = $_ENV["DATABASE_HOSTNAME"];
+        $port = $_ENV["DATABASE_PORT"];
+
+        $command = "mysql -u $username -p$password --database $database --host $host --port $port < " . $file->getStream()->getMetadata("uri");
+
+        //exec
+        $output = [];
+        exec($command, $output);
+
+        return true;
+    }
 }

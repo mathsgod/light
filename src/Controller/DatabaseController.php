@@ -125,7 +125,7 @@ class DatabaseController
     }
 
     #[Mutation]
-    #[Right("system.database.import")]
+    #[Right("system.database.restore")]
     public function restoreDatabase(#[Autowire] App $app, UploadedFileInterface $file): bool
     {
 

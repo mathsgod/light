@@ -102,9 +102,14 @@
               permission: system.database.table
 
             - label: Backup
-              icon: sym_o_database
+              icon: sym_o_cloud_download
               to: /System/database/backup
               permission: system.database.backup
+
+            - label: Restore
+              icon: sym_o_cloud_upload
+              to: /System/database/restore
+              permission: system.database.restore
 
             - label: Process
               icon: sym_o_memory

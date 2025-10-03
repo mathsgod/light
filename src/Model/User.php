@@ -48,6 +48,35 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class User extends \Light\Model
 {
 
+    #[Field]
+    public function isAllowedPath(string $path, #[Autowire] App $app): bool
+    {
+        if ($path == "/") return true;
+        $permissions = [];
+        foreach ($app->getFlatMenus() as $m) {
+            if ($m["path"] === $path) {
+                if ($m["permission"]) {
+                    $permissions = $m["permission"];
+                }
+            }
+        }
+
+        //if no permission is required, allow access
+        if (empty($permissions)) {
+            return true;
+        }
+
+        $rbac = $app->getRbac();
+        if ($user = $rbac->getUser($this->user_id)) {
+            foreach ($permissions as $permission) {
+                if ($user->can($permission)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * @return ?mixed
      */

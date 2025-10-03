@@ -30,6 +30,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
         /** @var \Light\App $app */
         $this->app = $request->getAttribute(\Light\App::class);
         $cache = $this->app->getCache();
+        
 
         $cookies = $request->getCookieParams();
 
@@ -46,9 +47,10 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
 
             try {
                 $payload = JWT::decode($this->token, new Key($_ENV["JWT_SECRET"], "HS256"));
+
                 $this->jti = $payload->jti;
 
-                if ($cache->get("logout_" . $payload->jti)) {
+                if ($cache->has("logout_" . $payload->jti)) {
                     return;
                 }
 
@@ -64,6 +66,8 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                         }
                     }
                 }
+
+                
 
 
                 if ($payload->view_as) {

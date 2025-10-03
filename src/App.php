@@ -170,6 +170,24 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         }
     }
 
+
+    public function getFlatMenus(): array
+    {
+        $result = [];
+        $stack = $this->menus;
+        while (count($stack) > 0) {
+            $item = array_shift($stack);
+            if ($item["children"]) {
+                foreach ($item["children"] as $child) {
+                    $stack[] = $child;
+                }
+            }
+            unset($item["children"]);
+            $result[] = $item;
+        }
+        return $result;
+    }
+
     public function getMenus()
     {
         return $this->menus;
@@ -540,7 +558,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $uploadMiddleware = new UploadMiddleware();
         $request = $uploadMiddleware->processRequest($request);
 
-        $body=$request->getParsedBody();
+        $body = $request->getParsedBody();
         $query = $body["query"] ?? null;
         $variableValues = $body["variables"] ?? null;
 

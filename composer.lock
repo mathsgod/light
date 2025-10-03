@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2ba3412f069d3379355a8c1765416e48",
+    "content-hash": "0a2c0ea4d281ab926bc5de59824a74d1",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1944,16 +1944,16 @@
         },
         {
             "name": "mathsgod/light-db",
-            "version": "1.0.4",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mathsgod/light-db.git",
-                "reference": "ad6d2592fb12459369c958404f3cc595bbe34a4f"
+                "reference": "a2c854e945a824af4abce5cb7f6f76824a3050f9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mathsgod/light-db/zipball/ad6d2592fb12459369c958404f3cc595bbe34a4f",
-                "reference": "ad6d2592fb12459369c958404f3cc595bbe34a4f",
+                "url": "https://api.github.com/repos/mathsgod/light-db/zipball/a2c854e945a824af4abce5cb7f6f76824a3050f9",
+                "reference": "a2c854e945a824af4abce5cb7f6f76824a3050f9",
                 "shasum": ""
             },
             "require": {
@@ -1986,9 +1986,9 @@
             ],
             "support": {
                 "issues": "https://github.com/mathsgod/light-db/issues",
-                "source": "https://github.com/mathsgod/light-db/tree/1.0.4"
+                "source": "https://github.com/mathsgod/light-db/tree/1.1.1"
             },
-            "time": "2025-07-24T04:58:58+00:00"
+            "time": "2025-09-19T04:47:38+00:00"
         },
         {
             "name": "mathsgod/light-db-graphqlite-mappers",

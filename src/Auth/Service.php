@@ -30,9 +30,9 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
         /** @var \Light\App $app */
         $this->app = $request->getAttribute(\Light\App::class);
         $cache = $this->app->getCache();
-        
 
         $cookies = $request->getCookieParams();
+
 
         //get Bearer token from Authorization header
         if ($authHeader = $request->getHeaderLine("Authorization")) {
@@ -47,28 +47,31 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
 
             try {
                 $payload = JWT::decode($this->token, new Key($_ENV["JWT_SECRET"], "HS256"));
-
-                $this->jti = $payload->jti;
-
-                if ($cache->has("logout_" . $payload->jti)) {
+                if ($payload->type != "access_token") {
                     return;
                 }
 
-                //get last Login jti
 
-                if (Config::Value("concurrent_login_disabled", false)) {
-                    $ul = UserLog::Query(["result" => "SUCCESS", "user_id" => $payload->id])
-                        ->sort("login_dt:desc")->first();
-                    if ($ul) {
-                        if ($ul->jti != $this->jti) {
-                            $cache->set("logout_" . $this->jti, true, 60 * 60 * 24);
-                            return;
+                $this->jti = $payload->jti;
+/*                 if ($payload->jti) {
+                    if ($cache->has("logout_" . $payload->jti)) {
+                        return;
+                    }
+
+                    //get last Login jti
+                    if (Config::Value("concurrent_login_disabled", false)) {
+                        $ul = UserLog::Query(["result" => "SUCCESS", "user_id" => $payload->id])
+                            ->sort("login_dt:desc")->first();
+                        if ($ul) {
+                            if ($ul->jti != $this->jti) {
+                                $cache->set("logout_" . $this->jti, true, 60 * 60 * 24);
+                                return;
+                            }
                         }
                     }
                 }
-
-                
-
+ */
+          
 
                 if ($payload->view_as) {
                     $this->view_as = true;
@@ -78,6 +81,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                     $this->user = User::Get($payload->id);
 
                     $this->user->saveLastAccessTime($this->jti);
+                    
                 }
                 $this->is_logged = true;
             } catch (Exception $e) {

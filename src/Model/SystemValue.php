@@ -14,30 +14,36 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class SystemValue extends Model
 {
 
+    public function getData()
+    {
+        if (is_array($this->value)) {
+            return $this->value;
+        } else {
+            $data = [];
+            foreach (explode("\n", $this->value) as $s) {
+                $s = explode("|", $s, 2);
+                $data[is_numeric($s[0]) ? (int) $s[0] : $s[0]] = $s[1] ? trim($s[1]) : $s[0];
+            }
+            return $data;
+        }
+    }
+
+    public function getValue($key)
+    {
+        $data = $this->getData();
+        return $data[$key] ?? null;
+    }
+
     public function getValues()
     {
+
         $values = [];
-        if (is_array($this->value)) {
-            foreach ($this->value as $k => $v) {
-                $values[] = [
-                    "label" => $v,
-                    "value" => $k
-                ];
-            }
-        } else {
-            //explode by enter
-            foreach (explode("\n", $this->value) as $s) {
-
-                //split by |
-                $s = explode("|", $s, 2);
-
-                $values[] = [
-                    "label" => $s[1] ? trim($s[1]) : $s[0],
-                    "value" => is_numeric($s[0]) ? (int) $s[0] : $s[0]
-                ];
-            }
+        foreach ($this->getData() as $k => $v) {
+            $values[] = [
+                "label" => $v,
+                "value" => $k
+            ];
         }
-
         return $values;
     }
 }

@@ -22,6 +22,20 @@ use Psr\Http\Message\UploadedFileInterface;
 class DatabaseController
 {
 
+    #[Mutation]
+    #[Right("system.database.event:alter")]
+    public function alterDatabaseEvent(#[Autowire] App $app, string $name, string $body): bool
+    {
+        $db = $app->getDatabase();
+        try {
+            $db->query("ALTER EVENT $name DO $body", $db::QUERY_MODE_EXECUTE);
+        } catch (Exception $e) {
+            throw new Error($e->getMessage());
+        }
+        return true;
+    }
+
+
     #[Mutation(name: "lightDatabaseTruncateTable")]
     #[Right("system.database.table.truncate")]
     public function truncateDatabaseTable(#[Autowire] App $app, string $table): bool

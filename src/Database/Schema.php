@@ -18,6 +18,29 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class Schema
 {
 
+    #[Field]
+    #[Right("system.database.events")]
+    /**
+     * @return mixed
+     */
+    public function getEvents(#[Autowire] App $app)
+    {
+        $db = $app->getDatabase();
+        $result = $db->query("SHOW EVENTS")->execute();
+        return iterator_to_array($result);
+    }
+
+    #[Field]
+    #[Right("system.database.event")]
+    /**
+     * @return mixed
+     */
+    public function getEvent(#[Autowire] App $app, string $name)
+    {
+        $db = $app->getDatabase();
+        $result = $db->query("SHOW CREATE EVENT $name")->execute();
+        return iterator_to_array($result)[0];
+    }
 
     #[Field]
     /**

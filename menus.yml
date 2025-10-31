@@ -111,6 +111,12 @@
               to: /System/database/restore
               permission: system.database.restore
 
+            - label: Event
+              icon: sym_o_event
+              to: /System/database/event
+              permission: system.database.events
+
+
             - label: Process
               icon: sym_o_memory
               to: /System/database/process

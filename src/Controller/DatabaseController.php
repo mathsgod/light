@@ -22,7 +22,7 @@ use Psr\Http\Message\UploadedFileInterface;
 class DatabaseController
 {
 
-    #[Mutation]
+ /*    #[Mutation]
     #[Right("system.database.event:alter")]
     public function alterDatabaseEvent(#[Autowire] App $app, string $name, string $body): bool
     {
@@ -34,7 +34,7 @@ class DatabaseController
         }
         return true;
     }
-
+ */
 
     #[Mutation(name: "lightDatabaseTruncateTable")]
     #[Right("system.database.table.truncate")]

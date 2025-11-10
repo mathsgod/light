@@ -25,9 +25,8 @@ class AppController
     public function test()
     {
         return [
-            "a"=>1
+            "a" => 1
         ];
-
     }
 
     #[Query]
@@ -140,5 +139,15 @@ class AppController
         return true;
     }
 
-    
+    #[Mutation]
+    #[Logged]
+    /**
+     * @param mixed $menu
+     */
+    public function updateMyMenu($menu, #[InjectUser] User $user): bool
+    {
+        $user->menu = $menu;
+        $user->save();
+        return true;
+    }
 }

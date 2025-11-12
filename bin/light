@@ -8,7 +8,6 @@ use Light\Code\PropertyGenerator;
 use Light\Code\ClassGenerator;
 use Light\Code\MethodGenerator;
 use Light\Code\ParameterGenerator;
-use Light\JsonToSql;
 use Light\Model\Role;
 use Light\Model\User;
 use Light\Model\UserRole;

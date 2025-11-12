@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0a2c0ea4d281ab926bc5de59824a74d1",
+    "content-hash": "c7cf904d99c1fcbca81227c4a3114421",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1941,6 +1941,45 @@
                 "source": "https://github.com/mathsgod/graphqlite-mixed-type/tree/2.3.0"
             },
             "time": "2025-02-07T04:54:21+00:00"
+        },
+        {
+            "name": "mathsgod/json-to-sql",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mathsgod/json-to-sql.git",
+                "reference": "7c14d70692d07db962000d2513689b7591ba7fcb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mathsgod/json-to-sql/zipball/7c14d70692d07db962000d2513689b7591ba7fcb",
+                "reference": "7c14d70692d07db962000d2513689b7591ba7fcb",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Raymond Chong",
+                    "email": "mathsgod@yahoo.com"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/mathsgod/json-to-sql/issues",
+                "source": "https://github.com/mathsgod/json-to-sql/tree/1.0.0"
+            },
+            "time": "2025-11-12T08:44:45+00:00"
         },
         {
             "name": "mathsgod/light-db",

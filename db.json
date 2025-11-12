@@ -228,9 +228,19 @@
                 ]
             }
         ],
-        "engine": "MyISAM",
-        "charset": "utf8mb4",
-        "collate": "utf8mb4_0900_ai_ci"
+        "foreign_keys": [
+            {
+                "columns": [
+                    "user_id"
+                ],
+                "reference_table": "User",
+                "reference_columns": [
+                    "user_id"
+                ],
+                "on_delete": "CASCADE",
+                "on_update": "CASCADE"
+            }
+        ]
     },
     {
         "name": "Config",
@@ -308,8 +318,8 @@
                 "length": 100
             },
             {
-                "name":"last_access_time",
-                "type":"datetime"
+                "name": "last_access_time",
+                "type": "datetime"
             }
         ],
         "primary_key": [
@@ -321,6 +331,19 @@
                 "columns": [
                     "user_id"
                 ]
+            }
+        ],
+        "foreign_keys": [
+            {
+                "columns": [
+                    "user_id"
+                ],
+                "reference_table": "User",
+                "reference_columns": [
+                    "user_id"
+                ],
+                "on_delete": "CASCADE",
+                "on_update": "CASCADE"
             }
         ]
     },
@@ -406,9 +429,19 @@
                 ]
             }
         ],
-        "engine": "MyISAM",
-        "charset": "utf8mb4",
-        "collate": "utf8mb4_0900_ai_ci"
+        "foreign_keys": [
+            {
+                "columns": [
+                    "user_id"
+                ],
+                "reference_table": "User",
+                "reference_columns": [
+                    "user_id"
+                ],
+                "on_delete": "SET NULL",
+                "on_update": "CASCADE"
+            }
+        ]
     },
     {
         "name": "MailLog",
@@ -465,10 +498,7 @@
         ],
         "primary_key": [
             "maillog_id"
-        ],
-        "engine": "MyISAM",
-        "charset": "utf8mb4",
-        "collate": "utf8mb4_0900_ai_ci"
+        ]
     },
     {
         "name": "Permission",
@@ -492,10 +522,7 @@
         ],
         "primary_key": [
             "permission_id"
-        ],
-        "engine": "InnoDB",
-        "charset": "utf8mb4",
-        "collate": "utf8mb4_0900_ai_ci"
+        ]
     },
     {
         "name": "SystemValue",
@@ -552,10 +579,7 @@
                     "name"
                 ]
             }
-        ],
-        "engine": "InnoDB",
-        "charset": "utf8mb4",
-        "collate": "utf8mb4_0900_ai_ci"
+        ]
     },
     {
         "name": "Translate",
@@ -619,12 +643,8 @@
                 "name": "module",
                 "columns": [
                     "module"
-                ],
-                "type": "BTREE"
+                ]
             }
-        ],
-        "engine": "InnoDB",
-        "charset": "utf8mb4",
-        "collate": "utf8mb4_0900_ai_ci"
+        ]
     }
 ]

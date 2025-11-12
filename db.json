@@ -1,0 +1,630 @@
+[
+    {
+        "name": "User",
+        "columns": [
+            {
+                "name": "user_id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "username",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "password",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "first_name",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "last_name",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "email",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "phone",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "addr1",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "addr2",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "addr3",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "status",
+                "type": "tinyint",
+                "unsigned": true,
+                "nullable": false,
+                "default": "0"
+            },
+            {
+                "name": "language",
+                "type": "varchar",
+                "length": 5
+            },
+            {
+                "name": "default_page",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "join_date",
+                "type": "date",
+                "nullable": false
+            },
+            {
+                "name": "secret",
+                "type": "varchar",
+                "length": 16
+            },
+            {
+                "name": "style",
+                "type": "json"
+            },
+            {
+                "name": "setting",
+                "type": "json"
+            },
+            {
+                "name": "expiry_date",
+                "type": "date"
+            },
+            {
+                "name": "credential",
+                "type": "json"
+            },
+            {
+                "name": "credential_creation_options",
+                "type": "json"
+            },
+            {
+                "name": "credential_request_options",
+                "type": "json"
+            },
+            {
+                "name": "two_step",
+                "type": "json"
+            },
+            {
+                "name": "microsoft",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "google",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "password_dt",
+                "type": "datetime"
+            },
+            {
+                "name": "created_time",
+                "type": "datetime"
+            },
+            {
+                "name": "menu",
+                "type": "json"
+            }
+        ],
+        "primary_key": [
+            "user_id"
+        ],
+        "unique_keys": [
+            {
+                "name": "username",
+                "columns": [
+                    "username"
+                ]
+            }
+        ],
+        "engine": "InnoDB",
+        "charset": "utf8mb4",
+        "collate": "utf8mb4_0900_ai_ci"
+    },
+    {
+        "name": "Role",
+        "columns": [
+            {
+                "name": "role_id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "name",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "child",
+                "type": "varchar",
+                "length": 255
+            }
+        ],
+        "primary_key": [
+            "role_id"
+        ],
+        "keys": [
+            {
+                "name": "name",
+                "columns": [
+                    "name"
+                ]
+            },
+            {
+                "name": "child",
+                "columns": [
+                    "child"
+                ]
+            }
+        ],
+        "engine": "InnoDB",
+        "charset": "utf8mb4",
+        "collate": "utf8mb4_0900_ai_ci"
+    },
+    {
+        "name": "UserRole",
+        "columns": [
+            {
+                "name": "user_role_id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "user_id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false
+            },
+            {
+                "name": "role",
+                "type": "varchar",
+                "length": 255
+            }
+        ],
+        "primary_key": [
+            "user_role_id"
+        ],
+        "keys": [
+            {
+                "name": "user_id",
+                "columns": [
+                    "user_id"
+                ]
+            },
+            {
+                "name": "role",
+                "columns": [
+                    "role"
+                ]
+            }
+        ],
+        "engine": "MyISAM",
+        "charset": "utf8mb4",
+        "collate": "utf8mb4_0900_ai_ci"
+    },
+    {
+        "name": "Config",
+        "columns": [
+            {
+                "name": "config_id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "name",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "value",
+                "type": "text"
+            }
+        ],
+        "primary_key": [
+            "config_id"
+        ],
+        "unique_keys": [
+            {
+                "name": "name",
+                "columns": [
+                    "name"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "UserLog",
+        "columns": [
+            {
+                "name": "userlog_id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "user_id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false
+            },
+            {
+                "name": "login_dt",
+                "type": "datetime"
+            },
+            {
+                "name": "logout_dt",
+                "type": "datetime"
+            },
+            {
+                "name": "ip",
+                "type": "varchar",
+                "length": 45
+            },
+            {
+                "name": "result",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "user_agent",
+                "type": "text"
+            },
+            {
+                "name": "jti",
+                "type": "varchar",
+                "length": 100
+            },
+            {
+                "name":"last_access_time",
+                "type":"datetime"
+            }
+        ],
+        "primary_key": [
+            "userlog_id"
+        ],
+        "keys": [
+            {
+                "name": "user_id",
+                "columns": [
+                    "user_id"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "EventLog",
+        "columns": [
+            {
+                "name": "eventlog_id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "class",
+                "type": "varchar",
+                "length": 64
+            },
+            {
+                "name": "id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false
+            },
+            {
+                "name": "action",
+                "type": "varchar",
+                "length": 64
+            },
+            {
+                "name": "source",
+                "type": "json"
+            },
+            {
+                "name": "target",
+                "type": "json"
+            },
+            {
+                "name": "remark",
+                "type": "text"
+            },
+            {
+                "name": "user_id",
+                "type": "int",
+                "unsigned": true
+            },
+            {
+                "name": "created_time",
+                "type": "datetime",
+                "nullable": false
+            },
+            {
+                "name": "status",
+                "type": "int",
+                "unsigned": true,
+                "default": "0"
+            },
+            {
+                "name": "different",
+                "type": "json"
+            }
+        ],
+        "primary_key": [
+            "eventlog_id"
+        ],
+        "keys": [
+            {
+                "name": "class",
+                "columns": [
+                    "class"
+                ]
+            },
+            {
+                "name": "user_id",
+                "columns": [
+                    "user_id"
+                ]
+            },
+            {
+                "name": "id",
+                "columns": [
+                    "id"
+                ]
+            }
+        ],
+        "engine": "MyISAM",
+        "charset": "utf8mb4",
+        "collate": "utf8mb4_0900_ai_ci"
+    },
+    {
+        "name": "MailLog",
+        "columns": [
+            {
+                "name": "maillog_id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "created_time",
+                "type": "datetime"
+            },
+            {
+                "name": "from",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "to",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "body",
+                "type": "text"
+            },
+            {
+                "name": "subject",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "from_name",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "to_name",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "altbody",
+                "type": "text"
+            },
+            {
+                "name": "host",
+                "type": "varchar",
+                "length": 255
+            }
+        ],
+        "primary_key": [
+            "maillog_id"
+        ],
+        "engine": "MyISAM",
+        "charset": "utf8mb4",
+        "collate": "utf8mb4_0900_ai_ci"
+    },
+    {
+        "name": "Permission",
+        "columns": [
+            {
+                "name": "permission_id",
+                "type": "int",
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "role",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "value",
+                "type": "varchar",
+                "length": 100
+            }
+        ],
+        "primary_key": [
+            "permission_id"
+        ],
+        "engine": "InnoDB",
+        "charset": "utf8mb4",
+        "collate": "utf8mb4_0900_ai_ci"
+    },
+    {
+        "name": "SystemValue",
+        "columns": [
+            {
+                "name": "systemvalue_id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "name",
+                "type": "varchar",
+                "length": 64
+            },
+            {
+                "name": "value",
+                "type": "text"
+            },
+            {
+                "name": "status",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false,
+                "default": "0"
+            },
+            {
+                "name": "can_delete",
+                "type": "tinyint",
+                "length": 1,
+                "nullable": false,
+                "default": "1"
+            },
+            {
+                "name": "language",
+                "type": "varchar",
+                "length": 5
+            }
+        ],
+        "primary_key": [
+            "systemvalue_id"
+        ],
+        "keys": [
+            {
+                "name": "language",
+                "columns": [
+                    "language"
+                ]
+            },
+            {
+                "name": "name",
+                "columns": [
+                    "name"
+                ]
+            }
+        ],
+        "engine": "InnoDB",
+        "charset": "utf8mb4",
+        "collate": "utf8mb4_0900_ai_ci"
+    },
+    {
+        "name": "Translate",
+        "columns": [
+            {
+                "name": "translate_id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "module",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "language",
+                "type": "varchar",
+                "length": 5
+            },
+            {
+                "name": "name",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "value",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "action",
+                "type": "varchar",
+                "length": 255
+            }
+        ],
+        "primary_key": [
+            "translate_id"
+        ],
+        "keys": [
+            {
+                "name": "language",
+                "columns": [
+                    "language"
+                ]
+            },
+            {
+                "name": "name",
+                "columns": [
+                    "name"
+                ]
+            },
+            {
+                "name": "action",
+                "columns": [
+                    "action"
+                ]
+            },
+            {
+                "name": "module",
+                "columns": [
+                    "module"
+                ],
+                "type": "BTREE"
+            }
+        ],
+        "engine": "InnoDB",
+        "charset": "utf8mb4",
+        "collate": "utf8mb4_0900_ai_ci"
+    }
+]

@@ -47,6 +47,17 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 class User extends \Light\Model
 {
+    #[Field]
+    /**
+     * @return mixed
+     */
+    public function getMenu(): array
+    {
+        if($this->menu){
+            return $this->menu;
+        }
+        return [];
+    }
 
     #[Field]
     public function isAllowedPath(string $path, #[Autowire] App $app): bool

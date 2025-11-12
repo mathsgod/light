@@ -53,25 +53,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
 
 
                 $this->jti = $payload->jti;
-/*                 if ($payload->jti) {
-                    if ($cache->has("logout_" . $payload->jti)) {
-                        return;
-                    }
 
-                    //get last Login jti
-                    if (Config::Value("concurrent_login_disabled", false)) {
-                        $ul = UserLog::Query(["result" => "SUCCESS", "user_id" => $payload->id])
-                            ->sort("login_dt:desc")->first();
-                        if ($ul) {
-                            if ($ul->jti != $this->jti) {
-                                $cache->set("logout_" . $this->jti, true, 60 * 60 * 24);
-                                return;
-                            }
-                        }
-                    }
-                }
- */
-          
 
                 if ($payload->view_as) {
                     $this->view_as = true;
@@ -81,7 +63,6 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                     $this->user = User::Get($payload->id);
 
                     $this->user->saveLastAccessTime($this->jti);
-                    
                 }
                 $this->is_logged = true;
             } catch (Exception $e) {

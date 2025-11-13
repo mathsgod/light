@@ -116,11 +116,15 @@
               to: /System/database/event
               permission: system.database.events
 
-
             - label: Process
               icon: sym_o_memory
               to: /System/database/process
               permission: system.database.process
+            
+            - label: Check & Fix
+              icon: sym_o_check_circle
+              to: /System/database/check
+              permission: system.database.check
           
     - label: User log
       icon: sym_o_description

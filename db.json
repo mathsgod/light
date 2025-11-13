@@ -644,5 +644,75 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "CustomField",
+        "columns": [
+            {
+                "name": "custom_field_id",
+                "type": "int",
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "name",
+                "type": "varchar",
+                "length": 100
+            },
+            {
+                "name": "label",
+                "type": "varchar",
+                "length": 100
+            },
+            {
+                "name": "model",
+                "type": "varchar",
+                "length": 45
+            },
+            {
+                "name": "type",
+                "type": "varchar",
+                "length": 45
+            },
+            {
+                "name": "placeholder",
+                "type": "varchar",
+                "length": 100
+            },
+            {
+                "name": "options",
+                "type": "json"
+            },
+            {
+                "name": "validation",
+                "type": "varchar",
+                "length": 100
+            },
+            {
+                "name": "default_value",
+                "type": "json"
+            },
+            {
+                "name": "order",
+                "type": "int",
+                "default": "0"
+            },
+            {
+                "name": "help",
+                "type": "varchar",
+                "length": 1000
+            }
+        ],
+        "primary_key": [
+            "custom_field_id"
+        ],
+        "keys": [
+            {
+                "name": "model",
+                "columns": [
+                    "model"
+                ]
+            }
+        ]
     }
 ]

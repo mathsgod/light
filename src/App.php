@@ -137,10 +137,11 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
             //return new JsonResponse($result->toArray());
 
+
             if ($this->isDevMode()) {
-                return new JsonResponse($result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE));
+                return new JsonResponse($result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE), 200, [], JsonResponse::DEFAULT_JSON_FLAGS | JSON_UNESCAPED_UNICODE);
             } else {
-                return new JsonResponse($result->toArray());
+                return new JsonResponse($result->toArray(), 200, [], JsonResponse::DEFAULT_JSON_FLAGS | JSON_UNESCAPED_UNICODE);
             }
         } catch (\Exception $e) {
             return new JsonResponse(['errors' => [

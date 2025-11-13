@@ -373,12 +373,6 @@
                 "name": "created_time",
                 "type": "datetime",
                 "nullable": false
-            },
-            {
-                "name": "status",
-                "type": "int",
-                "unsigned": true,
-                "default": "0"
             }
         ],
         "primary_key": [

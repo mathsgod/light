@@ -6,6 +6,7 @@ use Exception;
 use Firebase\JWT\JWT;
 use Google\Service\MigrationCenterAPI\UploadFileInfo;
 use GraphQL\Error\Error;
+use JsonToSql;
 use Laminas\Db\Sql\Ddl\CreateTable;
 use Light\App;
 use Light\Type\System;
@@ -184,7 +185,29 @@ class DatabaseController
 
         // If table doesn't exist, we can't fix it
         if (!$tableResult['exists']) {
-            throw new Error("Table '$name' does not exist in database");
+
+            // Create table from schema
+
+            $schema = file_get_contents(__DIR__ . "/../../db.json");
+            //find table schema
+            $tableSchema = json_decode($schema, true);
+            $tableSchema = array_filter($tableSchema, fn($t) => $t['name'] === $name);
+            $tableSchema = $tableSchema ? array_values($tableSchema)[0] : null;
+
+            if (!$tableSchema) {
+                throw new Error("Table '$name' not found in schema");
+            }
+
+            $jtq = new JsonToSql();
+            $sql = $jtq->generateCreateTableStatement($tableSchema);
+
+            //execute sql
+            try {
+                $db->query($sql, $db::QUERY_MODE_EXECUTE);
+            } catch (Exception $e) {
+                throw new Error("Failed to create table '$name': " . $e->getMessage());
+            }
+            return true;
         }
 
         // Process differences and apply fixes
@@ -201,28 +224,27 @@ class DatabaseController
                     $autoIncrement = $colDef['auto_increment'] ?? false ? 'AUTO_INCREMENT' : '';
 
                     $sql = "ALTER TABLE `$name` ADD `{$diff['column']}` $columnType";
-                    
+
                     if ($length) {
                         $sql .= "($length)";
                     }
-                    
+
                     if ($unsigned) {
                         $sql .= " $unsigned";
                     }
-                    
+
                     $sql .= " $nullable";
-                    
+
                     if ($default !== null) {
                         $sql .= " DEFAULT '$default'";
                     }
-                    
+
                     if ($autoIncrement) {
                         $sql .= " $autoIncrement";
                     }
 
                     $db->query($sql, $db::QUERY_MODE_EXECUTE);
-                } 
-                elseif ($diff['type'] === 'column_mismatch') {
+                } elseif ($diff['type'] === 'column_mismatch') {
                     // Modify column to match expected definition
                     $colDef = $diff['differences'];
                     $expectedDef = null;
@@ -249,25 +271,24 @@ class DatabaseController
                         $unsigned = $expectedDef['unsigned'] ?? false ? 'UNSIGNED' : '';
 
                         $sql = "ALTER TABLE `$name` MODIFY `{$diff['column']}` $columnType";
-                        
+
                         if ($length) {
                             $sql .= "($length)";
                         }
-                        
+
                         if ($unsigned) {
                             $sql .= " $unsigned";
                         }
-                        
+
                         $sql .= " $nullable";
-                        
+
                         if ($default !== null) {
                             $sql .= " DEFAULT '$default'";
                         }
 
                         $db->query($sql, $db::QUERY_MODE_EXECUTE);
                     }
-                }
-                elseif ($diff['type'] === 'extra_column') {
+                } elseif ($diff['type'] === 'extra_column') {
                     // Remove extra column
                     $db->query("ALTER TABLE `$name` DROP COLUMN `{$diff['column']}`", $db::QUERY_MODE_EXECUTE);
                 }

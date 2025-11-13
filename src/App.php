@@ -121,11 +121,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->rbac = new Rbac();
         $this->loadRbac();
         $this->loadMenu();
-
-        // database column check
-        if (!User::_table()->column("password_dt")) {
-            User::_table()->addColumn(new \Laminas\Db\Sql\Ddl\Column\Datetime("password_dt", true));
-        }
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -136,8 +131,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         try {
 
             //return new JsonResponse($result->toArray());
-
-
             if ($this->isDevMode()) {
                 return new JsonResponse($result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE), 200, [], JsonResponse::DEFAULT_JSON_FLAGS | JSON_UNESCAPED_UNICODE);
             } else {

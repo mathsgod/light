@@ -212,6 +212,21 @@ class Schema
             // Check if table exists in database
             try {
                 $dbTable = $db->getTable($tableName);
+
+                if (!$dbTable) {
+                    $result['exists'] = false;
+                    $result['status'] = 'MISSING';
+                    foreach ($schemaColumns as $colName => $colDef) {
+                        $result['differences'][] = [
+                            'type' => 'missing_column',
+                            'column' => $colName,
+                            'expected' => $colDef
+                        ];
+                    }
+                    $results[] = $result;
+                    continue;
+                }
+
                 $result['exists'] = true;
 
                 // Get current table columns from database

@@ -554,11 +554,6 @@
                 "auto_increment": true
             },
             {
-                "name": "module",
-                "type": "varchar",
-                "length": 255
-            },
-            {
                 "name": "language",
                 "type": "varchar",
                 "length": 5
@@ -570,11 +565,6 @@
             },
             {
                 "name": "value",
-                "type": "varchar",
-                "length": 255
-            },
-            {
-                "name": "action",
                 "type": "varchar",
                 "length": 255
             }

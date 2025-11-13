@@ -82,10 +82,6 @@
                 "length": 16
             },
             {
-                "name": "style",
-                "type": "json"
-            },
-            {
                 "name": "setting",
                 "type": "json"
             },
@@ -96,19 +92,7 @@
             {
                 "name": "credential",
                 "type": "json"
-            },
-            {
-                "name": "credential_creation_options",
-                "type": "json"
-            },
-            {
-                "name": "credential_request_options",
-                "type": "json"
-            },
-            {
-                "name": "two_step",
-                "type": "json"
-            },
+            },            
             {
                 "name": "microsoft",
                 "type": "varchar",
@@ -147,10 +131,7 @@
                     "username"
                 ]
             }
-        ],
-        "engine": "InnoDB",
-        "charset": "utf8mb4",
-        "collate": "utf8mb4_0900_ai_ci"
+        ]
     },
     {
         "name": "Role",
@@ -189,10 +170,7 @@
                     "child"
                 ]
             }
-        ],
-        "engine": "InnoDB",
-        "charset": "utf8mb4",
-        "collate": "utf8mb4_0900_ai_ci"
+        ]
     },
     {
         "name": "UserRole",

@@ -383,10 +383,6 @@
                 "type": "int",
                 "unsigned": true,
                 "default": "0"
-            },
-            {
-                "name": "different",
-                "type": "json"
             }
         ],
         "primary_key": [

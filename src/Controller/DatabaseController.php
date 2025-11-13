@@ -22,7 +22,8 @@ use Psr\Http\Message\UploadedFileInterface;
 class DatabaseController
 {
 
- /*    #[Mutation]
+
+    /*    #[Mutation]
     #[Right("system.database.event:alter")]
     public function alterDatabaseEvent(#[Autowire] App $app, string $name, string $body): bool
     {
@@ -154,6 +155,126 @@ class DatabaseController
         //exec
         $output = [];
         exec($command, $output);
+
+        return true;
+    }
+
+    #[Mutation]
+    #[Right("system.database.fix")]
+    public function fixDatabaseTable(#[Autowire] App $app, string $name): bool
+    {
+        $db = $app->getDatabase();
+
+        $schema = new \Light\Database\Schema();
+
+        $results = $schema->checkResult($app);
+
+        // Find the table result
+        $tableResult = null;
+        foreach ($results as $result) {
+            if ($result['table'] === $name) {
+                $tableResult = $result;
+                break;
+            }
+        }
+
+        if (!$tableResult) {
+            throw new Error("Table '$name' not found in schema");
+        }
+
+        // If table doesn't exist, we can't fix it
+        if (!$tableResult['exists']) {
+            throw new Error("Table '$name' does not exist in database");
+        }
+
+        // Process differences and apply fixes
+        foreach ($tableResult['differences'] as $diff) {
+            try {
+                if ($diff['type'] === 'missing_column') {
+                    // Add missing column
+                    $colDef = $diff['expected'];
+                    $columnType = strtoupper($colDef['type']);
+                    $length = $colDef['length'] ?? null;
+                    $nullable = $colDef['nullable'] ?? true ? 'NULL' : 'NOT NULL';
+                    $default = $colDef['default'] ?? null;
+                    $unsigned = $colDef['unsigned'] ?? false ? 'UNSIGNED' : '';
+                    $autoIncrement = $colDef['auto_increment'] ?? false ? 'AUTO_INCREMENT' : '';
+
+                    $sql = "ALTER TABLE `$name` ADD `{$diff['column']}` $columnType";
+                    
+                    if ($length) {
+                        $sql .= "($length)";
+                    }
+                    
+                    if ($unsigned) {
+                        $sql .= " $unsigned";
+                    }
+                    
+                    $sql .= " $nullable";
+                    
+                    if ($default !== null) {
+                        $sql .= " DEFAULT '$default'";
+                    }
+                    
+                    if ($autoIncrement) {
+                        $sql .= " $autoIncrement";
+                    }
+
+                    $db->query($sql, $db::QUERY_MODE_EXECUTE);
+                } 
+                elseif ($diff['type'] === 'column_mismatch') {
+                    // Modify column to match expected definition
+                    $colDef = $diff['differences'];
+                    $expectedDef = null;
+
+                    // Get expected definition from db.json
+                    $tables = json_decode(file_get_contents(__DIR__ . "/../../db.json"), true);
+                    foreach ($tables as $tableSchema) {
+                        if ($tableSchema['name'] === $name) {
+                            foreach ($tableSchema['columns'] as $col) {
+                                if ($col['name'] === $diff['column']) {
+                                    $expectedDef = $col;
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                    }
+
+                    if ($expectedDef) {
+                        $columnType = strtoupper($expectedDef['type']);
+                        $length = $expectedDef['length'] ?? null;
+                        $nullable = $expectedDef['nullable'] ?? true ? 'NULL' : 'NOT NULL';
+                        $default = $expectedDef['default'] ?? null;
+                        $unsigned = $expectedDef['unsigned'] ?? false ? 'UNSIGNED' : '';
+
+                        $sql = "ALTER TABLE `$name` MODIFY `{$diff['column']}` $columnType";
+                        
+                        if ($length) {
+                            $sql .= "($length)";
+                        }
+                        
+                        if ($unsigned) {
+                            $sql .= " $unsigned";
+                        }
+                        
+                        $sql .= " $nullable";
+                        
+                        if ($default !== null) {
+                            $sql .= " DEFAULT '$default'";
+                        }
+
+                        $db->query($sql, $db::QUERY_MODE_EXECUTE);
+                    }
+                }
+                elseif ($diff['type'] === 'extra_column') {
+                    // Remove extra column
+                    $db->query("ALTER TABLE `$name` DROP COLUMN `{$diff['column']}`", $db::QUERY_MODE_EXECUTE);
+                }
+            } catch (Exception $e) {
+                throw new Error("Failed to fix column '{$diff['column']}': {$e->getMessage()}");
+            }
+        }
 
         return true;
     }

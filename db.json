@@ -120,6 +120,11 @@
                 "length": 255
             },
             {
+                "name": "facebook",
+                "type": "varchar",
+                "length": 255
+            },
+            {
                 "name": "password_dt",
                 "type": "datetime"
             },
@@ -549,13 +554,6 @@
                 "unsigned": true,
                 "nullable": false,
                 "default": "0"
-            },
-            {
-                "name": "can_delete",
-                "type": "tinyint",
-                "length": 1,
-                "nullable": false,
-                "default": "1"
             },
             {
                 "name": "language",

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c7cf904d99c1fcbca81227c4a3114421",
+    "content-hash": "5fd202fc853daaad35aa62b94b563849",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1983,21 +1983,21 @@
         },
         {
             "name": "mathsgod/light-db",
-            "version": "1.1.1",
+            "version": "1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mathsgod/light-db.git",
-                "reference": "a2c854e945a824af4abce5cb7f6f76824a3050f9"
+                "reference": "ee03ff9455602d482d62f29d6fca91a4a1a05e03"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mathsgod/light-db/zipball/a2c854e945a824af4abce5cb7f6f76824a3050f9",
-                "reference": "a2c854e945a824af4abce5cb7f6f76824a3050f9",
+                "url": "https://api.github.com/repos/mathsgod/light-db/zipball/ee03ff9455602d482d62f29d6fca91a4a1a05e03",
+                "reference": "ee03ff9455602d482d62f29d6fca91a4a1a05e03",
                 "shasum": ""
             },
             "require": {
                 "ext-pdo": "*",
-                "illuminate/collections": "^10.48",
+                "illuminate/collections": "^10.48 || ^11.0 || ^12.0",
                 "laminas/laminas-db": "^2.20",
                 "laminas/laminas-paginator": "^2.19",
                 "php": ">=8.1",
@@ -2005,7 +2005,8 @@
             },
             "require-dev": {
                 "phpstan/phpstan": "^2.0",
-                "phpunit/phpunit": "^10.5"
+                "phpunit/phpunit": "^10.5",
+                "twig/twig": "^3.21"
             },
             "type": "library",
             "autoload": {
@@ -2025,9 +2026,9 @@
             ],
             "support": {
                 "issues": "https://github.com/mathsgod/light-db/issues",
-                "source": "https://github.com/mathsgod/light-db/tree/1.1.1"
+                "source": "https://github.com/mathsgod/light-db/tree/1.5.0"
             },
-            "time": "2025-09-19T04:47:38+00:00"
+            "time": "2025-11-12T09:29:10+00:00"
         },
         {
             "name": "mathsgod/light-db-graphqlite-mappers",

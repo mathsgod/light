@@ -185,4 +185,150 @@ class Schema
 
         return true;
     }
+
+    #[Field]
+    /**
+     * Check the database schema against the default schema
+     * @return mixed
+     */
+    public function checkResult(#[Autowire] App $app)
+    {
+        //read the default schema from db.json
+        $tables = json_decode(file_get_contents(__DIR__ . "/../../db.json"), true);
+
+        $db = $app->getDatabase();
+
+        $results = [];
+
+        foreach ($tables as $tableSchema) {
+            $tableName = $tableSchema['name'];
+            $result = [
+                'table' => $tableName,
+                'exists' => false,
+                'differences' => []
+            ];
+
+
+            // Check if table exists in database
+            try {
+                $dbTable = $db->getTable($tableName);
+                $result['exists'] = true;
+
+                // Get current table columns from database
+                $currentColumns = [];
+                foreach ($dbTable->columns()->toArray() as $col) {
+                    $currentColumns[$col->getName()] = [
+                        'type' => $col->getDataType(),
+                        'nullable' => $col->isNullable(),
+                        'default' => $col->getColumnDefault(),
+                        'length' => $col->getCharacterMaximumLength(),
+                        'unsigned' => $col->getNumericUnsigned(),
+                        'auto_increment' => $col->isAutoIncrement()
+                    ];
+                }
+
+
+                // Compare columns
+                $schemaColumns = [];
+                foreach ($tableSchema['columns'] as $col) {
+                    $schemaColumns[$col['name']] = $col;
+                }
+
+
+
+
+                // Check for missing columns in database
+                foreach ($schemaColumns as $colName => $colDef) {
+                    if (!isset($currentColumns[$colName])) {
+                        $result['differences'][] = [
+                            'type' => 'missing_column',
+                            'column' => $colName,
+                            'expected' => $colDef
+                        ];
+                    } else {
+
+                        // Compare column properties
+                        $current = $currentColumns[$colName];
+
+                        $diffs = [];
+
+                        if (strtolower($current['type']) !== strtolower($colDef['type'])) {
+                            $diffs['type'] = [
+                                'current' => $current['type'],
+                                'expected' => $colDef['type']
+                            ];
+                        }
+
+                        if (isset($colDef['length']) && $current['length'] != $colDef['length']) {
+                            $diffs['length'] = [
+                                'current' => $current['length'],
+                                'expected' => $colDef['length']
+                            ];
+                        }
+
+                        if (isset($colDef['nullable'])) {
+                            $expectedNullable = $colDef['nullable'];
+                            if ($current['nullable'] != $expectedNullable) {
+                                $diffs['nullable'] = [
+                                    'current' => $current['nullable'],
+                                    'expected' => $expectedNullable
+                                ];
+                            }
+                        }
+
+                        if (isset($colDef['unsigned']) && $current['unsigned'] !== null) {
+                            if ($current['unsigned'] != $colDef['unsigned']) {
+                                $diffs['unsigned'] = [
+                                    'current' => $current['unsigned'],
+                                    'expected' => $colDef['unsigned']
+                                ];
+                            }
+                        }
+
+                        if (isset($colDef['auto_increment']) && $current['auto_increment'] !== null) {
+                            if ($current['auto_increment'] != $colDef['auto_increment']) {
+                                $diffs['auto_increment'] = [
+                                    'current' => $current['auto_increment'],
+                                    'expected' => $colDef['auto_increment']
+                                ];
+                            }
+                        }
+
+
+                        if (!empty($diffs)) {
+                            $result['differences'][] = [
+                                'type' => 'column_mismatch',
+                                'column' => $colName,
+                                'differences' => $diffs
+                            ];
+                        }
+                    }
+                }
+
+                // Check for extra columns in database
+                foreach ($currentColumns as $colName => $colDef) {
+                    if (!isset($schemaColumns[$colName])) {
+                        $result['differences'][] = [
+                            'type' => 'extra_column',
+                            'column' => $colName,
+                            'current' => $colDef
+                        ];
+                    }
+                }
+
+                // Add status
+                $result['status'] = empty($result['differences']) ? 'OK' : 'DIFFERENT';
+            } catch (\Exception $e) {
+                $result['exists'] = false;
+                $result['status'] = 'MISSING';
+                $result['error'] = $e->getMessage();
+            }
+
+            $results[] = $result;
+        }
+
+
+
+        return $results;
+    }
 }

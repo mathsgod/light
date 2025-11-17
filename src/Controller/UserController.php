@@ -32,6 +32,7 @@ class UserController
     #[Right("user.list")]
     public function listUser(#[InjectUser] \Light\Model\User $user, $filters = [], ?string $sort = ""): DBQuery
     {
+
         //only administrators can list administrators
         $q = User::Query()->filters($filters)->sort($sort);
         if (!$user->is("Administrators")) {

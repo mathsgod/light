@@ -5,12 +5,10 @@ namespace Light\Type;
 use Light\Type\Auth;
 use Light\Rbac\Rbac;
 use Light\App as LightApp;
-use Light\Input\Table\Column;
 use Light\Model\Config;
 use Light\Model\CustomField;
 use Light\Model\EventLog;
 use Light\Model\MailLog;
-use Light\Model\MyFavorite;
 use Light\Model\Permission;
 use Light\Model\Role;
 use Light\Model\SystemValue;
@@ -23,6 +21,8 @@ use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
+use TheCodingMachine\GraphQLite\Exceptions\GraphQLExceptionInterface;
+
 
 #[Type]
 class App
@@ -424,6 +424,7 @@ class App
     #[Right("user.list")]
     public function listUser(#[InjectUser] \Light\Model\User $user, $filters = [], ?string $sort = ""): \Light\Db\Query
     {
+
         //only administrators can list administrators
         $q = User::Query()->filters($filters)->sort($sort);
         if (!$user->is("Administrators")) {

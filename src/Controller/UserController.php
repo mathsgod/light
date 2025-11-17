@@ -110,7 +110,7 @@ class UserController
 
     #[Mutation]
     #[Right("user.add")]
-    public function addUser(InputUser $data, #[InjectUser] \Light\Model\User $user): int
+    public function addUser(InputUser $data): int
     {
 
         $user = User::Create();

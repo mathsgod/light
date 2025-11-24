@@ -4,6 +4,7 @@ namespace Light\Controller;
 
 use League\OAuth2\Client\Provider\Google;
 use Light\App as LightApp;
+use Light\Input\Test;
 use Light\Model\Config;
 use Light\Model\User;
 use Light\Type\App;
@@ -18,16 +19,15 @@ use Psr\Http\Message\UploadedFileInterface;
 class AppController
 {
 
-    #[Query]
-    /** 
-     * @return mixed
-     */
-    public function test()
+/*     #[Query]
+
+    public function test(Test $input): array
     {
-        return [
-            "a" => 1
-        ];
-    }
+        if ($input->file1) {
+            return ["size" => $input->file1->getSize()];
+        }
+        return ["ok" => true];
+    } */
 
     #[Query]
     public function getApp(): App

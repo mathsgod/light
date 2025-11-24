@@ -556,6 +556,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $query = $body["query"] ?? null;
         $variableValues = $body["variables"] ?? null;
 
+
         $schema = $this->factory->createSchema();
         return  GraphQL::executeQuery($schema, $query, null, new Context, $variableValues);
     }

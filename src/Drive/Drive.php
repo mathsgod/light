@@ -43,13 +43,22 @@ class Drive
 
 
     #[Field]
-    public function file(string $path): ?File
+    public function getFile(string $path): ?File
     {
-        $list = $this->filesystem->listContents(dirname($path), false);
-        foreach ($list as $file) {
-            if ($file->path() === $path) {
-                return new File($this, $file);
+        // 正規化路徑 - 移除前導 "/"
+        $path = ltrim($path, '/');
+        
+        try {
+            if ($this->filesystem->has($path)) {
+                // 直接取得 FileAttributes
+                foreach ($this->filesystem->listContents(dirname($path), false) as $file) {
+                    if ($file->path() === $path) {
+                        return new File($this, $file);
+                    }
+                }
             }
+        } catch (\Exception $e) {
+            return null;
         }
         return null;
     }
@@ -81,7 +90,7 @@ class Drive
         foreach ($this->filesystem->listContents($path, $deep) as $file) {
             if (!$file->isFile()) continue;
 
-           //skip hidden files
+            //skip hidden files
             //if start with . 
             $name = basename($file->path());
             if (strpos($name, ".") === 0) continue;

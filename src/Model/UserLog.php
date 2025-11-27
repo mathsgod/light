@@ -18,8 +18,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 class UserLog extends \Light\Model
 {
-
-
     #[Field]
     public function getUsername(): ?string
     {
@@ -29,3 +27,7 @@ class UserLog extends \Light\Model
         return null;
     }
 }
+
+UserLog::RegisterFilter("username", function ($f) {
+    return "user_id in (" . User::Query()->columns(["user_id"])->filters(["username" => $f])->getSqlString() . ")";
+});

@@ -2,6 +2,7 @@
 
 namespace Light\Controller;
 
+use GraphQL\Error\Error;
 use Light\Rbac\Rbac;
 use Light\Model\Role;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
@@ -53,8 +54,13 @@ class RoleController
     #[Mutation]
     #[Logged]
     #[Right("role.add")]
-    public function addRole(\Light\Input\Role $data, #[InjectUser] \Light\Model\User $user): bool
-    {
+    public function addRole(
+        \Light\Input\Role $data,
+        #[InjectUser] \Light\Model\User $user,
+        #[Autowire] Rbac $rbac
+    ): bool {
+
+
         foreach ($data->childs as $child) {
             $obj = Role::Create([
                 'name' => $data->name,
@@ -130,11 +136,20 @@ class RoleController
     #[Mutation]
     #[Logged]
     #[Right('#administrators')]
-    public function addRoleChild(string $name, string $child): bool
+    public function addRoleChild(string $name, string $child, #[Autowire] Rbac $rbac): bool
     {
         if ($name == $child) return false;
         if (Role::Get(['name' => $name, 'child' => $child])) {
             return false;
+        }
+
+
+        // Check if child already has parent as its descendant (would create cycle)
+        if ($rbac->hasRole($child)) {
+            $childRole = $rbac->getRole($child);
+            if ($childRole->hasDescendant($name)) {
+                throw new Error("Cannot add role '{$child}' as child of '{$name}': would create circular dependency");
+            }
         }
 
         $obj = Role::Create([

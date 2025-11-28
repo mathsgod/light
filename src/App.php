@@ -39,7 +39,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     protected $container;
     protected $factory;
 
-    protected $rbac;
+    protected Rbac $rbac;
 
     protected $mode = "dev";
 
@@ -295,7 +295,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->rbac->getRole("Everyone")->addPermission("#everyone");
         $this->rbac->getRole("Everyone")->addParent("Users");
 
-        //check if table exists
         try {
             foreach (Role::Query() as $q) {
                 $this->rbac->addRole($q->name)->addPermission("#" . strtolower($q->name));
@@ -306,8 +305,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             }
         } catch (Exception $e) {
             // may be mysql not ready
-
         }
+
+
         /** Permissions */
         $all = Yaml::parseFile(dirname(__DIR__) . '/permissions.yml');
 

@@ -4,6 +4,8 @@ namespace Light\Database;
 
 use Light\App;
 use Light\Database\Table;
+use MysqlSchemaMigrate\Exporter;
+use MysqlSchemaMigrate\Importer;
 use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -17,6 +19,48 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type]
 class Schema
 {
+
+    #[Field]
+    #[Right("system.database.schema_import")]
+    public function importSchema(UploadedFileInterface $schema): string
+    {
+        $importer = new Importer(
+            host: $_ENV["DATABASE_HOSTNAME"],
+            database: $_ENV["DATABASE_DATABASE"],
+            username: $_ENV["DATABASE_USERNAME"],
+            password: $_ENV["DATABASE_PASSWORD"],
+            port: (int)$_ENV["DATABASE_PORT"] ?: 3306,
+            charset: $_ENV["DATABASE_CHARSET"] ?? 'utf8mb4'
+        );
+
+        // Import from file (dry-run)
+        $importer->importFromFile(
+            filePath: $schema->getStream()->getMetadata("uri"),
+            dryRun: true,
+            allowDrop: false,
+            keepDefiner: false,
+            only: [] // empty = all types
+        );
+
+        return $importer->formatSqlForFile();
+    }
+
+    #[Field]
+    #[Right("system.database.schema_export")]
+    public function exportSchema(): string
+    {
+
+        $exporter = new Exporter(
+            host: $_ENV["DATABASE_HOSTNAME"],
+            database: $_ENV["DATABASE_DATABASE"],
+            username: $_ENV["DATABASE_USERNAME"],
+            password: $_ENV["DATABASE_PASSWORD"],
+            port: (int)$_ENV["DATABASE_PORT"] ?: 3306,
+            charset: $_ENV["DATABASE_CHARSET"] ?? 'utf8mb4'
+        );
+
+        return $exporter->toJson();
+    }
 
     #[Field]
     #[Right("system.database.events")]

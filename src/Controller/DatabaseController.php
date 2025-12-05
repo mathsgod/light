@@ -18,10 +18,33 @@ use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use Laminas\Db\Sql\Ddl\Column;
+use MysqlSchemaMigrate\Importer;
 use Psr\Http\Message\UploadedFileInterface;
 
 class DatabaseController
 {
+
+    #[Mutation]
+    #[Right("system.database.schema_import")]
+    public function importDatabaseSchema(UploadedFileInterface $schema): string
+    {
+        $importer = new Importer(
+            host: $_ENV["DATABASE_HOSTNAME"],
+            database: $_ENV["DATABASE_DATABASE"],
+            username: $_ENV["DATABASE_USERNAME"],
+            password: $_ENV["DATABASE_PASSWORD"],
+            port: (int)$_ENV["DATABASE_PORT"] ?: 3306,
+            charset: $_ENV["DATABASE_CHARSET"] ?? 'utf8mb4'
+        );
+
+        // Import from file (dry-run)
+        $importer->importFromFile(
+            filePath: $schema->getStream()->getMetadata("uri"),
+            allowDrop: false,
+        );
+
+        return true;
+    }
 
 
     /*    #[Mutation]

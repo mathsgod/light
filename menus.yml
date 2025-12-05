@@ -125,6 +125,11 @@
               icon: sym_o_check_circle
               to: /System/database/check
               permission: system.database.check
+              
+            - label: Migrate
+              icon: sym_o_table_convert
+              to: /System/database/migrate
+              permission: system.database.migrate
           
     - label: User log
       icon: sym_o_description

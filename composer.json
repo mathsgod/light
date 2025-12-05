@@ -31,7 +31,8 @@
         "web-auth/webauthn-lib": "^4.9",
         "mathsgod/light-db": "^1.5",
         "mathsgod/light-db-graphqlite-mappers": "^1.0",
-        "mathsgod/json-to-sql": "^1.0"
+        "mathsgod/json-to-sql": "^1.0",
+        "mathsgod/mysql-schema-migrate": "^1.0"
     },
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*",

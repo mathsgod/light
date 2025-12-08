@@ -32,7 +32,8 @@
         "mathsgod/light-db": "^1.5",
         "mathsgod/light-db-graphqlite-mappers": "^1.0",
         "mathsgod/json-to-sql": "^1.0",
-        "mathsgod/mysql-schema-migrate": "^1.0"
+        "mathsgod/mysql-schema-migrate": "^1.0",
+        "symfony/console": "^7.4"
     },
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*",

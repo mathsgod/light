@@ -23,6 +23,7 @@ class MakeInputCommand extends Command
     {
         $this
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the input (table name)')
+            ->addOption('display', 'd', InputOption::VALUE_NONE, 'Output to console instead of file')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Overwrite existing file');
     }
 
@@ -31,13 +32,14 @@ class MakeInputCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $org_name = $input->getArgument('name');
         $name = ucfirst($org_name);
+        $display = $input->getOption('display');
         $force = $input->getOption('force');
         $cwd = getcwd();
 
         $path = $cwd . "/src/Input/{$name}.php";
 
-        // Check if file exists
-        if (file_exists($path) && !$force) {
+        // Check if file exists (only when not displaying to console)
+        if (!$display && file_exists($path) && !$force) {
             $io->error("Input {$name} already exists. Use --force to overwrite.");
             return Command::FAILURE;
         }
@@ -90,9 +92,17 @@ class MakeInputCommand extends Command
             $class->addPropertyFromGenerator($property);
         }
 
+        $content = "<?php\n\n" . $class->generate();
+
+        // Display to console
+        if ($display) {
+            $output->writeln($content);
+            return Command::SUCCESS;
+        }
+
         // Write to file
         $existed = file_exists($path);
-        file_put_contents($path, "<?php\n\n" . $class->generate());
+        file_put_contents($path, $content);
 
         if ($existed && $force) {
             $io->warning("Input {$name} overwritten");

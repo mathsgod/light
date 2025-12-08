@@ -5,10 +5,8 @@ namespace Light\Auth;
 use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use Light\Model\Config;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use Light\Model\User;
-use Light\Model\UserLog;
 use Psr\Http\Message\ServerRequestInterface;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 
@@ -19,20 +17,16 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
     protected $org_user = null;
     protected $app;
     protected $view_as = false;
-
     protected $token = null;
     protected $jti = null;
 
 
     public function __construct(ServerRequestInterface $request)
     {
-
         /** @var \Light\App $app */
         $this->app = $request->getAttribute(\Light\App::class);
-        $cache = $this->app->getCache();
 
         $cookies = $request->getCookieParams();
-
 
         //get Bearer token from Authorization header
         if ($authHeader = $request->getHeaderLine("Authorization")) {
@@ -51,9 +45,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                     return;
                 }
 
-
                 $this->jti = $payload->jti;
-
 
                 if ($payload->view_as) {
                     $this->view_as = true;

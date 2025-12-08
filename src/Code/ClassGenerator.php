@@ -22,7 +22,6 @@ class ClassGenerator extends GeneratorClassGenerator
 
         $parts = explode("class {$this->getName()}", $content, 2);
 
-
         $parts[0] .= implode("\n", $this->attributes) . "\n";
 
         $content = implode("class {$this->getName()}", $parts);

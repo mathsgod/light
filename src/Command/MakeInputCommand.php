@@ -75,11 +75,9 @@ class MakeInputCommand extends Command
             $type = $field->getDataType();
 
             $php_type = match ($type) {
-                "int" => "int",
-                "varchar", "text" => "string",
-                "float" => "float",
+                "int", "bigint", "smallint", "mediumint", "year" => "int",
+                "float", "double", "decimal" => "float",
                 "tinyint" => "bool",
-                "json" => "string",
                 default => "string"
             };
 

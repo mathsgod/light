@@ -21,14 +21,17 @@ use Light\Model\UserLog;
 use Light\Model\UserRole;
 use Light\Drive\Drive;
 use PHPMailer\PHPMailer\PHPMailer;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\SimpleCache\CacheInterface;
 use R\DB\Schema;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Yaml\Yaml;
 use TheCodingMachine\GraphQLite\Context\Context;
+use TheCodingMachine\GraphQLite\SchemaFactory;
 use Webauthn\PublicKeyCredentialRpEntity;
 
 class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, RequestHandlerInterface
@@ -39,7 +42,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     protected $container;
     protected $factory;
 
-    protected Rbac $rbac;
+    protected $rbac;
 
     protected $mode = "dev";
 
@@ -199,7 +202,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return \Light\Db\Adapter::Create();
     }
 
-    public function getCache()
+    public function getCache(): CacheInterface
     {
         return $this->cache;
     }
@@ -451,17 +454,17 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return Config::Value("two_factor_authentication") ? true : false;
     }
 
-    public function getRbac()
+    public function getRbac(): Rbac
     {
         return $this->rbac;
     }
 
-    public function getContainer()
+    public function getContainer(): ContainerInterface
     {
         return $this->container;
     }
 
-    public function getSchemaFactory()
+    public function getSchemaFactory(): SchemaFactory
     {
         return $this->factory;
     }

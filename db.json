@@ -92,7 +92,7 @@
             {
                 "name": "credential",
                 "type": "json"
-            },            
+            },
             {
                 "name": "microsoft",
                 "type": "varchar",
@@ -118,6 +118,10 @@
             },
             {
                 "name": "menu",
+                "type": "json"
+            },
+            {
+                "name": "style",
                 "type": "json"
             }
         ],

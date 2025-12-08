@@ -53,6 +53,11 @@ class MakeTsCommand extends Command
                 $str .= "\t\t\tsearchType: \"date\",\n";
             }
 
+            if($type=="tinyint") {
+                $str .= "\t\t\tsearchType: \"boolean\",\n";
+            }
+
+     
             $str .= "\t\t},\n";
         }
 

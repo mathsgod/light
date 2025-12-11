@@ -385,9 +385,16 @@ class AuthController
             }
         }
 
+        $need_2fa = $app->isTwoFactorAuthentication();
+
+        if ($need_2fa && !$user->secret) {
+            throw new Error("setup_2fa_required");
+        }
+
 
         //check two factor authentication
-        if ($app->isTwoFactorAuthentication()) {
+        if ($need_2fa) {
+
             if (!(new TwoFactorAuthentication)->checkCode($user->secret, $code)) {
                 throw new Error("two factor authentication error");
             }

@@ -2,6 +2,8 @@
 
 namespace Light\Type;
 
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 use Light\Type\Auth;
 use Light\Rbac\Rbac;
 use Light\App as LightApp;
@@ -15,6 +17,7 @@ use Light\Model\SystemValue;
 use Light\Model\Translate;
 use Light\Model\User;
 use Light\Model\UserLog;
+use Light\Security\TwoFactorAuthentication;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -27,6 +30,25 @@ use TheCodingMachine\GraphQLite\Exceptions\GraphQLExceptionInterface;
 #[Type]
 class App
 {
+
+    #[Field(outputType: "mixed")]
+    public function generate2FASecret(string $username): array
+    {
+        $secret = (new TwoFactorAuthentication())->generateSecret();
+
+        $host = $_SERVER["HTTP_HOST"];
+        $url = sprintf("otpauth://totp/%s@%s?secret=%s", $username, $host, $secret);
+
+        $writer = new PngWriter();
+        $png = $writer->write(QrCode::create($url));
+        return [
+            "secret" => $secret,
+            "host" => $host,
+            "image" => $png->getDataUri()
+        ];
+    }
+
+
 
     #[Field(outputType: "[mixed]")]
     public function getCustomFieldSchema(string $model)

@@ -28,7 +28,6 @@ use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 class AuthController
 {
 
-
     #[Mutation]
     public function changeExpiredPassword(string $username, string $old_password, string $new_password): bool
     {

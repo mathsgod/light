@@ -39,6 +39,8 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     use \League\Event\EventDispatcherAwareBehavior;
 
+    protected Auth\Service $auth_service;
+
     protected $container;
     protected $factory;
 
@@ -469,6 +471,11 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return $this->factory;
     }
 
+    public function getAuthService()
+    {
+        return $this->auth_service;
+    }
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($request->getMethod() == "OPTIONS") {
@@ -494,6 +501,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
  */
 
         $auth_service = new Auth\Service($request);
+        $this->auth_service = $auth_service;
 
         $this->factory->setAuthenticationService($auth_service);
         $this->factory->setAuthorizationService($auth_service);
@@ -787,5 +795,22 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     public function run()
     {
         $this->server->run();
+    }
+
+    public function getIpLocation(string $ip)
+    {
+
+        $data = $this->cache->get("geoip_" . $ip);
+        if ($data) {
+            return $data;
+        }
+
+        $url = "http://ip-api.com/json/{$ip}";
+        $response = @file_get_contents($url);
+        $data = json_decode($response, true);
+
+        $this->cache->set("geoip_" . $ip, $data, 60);
+
+        return $data;
     }
 }

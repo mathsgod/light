@@ -19,15 +19,12 @@ use Psr\Http\Message\UploadedFileInterface;
 class AppController
 {
 
-/*     #[Query]
-
-    public function test(Test $input): array
+    #[Mutation]
+    #[Logged]
+    public function revokeSession(string $jti, #[Autowire] LightApp $app, #[InjectUser] User $user): bool
     {
-        if ($input->file1) {
-            return ["size" => $input->file1->getSize()];
-        }
-        return ["ok" => true];
-    } */
+        return $user->revokeSession($jti);
+    }
 
     #[Query]
     public function getApp(): App

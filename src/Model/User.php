@@ -47,13 +47,47 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 class User extends \Light\Model
 {
+    public function revokeSession(string $jti): bool
+    {
+        UserLog::_table()->update(["logout_dt" => date("Y-m-d H:i:s")], ["jti" => $jti, "user_id" => $this->user_id]);
+        return true;
+    }
+
+    #[Field(outputType: "[mixed]")]
+    public function getSessions(#[Autowire] App $app): array
+    {
+        $token_expire = $app->getAccessTokenExpire();
+        $jti = $app->getAuthService()->getJti();
+
+        $ul = UserLog::Query(["user_id" => $this->user_id, "result" => "SUCCESS"]);
+        $ul->where->isNull("logout_dt");
+        $ul->where->greaterThan("login_dt", date("Y-m-d H:i:s", time() - $token_expire));
+
+        $sessions = [];
+        foreach ($ul as $log) {
+
+            $sessions[] = [
+                "is_current" => $log->jti == $jti,
+                "jti" => $log->jti,
+                "ip" => $log->ip,
+                "login_dt" => $log->login_dt,
+                "user_agent" => $log->user_agent,
+                "location" => $app->getIpLocation($log->ip),
+                "last_access_time" => $log->last_access_time
+            ];
+        }
+
+
+        return $sessions;
+    }
+
     #[Field]
     /**
      * @return mixed
      */
     public function getMenu(): array
     {
-        if($this->menu){
+        if ($this->menu) {
             return $this->menu;
         }
         return [];

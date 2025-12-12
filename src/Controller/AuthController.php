@@ -33,7 +33,7 @@ class AuthController
         $cache = $app->getCache();
         $count = $cache->get("two_factor_authentication_setup_" . $username, 0);
         if ($count >= 5) {
-            throw new Error("update two factor authentication failed");
+            throw new Error("You have reached the maximum number of attempts to set up two-factor authentication. Please try again later.");
         }
 
         $cache->set("two_factor_authentication_setup_" . $username, $count + 1, 600);

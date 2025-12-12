@@ -28,14 +28,22 @@ use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 class AuthController
 {
     #[Mutation]
-    public function updateTwoFactorAuthentication(string $username, string $password, string $secret, string $code): bool
+    public function updateTwoFactorAuthentication(string $username, string $password, string $secret, string $code, #[Autowire] App $app): bool
     {
+        $cache = $app->getCache();
+        $count = $cache->get("two_factor_authentication_setup_" . $username, 0);
+        if ($count >= 5) {
+            throw new Error("update two factor authentication failed");
+        }
+
+        $cache->set("two_factor_authentication_setup_" . $username, $count + 1, 600);
+
         $user = User::Get(["username" => $username]);
         if (!$user) {
             throw new Error("update two factor authentication failed");
         }
 
-        if($user->secret){
+        if ($user->secret) {
             throw new Error("update two factor authentication failed");
         }
 
@@ -45,7 +53,6 @@ class AuthController
 
         if (!(new TwoFactorAuthentication)->checkCode($secret, $code)) {
             throw new Error("setup two factor authentication failed");
-            
         }
 
         $user->secret = $secret;

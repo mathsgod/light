@@ -101,7 +101,7 @@ class WebAuthnController
         $publicKeyCredentialSource  = $this->getPublicKeyCredentialSourceById($publicKeyCredential->id);
 
         if (!$publicKeyCredentialSource) {
-            throw new Error("Invalid credential1");
+            throw new Error("Invalid credential");
             return false;
         }
 

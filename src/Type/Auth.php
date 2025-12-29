@@ -73,7 +73,9 @@ class Auth
         $cache = $app->getCache();
         $cache->set("webauthn_request", serialize($publicKeyCredentialRequestOptions), 60 * 5);
 
-        return $publicKeyCredentialRequestOptions->jsonSerialize();
+        $json = $publicKeyCredentialRequestOptions->jsonSerialize();
+
+        return $json;
     }
 
     #[Field]

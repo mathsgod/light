@@ -21,6 +21,31 @@ class DriveController
     const DISALLOW_EXT = ['zip', 'js', 'jsp', 'jsb', 'mhtml', 'mht', 'xhtml', 'xht', 'php', 'phtml', 'php3', 'php4', 'php5', 'phps', 'shtml', 'jhtml', 'pl', 'sh', 'py', 'cgi', 'exe', 'application', 'gadget', 'hta', 'cpl', 'msc', 'jar', 'vb', 'jse', 'ws', 'wsf', 'wsc', 'wsh', 'ps1', 'ps2', 'psc1', 'psc2', 'msh', 'msh1', 'msh2', 'inf', 'reg', 'scf', 'msp', 'scr', 'dll', 'msi', 'vbs', 'bat', 'com', 'pif', 'cmd', 'vxd', 'cpl', 'htpasswd', 'htaccess'];
 
 
+    #[Mutation(name:"lightDriveDuplicateFile")]
+    #[Right("fs.file.duplicate")]
+    public function duplicateFile(#[Autowire] App $app, int $index, string $path): string
+    {
+        $drive = $app->getDrive($index);
+        $fs = $drive->getFilesystem();
+
+        if (!$fs->fileExists($path)) {
+            throw new Error("File does not exist");
+        }
+
+        $basename = basename($path);
+        $dirname = dirname($path);
+        $newFilename = $this->getNextFilename($fs, $dirname, $basename);
+        $newPath = $dirname . "/" . $newFilename;
+
+        $stream = $fs->readStream($path);
+        $fs->writeStream($newPath, $stream);
+        if (is_resource($stream)) {
+            fclose($stream);
+        }
+
+        return $newPath;
+    }
+
     #[Mutation(name: "lightDriveUploadTempFile")]
     #[Right("fs.file.upload")]
     public function uploadTempFile(#[Autowire] App $app, int $index, UploadedFileInterface $file): File

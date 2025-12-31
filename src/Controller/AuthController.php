@@ -333,10 +333,10 @@ class AuthController
     #[Mutation]
     public function logout(#[Autowire] Service $service, #[Autowire] App $app): bool
     {
-        $access_token_expire = $app->getAccessTokenExpire();
+        $refresh_token_expire = $app->getRefreshTokenExpire();
         if ($jti = $service->getJti()) {
             $cache = $app->getCache();
-            $cache->set("logout_" . $jti, true, $access_token_expire);
+            $cache->set("logout_" . $jti, true, $refresh_token_expire);
         }
 
 
@@ -355,6 +355,17 @@ class AuthController
             "httponly" => true,
             "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax"
         ]);
+
+        //set cookie
+        setcookie("refresh_token", "", [
+            "expires" => time() - 3600,
+            "path" => "/refresh_token",
+            "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
+            "secure" => $_ENV["COOKIE_SECURE"] ?? false,
+            "httponly" => true,
+            "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax"
+        ]);
+
         return true;
     }
 

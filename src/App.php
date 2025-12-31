@@ -598,37 +598,18 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function getAccessTokenExpire(): int
     {
-        return intval(Config::Value("access_token_expire", 3600 * 8));
+        //15 minutes default
+        return intval(Config::Value("access_token_expire", 900));
     }
 
-
-
-    public function userLogin(User $user)
+    public function getRefreshTokenExpire(): int
     {
-        $access_token_expire = $this->getAccessTokenExpire();
-        $jti = Uuid::uuid4()->toString();
-        $payload = [
-            "iss" => "light server",
-            "jti" => $jti,
-            "iat" => time(),
-            "exp" => time() + $access_token_expire,
-            "role" => "Users",
-            "id" => $user->user_id,
-            "type" => "access_token"
-        ];
+        //7 days default
+        return intval(Config::Value("refresh_token_expire", 3600 * 24 * 7));
+    }
 
-        $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
-
-        //save UserLog
-        UserLog::_table()->insert([
-            "user_id" => $user->user_id,
-            "login_dt" => date("Y-m-d H:i:s"),
-            "result" => "SUCCESS",
-            "ip" => $_SERVER["REMOTE_ADDR"],
-            "user_agent" => $_SERVER["HTTP_USER_AGENT"],
-            "jti" => $jti
-        ]);
-
+    public function setAccessTokenCookie(string $token): void
+    {
         $samesite = $_ENV["COOKIE_SAMESITE"] ?? "Lax";
         // if is https then add Partitioned
         if ($_SERVER["HTTPS"] == "on" && $_ENV["COOKIE_PARTITIONED"] == "true") {
@@ -642,10 +623,55 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             "httponly" => true,
             "samesite" => $samesite
         ]);
+    }
+
+    public function setRefreshTokenCookie(string $token): void
+    {
+        $samesite = $_ENV["COOKIE_SAMESITE"] ?? "Lax";
+        // if is https then add Partitioned
+        if ($_SERVER["HTTPS"] == "on" && $_ENV["COOKIE_PARTITIONED"] == "true") {
+            $samesite .= ";Partitioned";
+        }
+        //set cookie
+        setcookie("refresh_token", $token, [
+            "path" => "/refresh_token",
+            "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
+            "secure" => $_ENV["COOKIE_SECURE"] ?? false,
+            "httponly" => true,
+            "samesite" => $samesite
+        ]);
+    }
+
+    public function userLogin(User $user)
+    {
+        $access_token_expire = $this->getAccessTokenExpire();
+        $jti = Uuid::uuid4()->toString();
+
+        $payload = [
+            "iss" => "light server",
+            "jti" => $jti,
+            "iat" => time(),
+            "exp" => time() + $access_token_expire,
+            "role" => "Users",
+            "id" => $user->user_id,
+            "type" => "access_token"
+        ];
+
+
+        $this->setAccessTokenCookie(JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256"));
+
+        //save UserLog
+        UserLog::_table()->insert([
+            "user_id" => $user->user_id,
+            "login_dt" => date("Y-m-d H:i:s"),
+            "result" => "SUCCESS",
+            "ip" => $_SERVER["REMOTE_ADDR"],
+            "user_agent" => $_SERVER["HTTP_USER_AGENT"],
+            "jti" => $jti
+        ]);
 
         //set refresh token
-        $refresh_token_expire = intval(Config::Value("refresh_token_expire", 3600 * 24 * 30));
-
+        $refresh_token_expire = intval(Config::Value("refresh_token_expire", 3600 * 24 * 7));
         $refresh_payload = [
             "iss" => "light server",
             "jti" => $jti,
@@ -661,7 +687,8 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
             "secure" => $_ENV["COOKIE_SECURE"] ?? false,
             "httponly" => true,
-            "samesite" => $samesite
+            "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax",
+            "expires" => time() + $refresh_token_expire
         ]);
     }
 
@@ -851,19 +878,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                     "type" => "access_token"
                 ];
                 $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
-                $samesite = $_ENV["COOKIE_SAMESITE"] ?? "Lax";
-                // if is https then add Partitioned
-                if ($_SERVER["HTTPS"] == "on" && $_ENV["COOKIE_PARTITIONED"] == "true") {
-                    $samesite .= ";Partitioned";
-                }
-                //set cookie
-                setcookie("access_token", $token, [
-                    "path" => "/",
-                    "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
-                    "secure" => $_ENV["COOKIE_SECURE"] ?? false,
-                    "httponly" => true,
-                    "samesite" => $samesite
-                ]);
+                $this->setAccessTokenCookie($token);
 
                 return new TextResponse("Token refreshed", 200);
             } catch (Exception $e) {

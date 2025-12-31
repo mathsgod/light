@@ -11,7 +11,6 @@ use Kcs\ClassFinder\Finder\ComposerFinder;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\Response\TextResponse;
-use Laminas\Diactoros\ServerRequestFactory;
 use Light\Rbac\Rbac;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\Model\Config;
@@ -23,14 +22,12 @@ use Light\Model\UserLog;
 use Light\Model\UserRole;
 use Light\Drive\Drive;
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPUnit\Util\Json;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\SimpleCache\CacheInterface;
-use R\DB\Schema;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Yaml\Yaml;
 use TheCodingMachine\GraphQLite\Context\Context;
@@ -513,30 +510,11 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->container->add(ServerRequestInterface::class, $request);
         $this->container->add(Auth\Service::class, $auth_service);
 
-        if ($request->getMethod() == "GET" && $auth_service->isLogged()) {
-
-            $base_path = $this->server->getBasePath($request);
-
-            $path = $request->getUri()->getPath();
-
-            //real path - base path
-            $path = substr($path, strlen($base_path ?? ""));
-            //trim / from start
-            $path = ltrim($path, "/");
-
-            //split 3 parts
-            $parts = explode("/", $path, 3);
-
-
-            if ($parts[0] == "drive") {
-                return $this->getDriveResponse($request, $parts[1], $parts[2]);
-            }
-        }
         return $handler->handle($request);
     }
 
 
-    public function getDriveResponse(ServerRequestInterface $requeset, int $index, string $path)
+    public function getDriveResponse(int $index, string $path)
     {
         $config = json_decode(Config::Value("fs", "[]"), true);
         if (count($config) == 0) {
@@ -547,12 +525,14 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             return new \Laminas\Diactoros\Response\EmptyResponse(404);
         }
 
-        $drive = $config[$index]["name"];
-        $fs = $this->getFS($drive);
+        $drive = $this->getDrive($index);
+        $fs = $drive->getFilesystem();
 
-        if (!$fs->fileExists($path)) {
+        if (!$fs->has($path)) {
             return new \Laminas\Diactoros\Response\EmptyResponse(404);
         }
+
+
 
         $response = new \Laminas\Diactoros\Response();
         $response = $response->withHeader("Content-Type", $fs->mimeType($path));
@@ -850,6 +830,17 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     {
         $router = $this->server->getRouter();
 
+
+        $router->map("GET", "/drive/{index}/{path:.*}", function (ServerRequestInterface $request, array $args) {
+
+            $auth = new Auth\Service($request);
+
+            if ($auth->isLogged()) {
+                return $this->getDriveResponse($args["index"], $args["path"]);
+            }
+            return new TextResponse("Unauthorized", 401);
+        });
+
         $router->map('POST', '/refresh_token', function (ServerRequestInterface $request, array $args) {
             $token = $request->getCookieParams()["refresh_token"] ?? null;
 
@@ -884,7 +875,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                 return new TextResponse("Token refreshed", 200);
             } catch (Exception $e) {
 
-                
+
 
                 return new TextResponse("Invalid token: " . $e->getMessage(), 401);
             }

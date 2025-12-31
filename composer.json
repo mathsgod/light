@@ -23,7 +23,7 @@
         "mathsgod/light-rbac": "^1.0",
         "league/event": "^3.0",
         "utopia-php/system": "^0.9.0",
-        "mathsgod/light-server": "^1.0",
+        "mathsgod/light-server": "^1.1",
         "mathsgod/light-graphql": "^1.2",
         "symfony/serializer": "^6.3",
         "symfony/property-info": "^6.4",

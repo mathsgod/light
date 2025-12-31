@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "697ec831d4f451761793c15e152241c3",
+    "content-hash": "6b0a4dd8a9362d21af8093e82e94b5ca",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2239,7 +2239,7 @@
         },
         {
             "name": "mathsgod/light-server",
-            "version": "1.0.5",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mathsgod/light-server.git",
@@ -2279,7 +2279,7 @@
             ],
             "support": {
                 "issues": "https://github.com/mathsgod/light-server/issues",
-                "source": "https://github.com/mathsgod/light-server/tree/1.0.5"
+                "source": "https://github.com/mathsgod/light-server/tree/1.1.0"
             },
             "time": "2025-12-30T09:33:02+00:00"
         },

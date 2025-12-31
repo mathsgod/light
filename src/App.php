@@ -585,7 +585,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     public function getRefreshTokenExpire(): int
     {
         //7 days default
-        return intval(Config::Value("refresh_token_expire", 3600 * 24 * 7));
+        return intval(Config::Value("refresh_token_expire", 604800));
     }
 
     public function setAccessTokenCookie(string $token): void

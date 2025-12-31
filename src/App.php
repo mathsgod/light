@@ -682,8 +682,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         ];
 
         $refresh_token = JWT::encode($refresh_payload, $_ENV["JWT_SECRET"], "HS256");
+        $currentDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
         setcookie("refresh_token", $refresh_token, [
-            "path" => "/refresh_token",
+            "path" => $currentDir . "/refresh_token",
             "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
             "secure" => $_ENV["COOKIE_SECURE"] ?? false,
             "httponly" => true,
@@ -882,6 +883,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
                 return new TextResponse("Token refreshed", 200);
             } catch (Exception $e) {
+
+                
+
                 return new TextResponse("Invalid token: " . $e->getMessage(), 401);
             }
         });

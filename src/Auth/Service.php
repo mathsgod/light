@@ -22,6 +22,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
     protected $view_as = false;
     protected $token = null;
     protected $jti = null;
+    protected $token_status = 'valid';
 
 
     public function __construct(ServerRequestInterface $request)
@@ -38,34 +39,34 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                 $token = $matches[1];
             }
         }
-        $this->token = $token ?? $cookies["access_token"] ?? null;
-    }
+        $token = $token ?? $cookies["access_token"] ?? null;
 
-    public function getUserFromToken()
-    {
+        if (!$token) {
+            return;
+        }
+        $this->token = $token;
+
         try {
-
             $payload = JWT::decode($this->token, new Key($_ENV["JWT_SECRET"], "HS256"));
-            if ($payload->type != "access_token") {
-                return;
+            if ($payload->type == "access_token") {
+
+                //decode user
+
+                $this->jti = $payload->jti;
+
+                if ($payload->view_as) {
+                    $this->view_as = true;
+                    $this->user = User::Get($payload->view_as);
+                    $this->org_user = User::Get($payload->id);
+                } else {
+                    $this->user = User::Get($payload->id);
+
+                    $this->user->saveLastAccessTime($this->jti);
+                }
+                $this->is_logged = true;
             }
-
-            $this->jti = $payload->jti;
-
-            if ($payload->view_as) {
-                $this->view_as = true;
-                $this->user = User::Get($payload->view_as);
-                $this->org_user = User::Get($payload->id);
-            } else {
-                $this->user = User::Get($payload->id);
-
-                $this->user->saveLastAccessTime($this->jti);
-            }
-            $this->is_logged = true;
-            return $this->user;
         } catch (ExpiredException $e) {
-            $this->is_logged = false;
-            throw new TokenExpiredException('TOKEN_EXPIRED');
+            $this->token_status = 'expired';
         } catch (Exception $e) {
             $this->is_logged = false;
         }
@@ -88,12 +89,20 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
 
     public function isLogged(): bool
     {
+
+        if ($this->token_status == 'expired') {
+            throw new TokenExpiredException('TOKEN_EXPIRED');
+        }
+
         return $this->is_logged;
     }
 
     public function getUser(): ?object
     {
-        return $this->getUserFromToken($this->token);
+        if ($this->token_status == 'expired') {
+            throw new TokenExpiredException('TOKEN_EXPIRED');
+        }
+        return $this->user;
     }
 
     public function getOrginalUser(): ?object

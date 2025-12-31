@@ -3,11 +3,14 @@
 namespace Light\Auth;
 
 use Exception;
+use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use Light\Model\User;
+use Light\TokenExpiredException;
 use Psr\Http\Message\ServerRequestInterface;
+use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 
 class Service implements AuthenticationServiceInterface, AuthorizationServiceInterface
@@ -23,6 +26,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
 
     public function __construct(ServerRequestInterface $request)
     {
+
         /** @var \Light\App $app */
         $this->app = $request->getAttribute(\Light\App::class);
 
@@ -34,32 +38,36 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                 $token = $matches[1];
             }
         }
-
         $this->token = $token ?? $cookies["access_token"] ?? null;
+    }
 
-        if ($this->token) {
+    public function getUserFromToken()
+    {
+        try {
 
-            try {
-                $payload = JWT::decode($this->token, new Key($_ENV["JWT_SECRET"], "HS256"));
-                if ($payload->type != "access_token") {
-                    return;
-                }
-
-                $this->jti = $payload->jti;
-
-                if ($payload->view_as) {
-                    $this->view_as = true;
-                    $this->user = User::Get($payload->view_as);
-                    $this->org_user = User::Get($payload->id);
-                } else {
-                    $this->user = User::Get($payload->id);
-
-                    $this->user->saveLastAccessTime($this->jti);
-                }
-                $this->is_logged = true;
-            } catch (Exception $e) {
-                $this->is_logged = false;
+            $payload = JWT::decode($this->token, new Key($_ENV["JWT_SECRET"], "HS256"));
+            if ($payload->type != "access_token") {
+                return;
             }
+
+            $this->jti = $payload->jti;
+
+            if ($payload->view_as) {
+                $this->view_as = true;
+                $this->user = User::Get($payload->view_as);
+                $this->org_user = User::Get($payload->id);
+            } else {
+                $this->user = User::Get($payload->id);
+
+                $this->user->saveLastAccessTime($this->jti);
+            }
+            $this->is_logged = true;
+            return $this->user;
+        } catch (ExpiredException $e) {
+            $this->is_logged = false;
+            throw new TokenExpiredException('TOKEN_EXPIRED');
+        } catch (Exception $e) {
+            $this->is_logged = false;
         }
     }
 
@@ -85,7 +93,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
 
     public function getUser(): ?object
     {
-        return $this->user;
+        return $this->getUserFromToken($this->token);
     }
 
     public function getOrginalUser(): ?object

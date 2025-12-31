@@ -10,6 +10,8 @@ use GraphQL\Upload\UploadMiddleware;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
+use Laminas\Diactoros\Response\TextResponse;
+use Laminas\Diactoros\ServerRequestFactory;
 use Light\Rbac\Rbac;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\Model\Config;
@@ -21,6 +23,7 @@ use Light\Model\UserLog;
 use Light\Model\UserRole;
 use Light\Drive\Drive;
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPUnit\Util\Json;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -130,11 +133,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-
         $result = $this->execute($request);
 
         try {
-
             //return new JsonResponse($result->toArray());
             if ($this->isDevMode()) {
                 return new JsonResponse($result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE), 200, [], JsonResponse::DEFAULT_JSON_FLAGS | JSON_UNESCAPED_UNICODE);
@@ -482,6 +483,8 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             return new EmptyResponse(200);
         }
 
+
+
         if (!$request->getParsedBody()) {
             $body = json_decode(file_get_contents('php://input'), true);
             $request = $request->withParsedBody($body);
@@ -598,6 +601,8 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return intval(Config::Value("access_token_expire", 3600 * 8));
     }
 
+
+
     public function userLogin(User $user)
     {
         $access_token_expire = $this->getAccessTokenExpire();
@@ -631,8 +636,28 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         }
         //set cookie
         setcookie("access_token", $token, [
-            "expires" => time() + $access_token_expire,
             "path" => "/",
+            "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
+            "secure" => $_ENV["COOKIE_SECURE"] ?? false,
+            "httponly" => true,
+            "samesite" => $samesite
+        ]);
+
+        //set refresh token
+        $refresh_token_expire = intval(Config::Value("refresh_token_expire", 3600 * 24 * 30));
+
+        $refresh_payload = [
+            "iss" => "light server",
+            "jti" => $jti,
+            "iat" => time(),
+            "exp" => time() + $refresh_token_expire,
+            "id" => $user->user_id,
+            "type" => "refresh_token"
+        ];
+
+        $refresh_token = JWT::encode($refresh_payload, $_ENV["JWT_SECRET"], "HS256");
+        setcookie("refresh_token", $refresh_token, [
+            "path" => "/refresh_token",
             "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
             "secure" => $_ENV["COOKIE_SECURE"] ?? false,
             "httponly" => true,
@@ -792,8 +817,59 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return new Drive($fs["name"], $this->getFS($index), $index, $fs["data"]);
     }
 
+
     public function run()
     {
+        $router = $this->server->getRouter();
+
+        $router->map('POST', '/refresh_token', function (ServerRequestInterface $request, array $args) {
+            $token = $request->getCookieParams()["refresh_token"] ?? null;
+
+            if (!$token) {
+                return new TextResponse("No refresh token", 401);
+            }
+
+            try {
+                $payload = JWT::decode($token, new \Firebase\JWT\Key($_ENV["JWT_SECRET"], "HS256"));
+                if ($payload->type != "refresh_token") {
+                    return new TextResponse("Invalid token", 401);
+                }
+
+                $user = User::Get($payload->id);
+                if (!$user) {
+                    return new TextResponse("User not found", 404);
+                }
+
+                $access_token_expire = $this->getAccessTokenExpire();
+                $payload = [
+                    "iss" => "light server",
+                    "jti" => $payload->jti,
+                    "iat" => time(),
+                    "exp" => time() + $access_token_expire,
+                    "role" => "Users",
+                    "id" => $user->user_id,
+                    "type" => "access_token"
+                ];
+                $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
+                $samesite = $_ENV["COOKIE_SAMESITE"] ?? "Lax";
+                // if is https then add Partitioned
+                if ($_SERVER["HTTPS"] == "on" && $_ENV["COOKIE_PARTITIONED"] == "true") {
+                    $samesite .= ";Partitioned";
+                }
+                //set cookie
+                setcookie("access_token", $token, [
+                    "path" => "/",
+                    "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
+                    "secure" => $_ENV["COOKIE_SECURE"] ?? false,
+                    "httponly" => true,
+                    "samesite" => $samesite
+                ]);
+
+                return new TextResponse("Token refreshed", 200);
+            } catch (Exception $e) {
+                return new TextResponse("Invalid token: " . $e->getMessage(), 401);
+            }
+        });
         $this->server->run();
     }
 

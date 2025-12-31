@@ -336,7 +336,7 @@ class AuthController
         $refresh_token_expire = $app->getRefreshTokenExpire();
         if ($jti = $service->getJti()) {
             $cache = $app->getCache();
-            $cache->set("logout_" . $jti, true, $refresh_token_expire);
+            $cache->set("revoked_token_" . $jti, true, $refresh_token_expire);
         }
 
 

@@ -30,6 +30,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
 
         /** @var \Light\App $app */
         $this->app = $request->getAttribute(\Light\App::class);
+        $cache = $this->app->getCache();
 
         $cookies = $request->getCookieParams();
 
@@ -53,6 +54,12 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                 //decode user
 
                 $this->jti = $payload->jti;
+
+                if($cache->has("revoked_token_".$this->jti)){
+                    return;
+                }
+                
+
 
                 if ($payload->view_as) {
                     $this->view_as = true;

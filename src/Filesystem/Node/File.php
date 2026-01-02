@@ -58,7 +58,6 @@ class File implements Node
     #[Field]
     public function getPublicUrl(): ?string
     {
-        return "abc";
         return $this->mountManager->publicUrl($this->path);
     }
 }

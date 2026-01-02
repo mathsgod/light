@@ -126,6 +126,23 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->rbac = new Rbac();
         $this->loadRbac();
         $this->loadMenu();
+
+
+
+        //load Mount Manager
+
+        $filesystems = [];
+
+        foreach ($this->getFSConfig() as $index => $config) {
+
+            $filesystems[$config["name"]] = $this->getFS($index);
+        }
+
+
+        $mountManager = new \League\Flysystem\MountManager($filesystems);
+        $this->container->add(\League\Flysystem\MountManager::class, $mountManager);
+
+        
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -724,8 +741,10 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             ]);
 
             $location = $data["location"];
-            $adapter = new \League\Flysystem\Local\LocalFilesystemAdapter($location, $visibilityConverter);
-            $filesystem = new \League\Flysystem\Filesystem($adapter);
+            $adapter = new \League\Flysystem\Local\LocalFilesystemAdapter($location, $visibilityConverter, lazyRootCreation: true);
+            $filesystem = new \League\Flysystem\Filesystem($adapter,[
+                "public_url" => $data["public_url"] ?? ""
+            ]);
             return $filesystem;
         }
 
@@ -824,6 +843,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $fs = $config[$index] ?? $config[0];
         return new Drive($fs["name"], $this->getFS($index), $index, $fs["data"]);
     }
+
 
 
     public function run()

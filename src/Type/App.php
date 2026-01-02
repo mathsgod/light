@@ -31,6 +31,12 @@ use TheCodingMachine\GraphQLite\Exceptions\GraphQLExceptionInterface;
 class App
 {
 
+    #[Field]
+    public function fs(): \Light\Type\Filesystem
+    {
+        return new \Light\Type\Filesystem();
+    }
+
     #[Field(outputType: "mixed")]
     public function generate2FASecret(string $username): array
     {

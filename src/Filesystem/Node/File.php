@@ -48,4 +48,17 @@ class File implements Node
     {
         return $this->mountManager->lastModified($this->path);
     }
+
+    #[Field]
+    public function getMimetype(): string
+    {
+        return $this->mountManager->mimeType($this->path);
+    }
+
+    #[Field]
+    public function getPublicUrl(): ?string
+    {
+        return "abc";
+        return $this->mountManager->publicUrl($this->path);
+    }
 }

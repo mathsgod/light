@@ -55,7 +55,41 @@ class FileSystemController
 
     #[Mutation(name: "lightFSWriteFile")]
     #[Right("fs.file:write")]
-    public function writeFile(#[Autowire] MountManager $mountManager, string $location, UploadedFileInterface $file, bool $rename = false): string
+    public function writeFile(#[Autowire] MountManager $mountManager, string $location, string $content): bool
+    {
+        $mountManager->write($location, $content);
+        return true;
+    }
+
+    #[Mutation(name: "lightFSDeleteFile")]
+    #[Right("fs.file:delete")]
+    public function deleteFile(#[Autowire] MountManager $mountManager, string $location): bool
+    {
+        $mountManager->delete($location);
+        return true;
+    }
+
+    #[Mutation(name: "lightFSRenameFile")]
+    #[Right("fs.file:rename")]
+    public function renameFile(#[Autowire] MountManager $mountManager, string $location, string $newName): bool
+    {
+        $pathParts = pathinfo($location);
+        $dirname = $pathParts['dirname'];
+        if (str_ends_with($dirname, ':')) {
+            $dirname .= '/';
+        }
+
+        $newLocation = $dirname . '/' . $newName;
+        $mountManager->move($location, $newLocation);
+        return true;
+    }
+    
+
+
+
+    #[Mutation(name: "lightFSUploadFile")]
+    #[Right("fs.file:write")]
+    public function uploadFile(#[Autowire] MountManager $mountManager, string $location, UploadedFileInterface $file, bool $rename = false): string
     {
         $pathParts = pathinfo($location);
         $dirname = $pathParts['dirname'];
@@ -93,8 +127,6 @@ class FileSystemController
         } while ($mountManager->fileExists($path . '/' . $newFilename));
         return $newFilename;
     }
-
-
 
 
     #[Mutation(name: "lightFSupdate")]

@@ -11,53 +11,65 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class File implements Node
 {
 
-    public string $path;
+    public string $location;
     public function __construct(
-        string $path,
+        string $location,
         private readonly MountManager $mountManager
     ) {
-        $this->path = $path;
+        $this->location = $location;
     }
 
     #[Field()]
     public function getName(): string
     {
-        return basename($this->path);
+        return basename($this->location);
     }
 
     #[Field]
     public function getPath(): string
     {
-        return $this->path;
+        $pos = strpos($this->location, '://');
+        if ($pos !== false) {
+            $path = substr($this->location, $pos + 3);
+            // 確保去掉開頭的斜線，保持為 "test/1.txt"
+            return ltrim($path, '/');
+        }
+        return ltrim($this->location, '/');
+    }
+
+    #[Field]
+    public function getLocation(): string
+    {
+        return $this->location;
     }
 
     #[Field]
     public function getSize(): int
     {
-        return $this->mountManager->fileSize($this->path);
+        return $this->mountManager->fileSize($this->location);
     }
 
     #[Field()]
     public function getContent(): string
     {
-        return  $this->mountManager->read($this->path);
+        return  $this->mountManager->read($this->location);
     }
 
     #[Field]
     public function getLastModified(): int
     {
-        return $this->mountManager->lastModified($this->path);
+        return $this->mountManager->lastModified($this->location);
     }
 
     #[Field]
     public function getMimeType(): string
     {
-        return $this->mountManager->mimeType($this->path);
+        return $this->mountManager->mimeType($this->location);
     }
 
     #[Field]
     public function getPublicUrl(): ?string
     {
-        return $this->mountManager->publicUrl($this->path);
+        return $this->mountManager->publicUrl($this->location);
     }
 }

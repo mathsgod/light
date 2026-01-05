@@ -16,4 +16,7 @@ interface Node
 
     #[Field]
     public function getLastModified(): int;
+
+    #[Field]
+    public function getLocation(): string;
 }

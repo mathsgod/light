@@ -11,7 +11,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class Folder implements Node
 {
     public function __construct(
-        private readonly string $path,
+        private readonly string $location,
         private readonly MountManager $mountManager
     ) {}
 
@@ -19,13 +19,18 @@ class Folder implements Node
     public function getName(): string
     {
         // 去掉結尾斜線後取 basename
-        return basename(rtrim($this->path, '/'));
+        return basename(rtrim($this->location, '/'));
     }
 
     #[Field]
     public function getPath(): string
     {
-        return $this->path;
+        return ltrim(explode('://', $this->location)[1] ?? $this->location, '/');
+    }
+
+    public function getLocation(): string
+    {
+        return $this->location;
     }
 
     /**
@@ -39,7 +44,7 @@ class Folder implements Node
         // 呼叫 Service 內的 list 方法，將底層數據轉為 Node 物件陣列
         $nodes = [];
         // listContents 回傳一個迭代器
-        $contents = $this->mountManager->listContents($this->path, false);
+        $contents = $this->mountManager->listContents($this->location, false);
 
         foreach ($contents as $attributes) {
             $location = $attributes->path();
@@ -63,6 +68,6 @@ class Folder implements Node
     #[Field]
     public function getLastModified(): int
     {
-        return $this->mountManager->lastModified($this->path);
+        return $this->mountManager->lastModified($this->location);
     }
 }

@@ -22,6 +22,8 @@ use TheCodingMachine\GraphQLite\Annotations\Autowire;
 class FileSystemController
 {
 
+    const DISALLOW_EXT = ['zip', 'js', 'jsp', 'jsb', 'mhtml', 'mht', 'xhtml', 'xht', 'php', 'phtml', 'php3', 'php4', 'php5', 'phps', 'shtml', 'jhtml', 'pl', 'sh', 'py', 'cgi', 'exe', 'application', 'gadget', 'hta', 'cpl', 'msc', 'jar', 'vb', 'jse', 'ws', 'wsf', 'wsc', 'wsh', 'ps1', 'ps2', 'psc1', 'psc2', 'msh', 'msh1', 'msh2', 'inf', 'reg', 'scf', 'msp', 'scr', 'dll', 'msi', 'vbs', 'bat', 'com', 'pif', 'cmd', 'vxd', 'cpl', 'htpasswd', 'htaccess'];
+
     #[Mutation(name: "lightFSCreateFolder")]
     #[Right("fs.folder:create")]
     public function createFolder(#[Autowire] MountManager $mountManager, string $location): bool
@@ -57,6 +59,13 @@ class FileSystemController
     #[Right("fs.file:write")]
     public function writeFile(#[Autowire] MountManager $mountManager, string $location, string $content): bool
     {
+        //check filename starts with dot
+        $pathParts = pathinfo($location);
+        $basename = $pathParts['basename'];
+        if (str_starts_with($basename, '.')) {
+            throw new Error("File name cannot start with a dot");
+        }
+
         $mountManager->write($location, $content);
         return true;
     }
@@ -65,6 +74,13 @@ class FileSystemController
     #[Right("fs.file:delete")]
     public function deleteFile(#[Autowire] MountManager $mountManager, string $location): bool
     {
+        //check filename starts with dot
+        $pathParts = pathinfo($location);
+        $basename = $pathParts['basename'];
+        if (str_starts_with($basename, '.')) {
+            throw new Error("File name cannot start with a dot");
+        }
+
         $mountManager->delete($location);
         return true;
     }
@@ -73,6 +89,18 @@ class FileSystemController
     #[Right("fs.file:rename")]
     public function renameFile(#[Autowire] MountManager $mountManager, string $location, string $newName): bool
     {
+
+        //check newName validity
+        $extension = pathinfo($newName, PATHINFO_EXTENSION);
+        if (in_array(strtolower($extension), self::DISALLOW_EXT)) {
+            throw new Error("File extension not allowed");
+        }
+
+        //check newName starts with dot
+        if (str_starts_with($newName, '.')) {
+            throw new Error("File name cannot start with a dot");
+        }
+
         $pathParts = pathinfo($location);
         $dirname = $pathParts['dirname'];
         if (str_ends_with($dirname, ':')) {
@@ -83,8 +111,14 @@ class FileSystemController
         $mountManager->move($location, $newLocation);
         return true;
     }
-    
 
+    #[Mutation(name: "lightFSMove")]
+    #[Right("fs.node:move")]
+    public function moveNode(#[Autowire] MountManager $mountManager, string $from, string $to): bool
+    {
+        $mountManager->move($from, $to);
+        return true;
+    }
 
 
     #[Mutation(name: "lightFSUploadFile")]

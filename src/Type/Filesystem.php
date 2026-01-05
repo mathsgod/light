@@ -17,7 +17,7 @@ class Filesystem
     #[Field]
     public function node(string $path, #[Autowire()] MountManager $mountManager): Node
     {
-        $is_dir = str_ends_with($path, '/');
+        $is_dir = $mountManager->directoryExists($path);
         if ($is_dir) {
             return new Folder(
                 $path,

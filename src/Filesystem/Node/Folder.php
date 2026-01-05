@@ -54,11 +54,14 @@ class Folder implements Node
                 continue;
             }
 
-            if ($attributes->isDir()) {
+            if ($attributes  instanceof \League\Flysystem\DirectoryAttributes) {
                 $nodes[] = new Folder($location, $this->mountManager);
-            } else {
+            } elseif ($attributes  instanceof \League\Flysystem\FileAttributes) {
                 // 這裡可以選擇傳入 metadata，或者讓 File 內部延遲獲取
-                $nodes[] = new File($location, $this->mountManager);
+                $nodes[] = new File($location,  $this->mountManager, [
+                    'size' => $attributes->fileSize(),
+                    'last_modified' => $attributes->lastModified(),
+                ]);
             }
         }
 

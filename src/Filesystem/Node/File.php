@@ -2,6 +2,7 @@
 
 namespace Light\Filesystem\Node;
 
+use League\Flysystem\FileAttributes;
 use League\Flysystem\MountManager;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -14,7 +15,8 @@ class File implements Node
     public string $location;
     public function __construct(
         string $location,
-        private readonly MountManager $mountManager
+        private readonly MountManager $mountManager,
+        private readonly ?array $metadata = null,
     ) {
         $this->location = $location;
     }
@@ -46,6 +48,9 @@ class File implements Node
     #[Field]
     public function getSize(): int
     {
+        if (isset($this->metadata['size'])) {
+            return $this->metadata['size'];
+        }
         return $this->mountManager->fileSize($this->location);
     }
 
@@ -58,6 +63,9 @@ class File implements Node
     #[Field]
     public function getLastModified(): int
     {
+        if (isset($this->metadata['last_modified'])) {
+            return $this->metadata['last_modified'];
+        }
         return $this->mountManager->lastModified($this->location);
     }
 

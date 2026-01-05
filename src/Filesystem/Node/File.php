@@ -50,7 +50,7 @@ class File implements Node
     }
 
     #[Field]
-    public function getMimetype(): string
+    public function getMimeType(): string
     {
         return $this->mountManager->mimeType($this->path);
     }

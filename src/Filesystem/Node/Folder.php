@@ -44,6 +44,11 @@ class Folder implements Node
         foreach ($contents as $attributes) {
             $location = $attributes->path();
 
+            //skip name start with .
+            if (basename($location)[0] === '.') {
+                continue;
+            }
+
             if ($attributes->isDir()) {
                 $nodes[] = new Folder($location, $this->mountManager);
             } else {

@@ -15,20 +15,20 @@ class Filesystem
 {
 
     #[Field]
-    public function node(string $path, #[Autowire()] MountManager $mountManager): Node
+    public function node(string $location, #[Autowire()] MountManager $mountManager): ?Node
     {
-        $is_dir = $mountManager->directoryExists($path);
-        if ($is_dir) {
+        if ($mountManager->directoryExists($location)) {
             return new Folder(
-                $path,
+                $location,
                 $mountManager
             );
-        } else {
+        } elseif ($mountManager->fileExists($location)) {
             return new File(
-                $path,
+                $location,
                 $mountManager
 
             );
         }
+        return null;
     }
 }

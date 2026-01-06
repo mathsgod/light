@@ -123,7 +123,12 @@ class FileSystemController
             $to = $to . '/' . $basename;
         }
 
-        $mountManager->move($from, $to);
+        try {
+            $mountManager->move($from, $to);
+        } catch (\Exception $e) {
+            throw new Error($e->getMessage());
+        }
+
         return true;
     }
 

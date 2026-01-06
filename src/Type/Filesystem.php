@@ -15,6 +15,14 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[Type()]
 class Filesystem
 {
+    #[Field]
+    /**
+     * @return array<int,mixed>
+     */
+    public function list(#[Autowire] App $app){
+        return $app->getFSConfig();
+
+    }
 
     #[Field]
     public function node(string $location, #[Autowire()] MountManager $mountManager): ?Node

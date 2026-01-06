@@ -719,7 +719,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                 "type" => "local",
                 "data" => [
                     "location" => getcwd() . "/uploads",
-                    "url" => "/uploads/"
+                    "public_url" => "/api/uploads/"
                 ]
             ];
         }

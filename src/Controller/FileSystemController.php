@@ -8,6 +8,7 @@ use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\App;
 
 use Light\Filesystem\Event\FolderCreating;
+use Light\Filesystem\Event\FolderDeleting;
 use Light\Model\EventLog;
 use Light\Filesystem\Node\File;
 use Psr\Http\Message\UploadedFileInterface;
@@ -30,6 +31,13 @@ class FileSystemController
     #[Right("fs.folder:create")]
     public function createFolder(#[Autowire] App $app, string $location): bool
     {
+        //check folder name starts with dot
+        $pathParts = pathinfo($location);
+        $basename = $pathParts['basename'];
+        if (str_starts_with($basename, '.')) {
+            throw new Error("Folder name cannot start with a dot");
+        }
+
         /** @var FolderCreating $event **/
         $event = $app->eventDispatcher()->dispatch(new FolderCreating($location));
         $app->getMountManager()->createDirectory($event->location);
@@ -38,9 +46,18 @@ class FileSystemController
 
     #[Mutation(name: "lightFSDeleteFolder")]
     #[Right("fs.folder:delete")]
-    public function deleteFolder(#[Autowire] MountManager $mountManager, string $location): bool
+    public function deleteFolder(#[Autowire] App $app, string $location): bool
     {
-        $mountManager->deleteDirectory($location);
+        //check folder name starts with dot
+        $pathParts = pathinfo($location);
+        $basename = $pathParts['basename'];
+        if (str_starts_with($basename, '.')) {
+            throw new Error("Folder name cannot start with a dot");
+        }
+
+        /** @var FolderDeleting $event **/
+        $event = $app->eventDispatcher()->dispatch(new FolderDeleting($location));
+        $app->getMountManager()->deleteDirectory($event->location);
         return true;
     }
 
@@ -48,6 +65,11 @@ class FileSystemController
     #[Right("fs.folder:rename")]
     public function renameFolder(#[Autowire] MountManager $mountManager, string $location, string $newName): bool
     {
+        //check newName starts with dot
+        if (str_starts_with($newName, '.')) {
+            throw new Error("Folder name cannot start with a dot");
+        }
+
         $pathParts = pathinfo($location);
         $dirname = $pathParts['dirname'];
         if (str_ends_with($dirname, ':')) {
@@ -120,6 +142,14 @@ class FileSystemController
     #[Right("fs.node:move")]
     public function moveNode(#[Autowire] MountManager $mountManager, string $from, string $to): bool
     {
+        //check if from starts with dot
+        $pathParts = pathinfo($from);
+        $basename = $pathParts['basename'];
+        if (str_starts_with($basename, '.')) {
+            throw new Error("File/Folder name cannot start with a dot");
+        }
+
+
         $basename = basename($from);
         if (str_ends_with($to, '/')) {
             $to = $to . $basename;
@@ -141,6 +171,17 @@ class FileSystemController
     #[Right("fs.file:write")]
     public function uploadBase64(#[Autowire] MountManager $mountManager, string $location, string $base64): File
     {
+        //check if extension is allowed
+        $ext = pathinfo($location, PATHINFO_EXTENSION);
+        if (in_array($ext, self::DISALLOW_EXT)) throw new Error("File type not allowed");
+
+        //check starting with dot
+        $basename = pathinfo($location, PATHINFO_BASENAME);
+        if (str_starts_with($basename, '.')) {
+            throw new Error("File name cannot start with a dot");
+        }
+
+
         // 1. 處理 Data URI Header (例如: data:image/png;base64,...)
         // 如果傳入的是完整的 Data URI，我們只需要後面的內容
         if (str_contains($base64, ',')) {

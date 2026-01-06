@@ -11,6 +11,7 @@ use Kcs\ClassFinder\Finder\ComposerFinder;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\Response\TextResponse;
+use League\Flysystem\MountManager;
 use Light\Rbac\Rbac;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\Model\Config;
@@ -40,6 +41,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     use \League\Event\EventDispatcherAwareBehavior;
 
     protected Auth\Service $auth_service;
+    protected MountManager $mountManager;
 
     protected $container;
     protected $factory;
@@ -140,9 +142,13 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
 
         $mountManager = new \League\Flysystem\MountManager($filesystems);
+        $this->mountManager = $mountManager;
         $this->container->add(\League\Flysystem\MountManager::class, $mountManager);
+    }
 
-        
+    public function getMountManager(): MountManager
+    {
+        return $this->mountManager;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -742,7 +748,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
             $location = $data["location"];
             $adapter = new \League\Flysystem\Local\LocalFilesystemAdapter($location, $visibilityConverter, lazyRootCreation: true);
-            $filesystem = new \League\Flysystem\Filesystem($adapter,[
+            $filesystem = new \League\Flysystem\Filesystem($adapter, [
                 "public_url" => $data["public_url"] ?? ""
             ]);
             return $filesystem;

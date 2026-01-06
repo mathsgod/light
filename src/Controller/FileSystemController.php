@@ -9,6 +9,12 @@ use Light\App;
 
 use Light\Filesystem\Event\FolderCreating;
 use Light\Filesystem\Event\FolderDeleting;
+use Light\Filesystem\Event\FolderRenaming;
+use Light\Filesystem\Event\FileWriting;
+use Light\Filesystem\Event\FileDeleting;
+use Light\Filesystem\Event\FileRenaming;
+use Light\Filesystem\Event\NodeMoving;
+use Light\Filesystem\Event\FileUploading;
 use Light\Model\EventLog;
 use Light\Filesystem\Node\File;
 use Psr\Http\Message\UploadedFileInterface;
@@ -63,27 +69,30 @@ class FileSystemController
 
     #[Mutation(name: "lightFSRenameFolder")]
     #[Right("fs.folder:rename")]
-    public function renameFolder(#[Autowire] MountManager $mountManager, string $location, string $newName): bool
+    public function renameFolder(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location, string $newName): bool
     {
         //check newName starts with dot
         if (str_starts_with($newName, '.')) {
             throw new Error("Folder name cannot start with a dot");
         }
 
-        $pathParts = pathinfo($location);
+        /** @var FolderRenaming $event **/
+        $event = $app->eventDispatcher()->dispatch(new FolderRenaming($location, $newName));
+
+        $pathParts = pathinfo($event->location);
         $dirname = $pathParts['dirname'];
         if (str_ends_with($dirname, ':')) {
             $dirname .= '/';
         }
 
-        $newLocation = $dirname . '/' . $newName;
-        $mountManager->move($location, $newLocation);
+        $newLocation = $dirname . '/' . $event->newName;
+        $mountManager->move($event->location, $newLocation);
         return true;
     }
 
     #[Mutation(name: "lightFSWriteFile")]
     #[Right("fs.file:write")]
-    public function writeFile(#[Autowire] MountManager $mountManager, string $location, string $content): bool
+    public function writeFile(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location, string $content): bool
     {
         //check filename starts with dot
         $pathParts = pathinfo($location);
@@ -92,13 +101,15 @@ class FileSystemController
             throw new Error("File name cannot start with a dot");
         }
 
-        $mountManager->write($location, $content);
+        /** @var FileWriting $event **/
+        $event = $app->eventDispatcher()->dispatch(new FileWriting($location, $content));
+        $mountManager->write($event->location, $event->content);
         return true;
     }
 
     #[Mutation(name: "lightFSDeleteFile")]
     #[Right("fs.file:delete")]
-    public function deleteFile(#[Autowire] MountManager $mountManager, string $location): bool
+    public function deleteFile(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location): bool
     {
         //check filename starts with dot
         $pathParts = pathinfo($location);
@@ -107,13 +118,15 @@ class FileSystemController
             throw new Error("File name cannot start with a dot");
         }
 
-        $mountManager->delete($location);
+        /** @var FileDeleting $event **/
+        $event = $app->eventDispatcher()->dispatch(new FileDeleting($location));
+        $mountManager->delete($event->location);
         return true;
     }
 
     #[Mutation(name: "lightFSRenameFile")]
     #[Right("fs.file:rename")]
-    public function renameFile(#[Autowire] MountManager $mountManager, string $location, string $newName): bool
+    public function renameFile(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location, string $newName): bool
     {
 
         //check newName validity
@@ -127,20 +140,23 @@ class FileSystemController
             throw new Error("File name cannot start with a dot");
         }
 
-        $pathParts = pathinfo($location);
+        /** @var FileRenaming $event **/
+        $event = $app->eventDispatcher()->dispatch(new FileRenaming($location, $newName));
+
+        $pathParts = pathinfo($event->location);
         $dirname = $pathParts['dirname'];
         if (str_ends_with($dirname, ':')) {
             $dirname .= '/';
         }
 
-        $newLocation = $dirname . '/' . $newName;
-        $mountManager->move($location, $newLocation);
+        $newLocation = $dirname . '/' . $event->newName;
+        $mountManager->move($event->location, $newLocation);
         return true;
     }
 
     #[Mutation(name: "lightFSMove")]
     #[Right("fs.node:move")]
-    public function moveNode(#[Autowire] MountManager $mountManager, string $from, string $to): bool
+    public function moveNode(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $from, string $to): bool
     {
         //check if from starts with dot
         $pathParts = pathinfo($from);
@@ -157,8 +173,11 @@ class FileSystemController
             $to = $to . '/' . $basename;
         }
 
+        /** @var NodeMoving $event **/
+        $event = $app->eventDispatcher()->dispatch(new NodeMoving($from, $to));
+
         try {
-            $mountManager->move($from, $to);
+            $mountManager->move($event->from, $event->to);
         } catch (\Exception $e) {
             throw new Error($e->getMessage());
         }
@@ -169,7 +188,7 @@ class FileSystemController
 
     #[Mutation(name: "lightFSUploadBase64")]
     #[Right("fs.file:write")]
-    public function uploadBase64(#[Autowire] MountManager $mountManager, string $location, string $base64): File
+    public function uploadBase64(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location, string $base64): File
     {
         //check if extension is allowed
         $ext = pathinfo($location, PATHINFO_EXTENSION);
@@ -198,17 +217,20 @@ class FileSystemController
             throw new \Exception("Invalid base64 string provided.");
         }
 
+        /** @var FileUploading $event **/
+        $event = $app->eventDispatcher()->dispatch(new FileUploading($location, $basename));
+
         // 3. 寫入檔案系統 (Flysystem)
         // 使用 write 方法，如果檔案已存在會覆蓋
-        $mountManager->write($location, $content);
+        $mountManager->write($event->location, $content);
 
         // 4. 回傳 File 物件供前端更新 UI
-        return new File($location);
+        return new File($event->location);
     }
 
     #[Mutation(name: "lightFSUploadFile")]
     #[Right("fs.file:write")]
-    public function uploadFile(#[Autowire] MountManager $mountManager, string $location, UploadedFileInterface $file, bool $rename = false): bool
+    public function uploadFile(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location, UploadedFileInterface $file, bool $rename = false): bool
     {
 
         $filename = $file->getClientFilename();
@@ -230,8 +252,11 @@ class FileSystemController
             }
         }
 
+        /** @var FileUploading $event **/
+        $event = $app->eventDispatcher()->dispatch(new FileUploading($location, $filename));
+
         //move file
-        $mountManager->write($location, $file->getStream()->getContents());
+        $mountManager->write($event->location, $file->getStream()->getContents());
 
         return true;
     }

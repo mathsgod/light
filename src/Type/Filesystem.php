@@ -48,7 +48,7 @@ class Filesystem
         $types[] = [
             "label" => "Amazon S3",
             "name" => "s3",
-            "disabled" => !\Composer\InstalledVersions::isInstalled("league/flysystem-aws-s3-v3"),
+            "disable" => !\Composer\InstalledVersions::isInstalled("league/flysystem-aws-s3-v3"),
             "options" => [
                 "region" => ["type" => "string", "description" => "AWS Region", "required" => true],
                 "endpoint" => ["type" => "string", "description" => "AWS Endpoint", "required" => true],
@@ -65,7 +65,7 @@ class Filesystem
         $types[] = [
             "label" => "Hostlink Storage",
             "name" => "hostlink",
-            "disabled" => !\Composer\InstalledVersions::isInstalled("hostlink/hostlink-storage-adapter"),
+            "disable" => !\Composer\InstalledVersions::isInstalled("hostlink/hostlink-storage-adapter"),
             "options" => [
                 "token" => ["type" => "string", "description" => "Hostlink Access Token", "required" => true],
                 "endpoint" => ["type" => "string", "description" => "Hostlink API Endpoint", "required" => true],
@@ -78,7 +78,7 @@ class Filesystem
         $types[] = [
             "label" => "Aliyun OSS",
             "name" => "oss",
-            "disabled" => !\Composer\InstalledVersions::isInstalled("alphasnow/aliyun-oss-flysystem"),
+            "disable" => !\Composer\InstalledVersions::isInstalled("alphasnow/aliyun-oss-flysystem"),
             "options" => [
                 "access_key_id" => ["type" => "string", "description" => "Access Key ID", "required" => true],
                 "access_key_secret" => ["type" => "string", "description" => "Access Key Secret", "required" => true],
@@ -89,6 +89,20 @@ class Filesystem
         ];
 
 
+        //ftp
+        $types[] = [
+            "label" => "FTP Server",
+            "name" => "ftp",
+            "disable" => !\Composer\InstalledVersions::isInstalled("league/flysystem-ftp"),
+            "options" => [
+                "host" => ["type" => "string", "description" => "FTP Host", "required" => true],
+                "username" => ["type" => "string", "description" => "FTP Username", "required" => true],
+                "password" => ["type" => "string", "description" => "FTP Password", "required" => true],
+                "port" => ["type" => "int", "description" => "FTP Port", "required" => false, "placeholder" => "21"],
+                "root" => ["type" => "string", "description" => "Root Path", "required" => false, "placeholder" => "/"],
+                "public_url" => ["type" => "string", "description" => "Public URL base path"],
+            ]
+        ];
 
         return $types;
     }

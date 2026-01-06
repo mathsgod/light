@@ -15,7 +15,6 @@ class File implements Node
     public string $location;
     public function __construct(
         string $location,
-        private readonly MountManager $mountManager,
         private readonly ?array $metadata = null,
     ) {
         $this->location = $location;
@@ -46,38 +45,38 @@ class File implements Node
     }
 
     #[Field]
-    public function getSize(): int
+    public function getSize(#[Autowire] MountManager $mountManager): int
     {
         if (isset($this->metadata['size'])) {
             return $this->metadata['size'];
         }
-        return $this->mountManager->fileSize($this->location);
+        return $mountManager->fileSize($this->location);
     }
 
     #[Field()]
-    public function getContent(): string
+    public function getContent(#[Autowire] MountManager $mountManager): string
     {
-        return  $this->mountManager->read($this->location);
+        return  $mountManager->read($this->location);
     }
 
     #[Field]
-    public function getLastModified(): int
+    public function getLastModified(#[Autowire] MountManager $mountManager): int
     {
         if (isset($this->metadata['last_modified'])) {
             return $this->metadata['last_modified'];
         }
-        return $this->mountManager->lastModified($this->location);
+        return $mountManager->lastModified($this->location);
     }
 
     #[Field]
-    public function getMimeType(): string
+    public function getMimeType(#[Autowire] MountManager $mountManager): string
     {
-        return $this->mountManager->mimeType($this->location);
+        return $mountManager->mimeType($this->location);
     }
 
     #[Field]
-    public function getPublicUrl(): ?string
+    public function getPublicUrl(#[Autowire] MountManager $mountManager ): ?string
     {
-        return $this->mountManager->publicUrl($this->location);
+        return $mountManager->publicUrl($this->location);
     }
 }

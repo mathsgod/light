@@ -12,7 +12,7 @@ class Folder implements Node
 {
     public function __construct(
         private readonly string $location,
-        private readonly MountManager $mountManager
+        private readonly ?array $metadata = null,
     ) {}
 
     #[Field()]
@@ -39,12 +39,12 @@ class Folder implements Node
      * @return Node[]
      */
     #[Field]
-    public function getChildren(): array
+    public function getChildren(#[Autowire] MountManager $mountManager): array
     {
         // 呼叫 Service 內的 list 方法，將底層數據轉為 Node 物件陣列
         $nodes = [];
         // listContents 回傳一個迭代器
-        $contents = $this->mountManager->listContents($this->location, false);
+        $contents = $mountManager->listContents($this->location, false);
 
         foreach ($contents as $attributes) {
             $location = $attributes->path();
@@ -54,11 +54,13 @@ class Folder implements Node
                 continue;
             }
 
-            if ($attributes  instanceof \League\Flysystem\DirectoryAttributes) {
-                $nodes[] = new Folder($location, $this->mountManager);
-            } elseif ($attributes  instanceof \League\Flysystem\FileAttributes) {
+            if ($attributes instanceof \League\Flysystem\DirectoryAttributes) {
+                $nodes[] = new Folder($location, [
+                    'last_modified' => $attributes->lastModified(),
+                ]);
+            } elseif ($attributes instanceof \League\Flysystem\FileAttributes) {
                 // 這裡可以選擇傳入 metadata，或者讓 File 內部延遲獲取
-                $nodes[] = new File($location,  $this->mountManager, [
+                $nodes[] = new File($location, [
                     'size' => $attributes->fileSize(),
                     'last_modified' => $attributes->lastModified(),
                 ]);
@@ -69,8 +71,11 @@ class Folder implements Node
     }
 
     #[Field]
-    public function getLastModified(): int
+    public function getLastModified(#[Autowire] MountManager $mountManager): int
     {
-        return $this->mountManager->lastModified($this->location);
+        if (isset($this->metadata['last_modified'])) {
+            return $this->metadata['last_modified'];
+        }
+        return $mountManager->lastModified($this->location);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Light\Filesystem\Node;
 
+use League\Flysystem\MountManager;
+use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
@@ -15,7 +17,7 @@ interface Node
     public function getPath(): string;
 
     #[Field]
-    public function getLastModified(): int;
+    public function getLastModified(#[Autowire] MountManager $mountManager): int;
 
     #[Field]
     public function getLocation(): string;

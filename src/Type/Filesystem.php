@@ -20,16 +20,9 @@ class Filesystem
     public function node(string $location, #[Autowire()] MountManager $mountManager): ?Node
     {
         if ($mountManager->directoryExists($location)) {
-            return new Folder(
-                $location,
-                $mountManager
-            );
+            return new Folder($location);
         } elseif ($mountManager->fileExists($location)) {
-            return new File(
-                $location,
-                $mountManager
-
-            );
+            return new File($location);
         }
         return null;
     }
@@ -45,10 +38,12 @@ class Filesystem
      * @return Node[]
      */
     public function find(
+        #[Autowire()] MountManager $mountManager,
+        #[Autowire()] App $app,
         ?string $search,
         ?string $label = null, // 新增標籤參數
-        #[Autowire()] MountManager $mountManager,
-        #[Autowire()] App $app
+
+
     ): array {
         $nodes = [];
 
@@ -74,11 +69,14 @@ class Filesystem
 
                 // 3. 實例化
                 if ($item->isDir()) {
-                    $nodes[] = new Folder($item->path(), $mountManager);
-                } elseif ($item->isFile()) {
-
-
-                    $nodes[] = new File($item->path(), $mountManager);
+                    $nodes[] = new Folder($item->path(), [
+                        'last_modified' => $item->lastModified(),
+                    ]);
+                } elseif ($item instanceof FileAttributes) {
+                    $nodes[] = new File($item->path(), [
+                        'size' => $item->fileSize(),
+                        'last_modified' => $item->lastModified(),
+                    ]);
                 }
             }
         }

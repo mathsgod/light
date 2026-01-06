@@ -128,8 +128,8 @@ class FileSystemController
     }
 
 
-    #[Mutation]
     #[Mutation(name: "lightFSUploadBase64")]
+    #[Right("fs.file:write")]
     public function uploadBase64(#[Autowire] MountManager $mountManager, string $location, string $base64): File
     {
         // 1. 處理 Data URI Header (例如: data:image/png;base64,...)

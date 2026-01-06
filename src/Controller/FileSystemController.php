@@ -6,6 +6,7 @@ use GraphQL\Error\Error;
 use League\Flysystem\MountManager;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\App;
+
 use Light\Filesystem\Event\FolderCreating;
 use Light\Model\EventLog;
 use Light\Filesystem\Node\File;
@@ -166,7 +167,7 @@ class FileSystemController
 
     #[Mutation(name: "lightFSUploadFile")]
     #[Right("fs.file:write")]
-    public function uploadFile(#[Autowire] MountManager $mountManager, string $location, UploadedFileInterface $file, bool $rename = false): File
+    public function uploadFile(#[Autowire] MountManager $mountManager, string $location, UploadedFileInterface $file, bool $rename = false): bool
     {
 
         $filename = $file->getClientFilename();
@@ -191,7 +192,7 @@ class FileSystemController
         //move file
         $mountManager->write($location, $file->getStream()->getContents());
 
-        return new File($location);
+        return true;
     }
 
     private function getNextFilename(MountManager $mountManager, string $path, string $filename): string

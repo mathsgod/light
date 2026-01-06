@@ -19,9 +19,78 @@ class Filesystem
     /**
      * @return array<int,mixed>
      */
-    public function list(#[Autowire] App $app){
+    public function list(#[Autowire] App $app)
+    {
         return $app->getFSConfig();
+    }
 
+    #[Field]
+    /**
+     * @return array<int,mixed>
+     */
+    public function getTypes()
+    {
+
+        $types = [];
+        $type = [
+            "label" => "Local Filesystem",
+            "name" => "local",
+            "options" => [
+                "location" => ["type" => "string", "description" => "Root Path", "required" => true, "placeholder" => "uploads"],
+                "public_url" => ["type" => "string", "description" => "Public URL base path"],
+            ],
+        ];
+
+        $types[] = $type;
+
+
+        //s3
+        $types[] = [
+            "label" => "Amazon S3",
+            "name" => "s3",
+            "disabled" => !\Composer\InstalledVersions::isInstalled("league/flysystem-aws-s3-v3"),
+            "options" => [
+                "region" => ["type" => "string", "description" => "AWS Region", "required" => true],
+                "endpoint" => ["type" => "string", "description" => "AWS Endpoint", "required" => true],
+                "bucket" => ["type" => "string", "description" => "S3 Bucket Name", "required" => true],
+                "access_key" => ["type" => "string", "description" => "AWS Access Key", "required" => true],
+                "secret_key" => ["type" => "string", "description" => "AWS Secret Key", "required" => true],
+                "prefix" => ["type" => "string", "description" => "Path Prefix inside the bucket"],
+                "public_url" => ["type" => "string", "description" => "Public URL base path"],
+            ],
+        ];
+
+
+        //hostlink storage
+        $types[] = [
+            "label" => "Hostlink Storage",
+            "name" => "hostlink",
+            "disabled" => !\Composer\InstalledVersions::isInstalled("hostlink/hostlink-storage-adapter"),
+            "options" => [
+                "token" => ["type" => "string", "description" => "Hostlink Access Token", "required" => true],
+                "endpoint" => ["type" => "string", "description" => "Hostlink API Endpoint", "required" => true],
+                "public_url" => ["type" => "string", "description" => "Public URL base path"],
+            ],
+        ];
+
+
+        //alphasnow/aliyun-oss-flysystem
+        $types[] = [
+            "label" => "Aliyun OSS",
+            "name" => "oss",
+            "disabled" => !\Composer\InstalledVersions::isInstalled("alphasnow/aliyun-oss-flysystem"),
+            "options" => [
+                "access_key_id" => ["type" => "string", "description" => "Access Key ID", "required" => true],
+                "access_key_secret" => ["type" => "string", "description" => "Access Key Secret", "required" => true],
+                "endpoint" => ["type" => "string", "description" => "OSS Endpoint", "required" => true],
+                "bucket" => ["type" => "string", "description" => "OSS Bucket Name", "required" => true],
+                "public_url" => ["type" => "string", "description" => "Public URL base path"],
+            ],
+        ];
+
+
+
+        return $types;
     }
 
     #[Field]

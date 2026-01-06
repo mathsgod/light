@@ -710,7 +710,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         if (!$config) {
             $fss = [];
         } else {
-            $fss = json_decode($config->value, true);
+            $fss = json_decode($config->value??"[]", true);
         }
         //push default if not exists
         if (count($fss) == 0) {

@@ -77,7 +77,11 @@ class File implements Node
     #[Field]
     public function getPublicUrl(#[Autowire] MountManager $mountManager): ?string
     {
-        return $mountManager->publicUrl($this->location);
+        try {
+            return $mountManager->publicUrl($this->location);
+        } catch (\Exception $e) {
+            return "/api/uploads/" . $this->getPath();
+        }
     }
 
 

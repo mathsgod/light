@@ -2,6 +2,7 @@
 
 namespace Light\Filesystem\Node;
 
+use League\Flysystem\FileAttributes;
 use League\Flysystem\MountManager;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -14,6 +15,19 @@ class Folder implements Node
         private readonly string $location,
         private readonly ?array $metadata = null,
     ) {}
+
+
+    #[Field]
+    public function getTotalSize(#[Autowire] MountManager $mountManager): int
+    {
+        $size = 0;
+        foreach ($mountManager->listContents($this->location, true) as $file) {
+            if ($file instanceof FileAttributes) {
+                $size += intval($file->fileSize());
+            }
+        }
+        return $size;
+    }
 
     #[Field()]
     public function getName(): string

@@ -71,7 +71,11 @@ class File implements Node
     #[Field]
     public function getMimeType(#[Autowire] MountManager $mountManager): string
     {
-        return $mountManager->mimeType($this->location);
+        try {
+            return $mountManager->mimeType($this->location);
+        } catch (\Exception $e) {
+            return 'application/octet-stream';
+        }
     }
 
     #[Field]

@@ -628,23 +628,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         ]);
     }
 
-    public function setRefreshTokenCookie(string $token): void
-    {
-        $samesite = $_ENV["COOKIE_SAMESITE"] ?? "Lax";
-        // if is https then add Partitioned
-        if ($_SERVER["HTTPS"] == "on" && $_ENV["COOKIE_PARTITIONED"] == "true") {
-            $samesite .= ";Partitioned";
-        }
-        //set cookie
-        setcookie("refresh_token", $token, [
-            "path" => "/refresh_token",
-            "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
-            "secure" => $_ENV["COOKIE_SECURE"] ?? false,
-            "httponly" => true,
-            "samesite" => $samesite
-        ]);
-    }
-
     public function userLogin(User $user)
     {
         $access_token_expire = $this->getAccessTokenExpire();
@@ -684,8 +667,13 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             "type" => "refresh_token"
         ];
 
+
+        if ($_ENV["API_PREFIX"]) {
+            $currentDir = rtrim($_ENV["API_PREFIX"], '/\\');
+        } else {
+            $currentDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+        }
         $refresh_token = JWT::encode($refresh_payload, $_ENV["JWT_SECRET"], "HS256");
-        $currentDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
         setcookie("refresh_token", $refresh_token, [
             "path" => $currentDir . "/refresh_token",
             "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
@@ -710,7 +698,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         if (!$config) {
             $fss = [];
         } else {
-            $fss = json_decode($config->value??"[]", true);
+            $fss = json_decode($config->value ?? "[]", true);
         }
         //push default if not exists
         if (count($fss) == 0) {
@@ -871,6 +859,18 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             $token = $request->getCookieParams()["refresh_token"] ?? null;
 
             if (!$token) {
+
+                //clear access token cookie
+                setcookie("access_token", "", [
+                    "path" => "/",
+                    "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
+                    "secure" => $_ENV["COOKIE_SECURE"] ?? false,
+                    "httponly" => true,
+                    "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax",
+                    "expires" => time() - 3600
+                ]);
+
+
                 return new TextResponse("No refresh token", 401);
             }
 

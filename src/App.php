@@ -844,6 +844,22 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     {
         $router = $this->server->getRouter();
 
+        $router->map("GET", "/fs/{protocol}/{path:.*}", function (ServerRequestInterface $request, array $args) {
+
+            $auth = new Auth\Service($request);
+            if ($auth->isLogged()) {
+                $location = $args["protocol"] . "://" . urldecode($args["path"]);
+                if ($this->getMountManager()->has($location)) {
+                    $stream = $this->getMountManager()->readStream($location);
+                    $response = new \Laminas\Diactoros\Response();
+                    $response = $response->withHeader("Content-Type", $this->getMountManager()->mimeType($location));
+                    $response->getBody()->write(stream_get_contents($stream));
+                    fclose($stream);
+                    return $response;
+                }
+            }
+            return new TextResponse("Unauthorized", 401);
+        });
 
         $router->map("GET", "/drive/{index}/{path:.*}", function (ServerRequestInterface $request, array $args) {
 

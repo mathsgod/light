@@ -284,6 +284,13 @@ class App
     }
 
     #[Field]
+    public function isWebAuthnEnabled(): bool
+    {
+        return Config::Value("webauthn_enabled", true);
+    }
+
+
+    #[Field]
     public function isForgetPasswordEnabled(): bool
     {
         return Config::Value("forget_password_enabled", true);

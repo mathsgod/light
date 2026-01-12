@@ -873,32 +873,19 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
         $router->map('POST', '/refresh_token', function (ServerRequestInterface $request, array $args) {
             $token = $request->getCookieParams()["refresh_token"] ?? null;
-
-            if (!$token) {
-
-                //clear access token cookie
-                setcookie("access_token", "", [
-                    "path" => "/",
-                    "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
-                    "secure" => $_ENV["COOKIE_SECURE"] ?? false,
-                    "httponly" => true,
-                    "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax",
-                    "expires" => time() - 3600
-                ]);
-
-
-                return new TextResponse("No refresh token", 401);
-            }
-
             try {
+                if (!$token) {
+                    throw new TextResponse("No refresh token", 401);
+                }
+
                 $payload = JWT::decode($token, new \Firebase\JWT\Key($_ENV["JWT_SECRET"], "HS256"));
                 if ($payload->type != "refresh_token") {
-                    return new TextResponse("Invalid token", 401);
+                    throw new TextResponse("Invalid token", 401);
                 }
 
                 $user = User::Get($payload->id);
                 if (!$user) {
-                    return new TextResponse("User not found", 404);
+                    throw new TextResponse("User not found", 404);
                 }
 
                 $access_token_expire = $this->getAccessTokenExpire();
@@ -916,10 +903,16 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
                 return new TextResponse("Token refreshed", 200);
             } catch (Exception $e) {
-
-
-
-                return new TextResponse("Invalid token: " . $e->getMessage(), 401);
+                //clear access token cookie
+                setcookie("access_token", "", [
+                    "path" => "/",
+                    "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
+                    "secure" => $_ENV["COOKIE_SECURE"] ?? false,
+                    "httponly" => true,
+                    "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax",
+                    "expires" => time() - 3600
+                ]);
+                return new TextResponse($e->getMessage(), 401);
             }
         });
         $this->server->run();

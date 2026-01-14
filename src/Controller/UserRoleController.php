@@ -31,7 +31,7 @@ class UserRoleController
     
     #[Mutation]
     #[Logged]
-    #[Right("user.role.add")]
+    #[Right("user.role.remove")]
     public function removeUserRole(#[InjectUser] \Light\Model\User $user, #[Autowire] Rbac $rbac, int $user_id, string $role): bool
     {
         if ($role == "Administrators") { // Only administrators can remove administrators

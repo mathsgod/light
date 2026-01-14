@@ -844,7 +844,10 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     {
         $router = $this->server->getRouter();
 
-        $router->map("GET", "/fs/{protocol}/{path:.*}", function (ServerRequestInterface $request, array $args) {
+        $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+
+
+        $router->map("GET", $basePath . "/fs/{protocol}/{path:.*}", function (ServerRequestInterface $request, array $args) {
 
             $auth = new Auth\Service($request);
             if ($auth->isLogged()) {
@@ -861,7 +864,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             return new TextResponse("Unauthorized", 401);
         });
 
-        $router->map("GET", "/drive/{index}/{path:.*}", function (ServerRequestInterface $request, array $args) {
+        $router->map("GET", $basePath . "/drive/{index}/{path:.*}", function (ServerRequestInterface $request, array $args) {
 
             $auth = new Auth\Service($request);
 
@@ -871,7 +874,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             return new TextResponse("Unauthorized", 401);
         });
 
-        $router->map('POST', '/refresh_token', function (ServerRequestInterface $request, array $args) {
+        $router->map('POST', $basePath . '/refresh_token', function (ServerRequestInterface $request, array $args) {
             $token = $request->getCookieParams()["refresh_token"] ?? null;
             try {
                 if (!$token) {

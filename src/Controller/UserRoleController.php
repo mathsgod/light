@@ -28,7 +28,7 @@ class UserRoleController
         $ur->save();
         return true;
     }
-    
+
     #[Mutation]
     #[Logged]
     #[Right("user.role.remove")]
@@ -56,7 +56,7 @@ class UserRoleController
      */
     public function updateUserRole(#[Autowire] Rbac $rbac, int $user_id, array $roles, #[InjectUser] \Light\Model\User $user): bool
     {
-        if ($user->is("Administrators")) {
+        if (!$user->is("Administrators")) {
             //remove administrators from the list
             $roles = array_filter($roles, function ($role) {
                 return $role != "Administrators";

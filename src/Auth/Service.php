@@ -18,7 +18,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
     protected $is_logged = false;
     protected $user = null;
     protected $org_user = null;
-    protected $app;
+    protected \Light\App $app;
     protected $view_as = false;
     protected $token = null;
     protected $jti = null;
@@ -55,10 +55,10 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
 
                 $this->jti = $payload->jti;
 
-                if($cache->has("revoked_token_".$this->jti)){
+                if ($cache->has("revoked_token_" . $this->jti)) {
                     return;
                 }
-                
+
 
 
                 if ($payload->view_as) {
@@ -134,12 +134,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
             }
 
             $rbac = $this->app->getRbac();
-
-            foreach ($user->getRoles() as $role) {
-                if ($rbac->hasRole($role) && $rbac->getRole($role)->can($right)) {
-                    return true;
-                }
-            }
+            return $rbac->getUser($user->user_id)->can($right);
         }
 
         return false;

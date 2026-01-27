@@ -878,17 +878,17 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             $token = $request->getCookieParams()["refresh_token"] ?? null;
             try {
                 if (!$token) {
-                    throw new TextResponse("No refresh token", 401);
+                    throw new Exception("No refresh token", 401);
                 }
 
                 $payload = JWT::decode($token, new \Firebase\JWT\Key($_ENV["JWT_SECRET"], "HS256"));
                 if ($payload->type != "refresh_token") {
-                    throw new TextResponse("Invalid token", 401);
+                    throw new Exception("Invalid token", 401);
                 }
 
                 $user = User::Get($payload->id);
                 if (!$user) {
-                    throw new TextResponse("User not found", 404);
+                    throw new Exception("User not found", 404);
                 }
 
                 $access_token_expire = $this->getAccessTokenExpire();

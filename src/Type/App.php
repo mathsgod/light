@@ -327,10 +327,12 @@ class App
     }
 
     #[Field]
-    public function isLogged(#[InjectUser] $user): bool
+    public function isLogged(#[InjectUser] $user, #[Autowire] Rbac $rbac): bool
     {
-        if ($user) return true;
-        return false;
+        if (!$user) return false;
+
+        $user = $rbac->getUser($user->user_id);
+        return $user->is("Users") || $user->is("Administrators") || $user->is("Powers Users");
     }
 
 

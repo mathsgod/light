@@ -30,6 +30,7 @@ class App
 {
 
     #[Field]
+    #[Logged]
     public function fs(): \Light\Type\Filesystem
     {
         return new \Light\Type\Filesystem();

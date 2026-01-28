@@ -19,7 +19,11 @@ class TranslateController
     #[Right('translate.update')]
     public function updateTranslate(string $name, string $value, string $language): bool
     {
-        if (!$t = Translate::Get(["name" => $name, "language" => $language])) {
+        $q = Translate::Query(["language" => $language]);
+        $q->where->expression("binary name = ?", [$name]);
+        $t = $q->first();
+
+        if (!$t) {
             $t = Translate::Create([
                 "name" => $name,
                 "value" => $value,
@@ -60,7 +64,11 @@ class TranslateController
     {
         foreach ($data->values as $value) {
 
-            if (!$t = Translate::Get(["name" => $data->name, "language" => $value["language"]])) {
+            $q = Translate::Query(["language" => $value["language"]]);
+            $q->where->expression("binary name = ?", [$data->name]);
+            $t = $q->first();
+
+            if (!$t) {
                 $t = Translate::Create([
                     "name" => $data->name,
                     "value" => $value["value"],
@@ -84,9 +92,10 @@ class TranslateController
     #[Right('translate.delete')]
     public function deleteTranslate(string $name): bool
     {
-        foreach (Translate::Query(["name" => $name]) as $obj) {
-            $obj->delete();
-        }
+
+        $q = Translate::Query();
+        $q->where->expression("binary name = ?", [$name]);
+        $q->delete();
         return true;
     }
 }

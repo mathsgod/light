@@ -1,0 +1,30 @@
+name: PHP CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          extensions: mbstring, xml
+      - name: Install composer dependencies
+        run: composer install --no-progress --prefer-dist --no-suggest
+      - name: Run PHPStan
+        run: |
+          if [ -f phpstan.neon ]; then
+            vendor/bin/phpstan analyse -l 5
+          fi
+      - name: Run tests
+        run: |
+          if [ -d tests ]; then
+            composer test
+          fi

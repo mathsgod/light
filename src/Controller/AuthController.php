@@ -610,7 +610,7 @@ class AuthController
             "jti" => $jti,
             "iat" => time(),
             "exp" => time() + $expired_time,
-            "id"  => $user->user_id,
+            "user_id"  => $user->user_id,
             "name" => $name,
             "type" => "access_token"
         ];

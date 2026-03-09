@@ -672,5 +672,60 @@
                 ]
             }
         ]
+    },  {
+        "name": "Revision",
+        "columns": [
+            {
+                "name": "revision_id",
+                "type": "int",
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "user_id",
+                "type": "int"
+            },
+            {
+                "name": "created_time",
+                "type": "datetime"
+            },
+            {
+                "name": "model_class",
+                "type": "varchar",
+                "length": 100
+            },
+            {
+                "name": "model_id",
+                "type": "int"
+            },
+            {
+                "name": "model_content",
+                "type": "json"
+            },
+            {
+                "name": "delta",
+                "type": "json"
+            }
+        ],
+        "primary_key": [
+            "revision_id"
+        ],
+        "keys": [
+            {
+                "name": "model_id",
+                "columns": [
+                    "model_id"
+                ]
+            },
+            {
+                "name": "model_class",
+                "columns": [
+                    "model_class"
+                ]
+            }
+        ],
+        "engine": "InnoDB",
+        "charset": "utf8mb4",
+        "collate": "utf8mb4_0900_ai_ci"
     }
 ]

@@ -7,6 +7,7 @@ use Endroid\QrCode\Writer\PngWriter;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use GraphQL\Error\Error;
+use Ramsey\Uuid\Uuid;
 
 use Light\App;
 use Light\Auth\Service;
@@ -329,6 +330,8 @@ class AuthController
         return true;
     }
 
+    
+
 
     #[Mutation]
     public function logout(#[Autowire] Service $service, #[Autowire] App $app): bool
@@ -591,6 +594,28 @@ class AuthController
         ]);
 
         return true;
+    }
+
+    #[Mutation]
+    #[Logged]
+    public function createAccessToken(
+        #[InjectUser] User $user,
+        string $name,
+        int $expired_time
+    ): string {
+        $jti = Uuid::uuid4()->toString();
+
+        $payload = [
+            "iss" => "light server",
+            "jti" => $jti,
+            "iat" => time(),
+            "exp" => time() + $expired_time,
+            "id"  => $user->user_id,
+            "name" => $name,
+            "type" => "access_token"
+        ];
+
+        return JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
     }
 
     #[Mutation]

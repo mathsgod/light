@@ -611,6 +611,7 @@ class AuthController
             "iat" => time(),
             "exp" => time() + $expired_time,
             "user_id"  => $user->user_id,
+            "role" => "Users",
             "name" => $name,
             "type" => "access_token"
         ];

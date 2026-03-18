@@ -33,7 +33,8 @@
         "mathsgod/light-db-graphqlite-mappers": "^1.0",
         "mathsgod/json-to-sql": "^1.0",
         "mathsgod/mysql-schema-migrate": "^1.0",
-        "symfony/console": "^7.4"
+        "symfony/console": "^7.4",
+        "webonyx/graphql-php": "15.30.2"
     },
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*",

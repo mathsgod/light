@@ -182,10 +182,18 @@ class Filesystem
     {
         if (!$item->isFile()) return false;
         //if start with dot, return false
+        if (str_starts_with(basename($item->path()), '.')) {
+            return false;
+        }
 
 
         // 獲取 mimeType (例如: image/jpeg)
-        $mime = $mountManager->mimeType($item->path());
+        try {
+            $mime = $mountManager->mimeType($item->path());
+        } catch (\Exception $e) {
+            return false; // 無法獲取 mimeType 的檔案不匹配任何標籤
+        }
+
 
         return match ($label) {
             'image'    => str_starts_with($mime, 'image/'),

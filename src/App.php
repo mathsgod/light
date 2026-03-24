@@ -167,7 +167,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             }
         } catch (\Exception $e) {
             return new JsonResponse(['errors' => [
-                ["message" => $e->getMessage()]
+                ["message" => $this->isDevMode() ? $e->getMessage() : "(Production mode) Internal Server Error"]
             ]]);
         }
     }

@@ -7,6 +7,8 @@ use Firebase\JWT\JWT;
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
 use GraphQL\Upload\UploadMiddleware;
+use GraphQL\Validator\DocumentValidator;
+use GraphQL\Validator\Rules\DisableIntrospection;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -160,6 +162,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             if ($this->isDevMode()) {
                 return new JsonResponse($result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE), 200, [], JsonResponse::DEFAULT_JSON_FLAGS | JSON_UNESCAPED_UNICODE);
             } else {
+                DocumentValidator::addRule(new DisableIntrospection(true));
                 return new JsonResponse($result->toArray(), 200, [], JsonResponse::DEFAULT_JSON_FLAGS | JSON_UNESCAPED_UNICODE);
             }
         } catch (\Exception $e) {

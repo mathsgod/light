@@ -331,7 +331,7 @@ class AuthController
         return true;
     }
 
-    
+
 
 
     #[Mutation]
@@ -602,7 +602,7 @@ class AuthController
     public function createAccessToken(
         #[InjectUser] User $user,
         string $name,
-        int $expired_time
+        ?int $expired_time = 0
     ): string {
         $jti = Uuid::uuid4()->toString();
 

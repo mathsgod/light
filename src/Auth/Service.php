@@ -7,6 +7,7 @@ use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
+use Light\Model\APIKey;
 use Light\Model\User;
 use Light\TokenExpiredException;
 use Psr\Http\Message\ServerRequestInterface;
@@ -57,6 +58,13 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
 
                 if ($cache->has("revoked_token_" . $this->jti)) {
                     return;
+                }
+
+                // If token has a name field, it's an API key — verify the record still exists
+                if (!empty($payload->name)) {
+                    if (!APIKey::Get(["key" => $this->token])) {
+                        return;
+                    }
                 }
 
 

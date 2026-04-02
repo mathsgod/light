@@ -12,6 +12,7 @@ use Ramsey\Uuid\Uuid;
 use Light\App;
 use Light\Auth\Service;
 use Light\Input\User as InputUser;
+use Light\Model\APIKey;
 use Light\Model\Config;
 use Light\Type\System;
 use Light\Model\User;
@@ -616,7 +617,16 @@ class AuthController
             "type" => "access_token"
         ];
 
-        return JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
+        $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
+
+        APIKey::_table()->insert([
+            "name"         => $name,
+            "key"          => $token,
+            "user_id"      => $user->user_id,
+            "created_time" => date("Y-m-d H:i:s")
+        ]);
+
+        return $token;
     }
 
     #[Mutation]

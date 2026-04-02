@@ -518,13 +518,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
         $request = $request->withAttribute(self::class, $this);
 
-        /*         $puxt = $request->getAttribute(\PUXT\App::class);
-
-        if (assert($puxt instanceof \PUXT\App)) {
-            $puxt->addAttributeMiddleware(new \Light\Attributes\Logged);
-            $puxt->addParameterHandler(InjectUser::class, new \Light\ParameterHandlers\InjectedUser);
-        }
- */
 
         $auth_service = new Auth\Service($request);
         $this->auth_service = $auth_service;

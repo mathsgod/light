@@ -610,12 +610,15 @@ class AuthController
             "iss" => "light server",
             "jti" => $jti,
             "iat" => time(),
-            "exp" => time() + $expired_time,
             "id"  => $user->user_id,
             "role" => "Users",
             "name" => $name,
             "type" => "access_token"
         ];
+
+        if ($expired_time > 0) {
+            $payload["exp"] = time() + $expired_time;
+        }
 
         $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
 

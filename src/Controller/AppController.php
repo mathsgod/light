@@ -105,9 +105,9 @@ class AppController
     #[Mutation]
     #[Logged]
     /**
-     * @param mixed $value
+     * @param ?mixed $value
      */
-    public function updateMyStyle(string $name, #[InjectUser] User $user, $value): bool
+    public function updateMyStyle(string $name, #[InjectUser] User $user, $value = null): bool
     {
         $user->updateStyle($name, $value);
         return true;
@@ -115,11 +115,11 @@ class AppController
     #[Mutation]
     #[Logged]
     /**
-     * @param mixed $value
+     * @param ?mixed $value
      */
-    public function updateMyStyles(#[InjectUser] User $user, array $value): bool
+    public function updateMyStyles(#[InjectUser] User $user, ?array $value = null): bool
     {
-        foreach ($value as $key => $val) {
+        foreach ($value ?? [] as $key => $val) {
             $user->updateStyle($key, $val);
         }
         return true;
@@ -139,9 +139,9 @@ class AppController
     #[Mutation]
     #[Logged]
     /**
-     * @param mixed $menu
+     * @param ?mixed $menu
      */
-    public function updateMyMenu($menu, #[InjectUser] User $user): bool
+    public function updateMyMenu($menu = null, #[InjectUser] User $user): bool
     {
         $user->menu = $menu;
         $user->save();

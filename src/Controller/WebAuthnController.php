@@ -85,9 +85,9 @@ class WebAuthnController
 
     #[Mutation]
     /**
-     * @param mixed $assertion
+     * @param ?mixed $assertion
      */
-    public function webAuthnAssertion(?string $username, $assertion, #[Autowire] App $app, #[Autowire] ServerRequestInterface $request): bool
+    public function webAuthnAssertion(?string $username, $assertion = null, #[Autowire] App $app, #[Autowire] ServerRequestInterface $request): bool
     {
         $serializer = $this->getSerializer();
 
@@ -150,9 +150,9 @@ class WebAuthnController
 
     #[Mutation]
     /**
-     * @param mixed $registration
+     * @param ?mixed $registration
      */
-    public function webAuthnRegister(#[InjectUser] User $user, #[Autowire] App $app, $registration, #[Autowire] ServerRequestInterface $request): bool
+    public function webAuthnRegister(#[InjectUser] User $user, #[Autowire] App $app, $registration = null, #[Autowire] ServerRequestInterface $request): bool
     {
 
         $csmFactory = new CeremonyStepManagerFactory();

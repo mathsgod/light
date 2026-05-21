@@ -414,7 +414,7 @@ class App
      * @return \Light\Model\MailLog[]
      */
     #[Right("maillog.list")]
-    public function listMailLog($filters = [],  ?string $sort = ''): \Light\Db\Query
+    public function listMailLog($filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return MailLog::Query()->filters($filters)->sort($sort);
     }
@@ -425,7 +425,7 @@ class App
      * @return \Light\Model\EventLog[]
      */
     #[Right("eventlog.list")]
-    public function listEventLog($filters = [],  ?string $sort = ''): \Light\Db\Query
+    public function listEventLog($filters = null,  ?string $sort = ''): \Light\Db\Query
     {
 
         $q = EventLog::Query();
@@ -445,7 +445,7 @@ class App
      * @return \Light\Model\Config[]
      * @param ?mixed $filters
      */
-    public function listConfig($filters = [],  ?string $sort = '',): \Light\Db\Query
+    public function listConfig($filters = null,  ?string $sort = '',): \Light\Db\Query
     {
         return Config::Query()->filters($filters)->sort($sort);
     }
@@ -458,7 +458,7 @@ class App
      * @param ?mixed $filters
      */
     #[Right("user.list")]
-    public function listUser(#[InjectUser] \Light\Model\User $user, $filters = [], ?string $sort = ""): \Light\Db\Query
+    public function listUser(#[InjectUser] \Light\Model\User $user, $filters = null, ?string $sort = ""): \Light\Db\Query
     {
 
         //only administrators can list administrators
@@ -514,7 +514,7 @@ class App
      * @param ?mixed $filters
      */
     #[Right('systemvalue.list')]
-    public function listSystemValue($filters = [],  ?string $sort = ''): \Light\Db\Query
+    public function listSystemValue($filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return SystemValue::Query()->filters($filters)->sort($sort);
     }
@@ -526,7 +526,7 @@ class App
      * @param ?mixed $filters
      */
     #[Right("userlog.list")]
-    public function listUserLog($filters = [],  ?string $sort = ''): \Light\Db\Query
+    public function listUserLog($filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return UserLog::Query()->filters($filters)->sort($sort);
     }
@@ -537,7 +537,7 @@ class App
      * @param ?mixed $filters
      * @return \Light\Model\Permission[]
      */
-    public function listPermission($filters = [],  ?string $sort = ''): \Light\Db\Query
+    public function listPermission($filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return Permission::Query()->filters($filters)->sort($sort);
     }

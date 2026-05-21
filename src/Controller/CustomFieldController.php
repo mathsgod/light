@@ -51,7 +51,7 @@ class CustomFieldController
      * @param ?mixed $filters
      */
     #[Right("customfield.list")]
-    public function listCustomField(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \Light\Db\Query
+    public function listCustomField(#[InjectUser] \Light\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return CustomField::Query()->filters($filters)->sort($sort);
     }

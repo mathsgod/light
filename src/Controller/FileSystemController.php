@@ -278,9 +278,9 @@ class FileSystemController
     #[Mutation(name: "lightFSupdate")]
     #[Right("filesystem.update")]
     /**
-     * @param mixed $data
+     * @param ?mixed $data
      */
-    public function updateFileSystem($data, #[Autowire] App $app): bool
+    public function updateFileSystem($data = null, #[Autowire] App $app): bool
     {
         if (!$config = Config::Get(["name" => "fs"])) {
             return false;
@@ -313,9 +313,9 @@ class FileSystemController
     #[Mutation(name: "lightFSadd")]
     #[Right("filesystem.add")]
     /**
-     * @param mixed $data
+     * @param ?mixed $data
      */
-    public function addFileSystem($data, #[Autowire] App $app): bool
+    public function addFileSystem($data = null, #[Autowire] App $app): bool
     {
         if (!$config = Config::Get(["name" => "fs"])) {
             $config = Config::Create(["name" => "fs", "value" => "[]"]);

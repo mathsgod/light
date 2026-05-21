@@ -16,7 +16,7 @@ class APIKeyController
      * @return \Light\Model\APIKey[]
      * @param ?mixed $filters
      */
-    public function listAPIKey(#[InjectUser] \Light\Model\User $user, $filters = [], ?string $sort = ''): \Light\Db\Query
+    public function listAPIKey(#[InjectUser] \Light\Model\User $user, $filters = null, ?string $sort = ''): \Light\Db\Query
     {
         return APIKey::Query(["user_id" => $user->user_id])->filters($filters)->sort($sort);
     }

@@ -30,7 +30,7 @@ class UserController
      * @deprecated use { app { users }}
      */
     #[Right("user.list")]
-    public function listUser(#[InjectUser] \Light\Model\User $user, $filters = [], ?string $sort = ""): DBQuery
+    public function listUser(#[InjectUser] \Light\Model\User $user, $filters = null, ?string $sort = ""): DBQuery
     {
 
         //only administrators can list administrators

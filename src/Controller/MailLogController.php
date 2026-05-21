@@ -20,7 +20,7 @@ class MailLogController
      * @deprecated use app.mailLogs instead
      */
     #[Right("maillog.list")]
-    public function listMailLog(#[InjectUser] \Light\Model\User $user, $filters = [],  ?string $sort = ''): \Light\Db\Query
+    public function listMailLog(#[InjectUser] \Light\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return MailLog::Query()->filters($filters)->sort($sort);
     }

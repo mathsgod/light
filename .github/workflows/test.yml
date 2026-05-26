@@ -43,7 +43,7 @@ jobs:
           DATABASE_USERNAME=root
           DATABASE_PASSWORD=test_password
           DATABASE_PORT=3306
-          JWT_SECRET=ci_test_secret_1234567890
+          JWT_SECRET=ci_test_jwt_secret_key_abcdef1234567890
           TZ=UTC
           EOF
 

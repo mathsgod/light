@@ -15,7 +15,7 @@ class JwtTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->secret = $_ENV['JWT_SECRET'] ?? 'test_secret_1234567890';
+        $this->secret = $_ENV['JWT_SECRET'] ?? 'ci_test_jwt_secret_key_abcdef1234567890';
     }
 
     private function encode(array $payload): string

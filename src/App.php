@@ -316,12 +316,12 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $role->addPermission("#power users");
         $role->addParent("Administrators");
 
-        $this->rbac->addRole("Users", ["Power Users"]);
+        $this->rbac->addRole("Users");
         $this->rbac->getRole("Users")->addPermission("#users");
         $this->rbac->getRole("Users")->addParent("Power Users");
 
 
-        $this->rbac->addRole("Everyone", ["Users"]);
+        $this->rbac->addRole("Everyone");
         $this->rbac->getRole("Everyone")->addPermission("#everyone");
         $this->rbac->getRole("Everyone")->addParent("Users");
 

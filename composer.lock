@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "85d3e032ddfab7b3c242e2bd3d545645",
+    "content-hash": "f843e2b9ec10859f1e44d456fb1b2828",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2058,11 +2058,17 @@
         },
         {
             "name": "mathsgod/light-db",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "../light-db",
+            "version": "1.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mathsgod/light-db.git",
                 "reference": "c35659d06f29c33cb11ea3ef0a608f6323062006"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mathsgod/light-db/zipball/c35659d06f29c33cb11ea3ef0a608f6323062006",
+                "reference": "c35659d06f29c33cb11ea3ef0a608f6323062006",
+                "shasum": ""
             },
             "require": {
                 "ext-pdo": "*",
@@ -2083,29 +2089,7 @@
                     "Light\\Db\\": "src/"
                 }
             },
-            "scripts": {
-                "test": [
-                    "phpunit"
-                ],
-                "test-basic": [
-                    "phpunit --group basic"
-                ],
-                "test-coverage": [
-                    "phpunit --coverage-html coverage-report"
-                ],
-                "test-crud": [
-                    "phpunit --group crud"
-                ],
-                "test-json": [
-                    "phpunit --group json"
-                ],
-                "test-unit": [
-                    "phpunit tests/Unit"
-                ],
-                "test-integration": [
-                    "phpunit tests/Integration"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -2115,9 +2099,11 @@
                     "email": "mathsgod@yahoo.com"
                 }
             ],
-            "transport-options": {
-                "relative": true
-            }
+            "support": {
+                "issues": "https://github.com/mathsgod/light-db/issues",
+                "source": "https://github.com/mathsgod/light-db/tree/1.7.0"
+            },
+            "time": "2026-05-26T03:16:33+00:00"
         },
         {
             "name": "mathsgod/light-db-graphqlite-mappers",
@@ -9235,9 +9221,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "mathsgod/light-db": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

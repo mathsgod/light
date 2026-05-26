@@ -1,0 +1,56 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test_password
+          MYSQL_DATABASE: light_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -ptest_password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_mysql, mbstring, intl
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Create database schema
+        env:
+          DATABASE_HOSTNAME: 127.0.0.1
+          DATABASE_DATABASE: light_test
+          DATABASE_USERNAME: root
+          DATABASE_PASSWORD: test_password
+          DATABASE_PORT: 3306
+        run: php tests/ci-setup.php
+
+      - name: Run tests
+        env:
+          DATABASE_HOSTNAME: 127.0.0.1
+          DATABASE_DATABASE: light_test
+          DATABASE_USERNAME: root
+          DATABASE_PASSWORD: test_password
+          DATABASE_PORT: 3306
+          JWT_SECRET: ci_test_secret_1234567890
+          TZ: UTC
+        run: ./vendor/bin/phpunit

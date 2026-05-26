@@ -29,7 +29,7 @@
         "symfony/property-info": "^6.4",
         "symfony/property-access": "^6.4",
         "web-auth/webauthn-lib": "^4.9",
-        "mathsgod/light-db": "@dev",
+        "mathsgod/light-db": "^1.7.0",
         "mathsgod/light-db-graphqlite-mappers": "^1.0",
         "mathsgod/json-to-sql": "^1.0",
         "mathsgod/mysql-schema-migrate": "^1.0",
@@ -53,7 +53,7 @@
             "function/base85.php"
         ]
     },
-    "bin": "bin\/light",
+    "bin": "bin/light",
     "config": {
         "allow-plugins": {
             "php-http/discovery": true,
@@ -62,11 +62,5 @@
     },
     "scripts": {
         "test": "phpunit tests --verbose"
-    },
-    "repositories": {
-        "light-db": {
-            "type": "path",
-            "url": "../light-db"
-        }
     }
 }

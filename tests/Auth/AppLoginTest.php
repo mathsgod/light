@@ -20,6 +20,11 @@ class AppLoginTest extends TestCase
         $_SERVER["SCRIPT_NAME"] = "/index.php";
         $_SERVER["SCRIPT_FILENAME"] = getcwd() . "/index.php";
         $_SERVER["HTTPS"] = "";
+
+        // light-server scans <root>/pages — ensure it exists in CI
+        if (!is_dir(getcwd() . "/pages")) {
+            mkdir(getcwd() . "/pages", 0777, true);
+        }
     }
 
     private function getApp(): App

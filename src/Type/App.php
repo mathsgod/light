@@ -332,8 +332,10 @@ class App
     {
         if (!$user) return false;
 
-        $user = $rbac->getUser($user->user_id);
-        return $user->is("Users") || $user->is("Administrators") || $user->is("Powers Users");
+        $rbacUser = $rbac->getUser($user->user_id);
+        if (!$rbacUser) return false;
+
+        return $rbacUser->is("Users") || $rbacUser->is("Administrators") || $rbacUser->is("Powers Users");
     }
 
 

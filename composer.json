@@ -1,5 +1,6 @@
 {
     "name": "mathsgod/light",
+    "description": "A lightweight PHP GraphQL framework",
     "license": "MIT",
     "authors": [
         {
@@ -34,7 +35,7 @@
         "mathsgod/json-to-sql": "^1.0",
         "mathsgod/mysql-schema-migrate": "^1.0",
         "symfony/console": "^7.4",
-        "webonyx/graphql-php": "15.30.2"
+        "webonyx/graphql-php": "^15.30"
     },
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*",
@@ -53,6 +54,12 @@
             "function/base85.php"
         ]
     },
+    "repositories": {
+        "light-db": {
+            "type": "path",
+            "url": "../light-db"
+        }
+    },
     "bin": "bin/light",
     "config": {
         "allow-plugins": {
@@ -62,11 +69,5 @@
     },
     "scripts": {
         "test": "phpunit tests --verbose"
-    },
-    "repositories": {
-        "light-db": {
-            "type": "path",
-            "url": "../light-db"
-        }
     }
 }

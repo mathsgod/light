@@ -110,6 +110,9 @@ class AppLoginTest extends TestCase
 
     public function testLoginUnknownUser(): void
     {
+        // ensure at least one user exists to skip the "create first admin" branch
+        $this->createUser("existing_" . uniqid(), "pw");
+
         $app = $this->getApp();
         $out = $this->gql($app, 'mutation { login(username:"no_such_user_xyz_999", password:"x") }');
 

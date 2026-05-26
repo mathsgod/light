@@ -29,7 +29,7 @@
         "symfony/property-info": "^6.4",
         "symfony/property-access": "^6.4",
         "web-auth/webauthn-lib": "^4.9",
-        "mathsgod/light-db": "^1.5",
+        "mathsgod/light-db": "@dev",
         "mathsgod/light-db-graphqlite-mappers": "^1.0",
         "mathsgod/json-to-sql": "^1.0",
         "mathsgod/mysql-schema-migrate": "^1.0",
@@ -62,5 +62,11 @@
     },
     "scripts": {
         "test": "phpunit tests --verbose"
+    },
+    "repositories": {
+        "light-db": {
+            "type": "path",
+            "url": "../light-db"
+        }
     }
 }

@@ -31,6 +31,16 @@ class Table
     {
         $db = $app->getDatabase();
         $table = $db->getTable($this->name);
-        return $table->getColumns();
+        return $table->getColumns()->map(function ($col) {
+            $length = $col->getCharacterMaximumLength() ?? $col->getNumericPrecision();
+            return [
+                'name'          => $col->getName(),
+                'type'          => $col->getDataType(),
+                'length'        => $length !== null ? (string)$length : '',
+                'nullable'      => $col->isNullable(),
+                'default'       => $col->getColumnDefault() ?? '',
+                'autoincrement' => $col->isAutoIncrement(),
+            ];
+        })->values()->toArray();
     }
 }

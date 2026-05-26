@@ -94,7 +94,37 @@ class DatabaseController
     {
         $db = $app->getDatabase();
         try {
-            $db->query("ALTER TABLE $table ADD $field $type($length) DEFAULT '$default' " . ($nullable ? "NULL" : "NOT NULL") . " " . ($autoincrement ? "AUTO_INCREMENT" : ""), $db::QUERY_MODE_EXECUTE);
+            $typeStr = $length !== '' ? "$type($length)" : $type;
+            $defaultStr = $default !== '' ? "DEFAULT '$default'" : ($nullable ? "DEFAULT NULL" : "");
+            $nullStr = $nullable ? "NULL" : "NOT NULL";
+            $autoStr = $autoincrement ? "AUTO_INCREMENT" : "";
+
+            $db->query("ALTER TABLE `$table` ADD `$field` $typeStr $nullStr $defaultStr $autoStr", $db::QUERY_MODE_EXECUTE);
+        } catch (Exception $e) {
+            throw new Error($e->getMessage());
+        }
+        return true;
+    }
+
+
+    #[Mutation(name: "lightDatabaseEditField")]
+    #[Right("system.database.field.add")]
+    public function editDatabaseField(#[Autowire] App $app, string $table, string $field, string $type, string $length, string $default, bool $nullable, bool $autoincrement): bool
+    {
+        $db = $app->getDatabase();
+        try {
+            $typeStr = $length !== '' ? "$type($length)" : $type;
+            $defaultStr = $default !== '' ? "DEFAULT '$default'" : ($nullable ? "DEFAULT NULL" : "");
+            $nullStr = $nullable ? "NULL" : "NOT NULL";
+            $autoStr = $autoincrement ? "AUTO_INCREMENT" : "";
+
+            // If changing to NOT NULL, fill existing NULLs with a default value first
+            if (!$nullable) {
+                $fillValue = in_array(strtolower($type), ['int', 'tinyint', 'smallint', 'mediumint', 'bigint', 'float', 'double', 'decimal']) ? 0 : '';
+                $db->query("UPDATE `$table` SET `$field` = '$fillValue' WHERE `$field` IS NULL", $db::QUERY_MODE_EXECUTE);
+            }
+
+            $db->query("ALTER TABLE `$table` MODIFY `$field` $typeStr $nullStr $defaultStr $autoStr", $db::QUERY_MODE_EXECUTE);
         } catch (Exception $e) {
             throw new Error($e->getMessage());
         }

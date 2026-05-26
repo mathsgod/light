@@ -514,8 +514,13 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             $request = $request->withParsedBody($body);
         }
 
-        $uploadMiddleware = new UploadMiddleware();
-        $request = $uploadMiddleware->processRequest($request);
+        $uploadCapture = new class($request) implements RequestHandlerInterface {
+            public ServerRequestInterface $captured;
+            public function __construct(ServerRequestInterface $r) { $this->captured = $r; }
+            public function handle(ServerRequestInterface $r): ResponseInterface { $this->captured = $r; return new EmptyResponse(); }
+        };
+        (new UploadMiddleware())->process($request, $uploadCapture);
+        $request = $uploadCapture->captured;
 
         $request = $request->withAttribute(self::class, $this);
 
@@ -563,8 +568,13 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function execute(ServerRequestInterface $request)
     {
-        $uploadMiddleware = new UploadMiddleware();
-        $request = $uploadMiddleware->processRequest($request);
+        $uploadCapture = new class($request) implements RequestHandlerInterface {
+            public ServerRequestInterface $captured;
+            public function __construct(ServerRequestInterface $r) { $this->captured = $r; }
+            public function handle(ServerRequestInterface $r): ResponseInterface { $this->captured = $r; return new EmptyResponse(); }
+        };
+        (new UploadMiddleware())->process($request, $uploadCapture);
+        $request = $uploadCapture->captured;
 
         $body = $request->getParsedBody();
         $query = $body["query"] ?? null;

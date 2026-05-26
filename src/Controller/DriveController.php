@@ -15,6 +15,9 @@ use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 
+/**
+ * @deprecated Use FileSystemController (lightFS* mutations) instead.
+ */
 class DriveController
 {
 
@@ -23,6 +26,9 @@ class DriveController
 
     #[Mutation(name:"lightDriveDuplicateFile")]
     #[Right("fs.file.duplicate")]
+    /**
+     * @deprecated Use lightFSDuplicateFile instead.
+     */
     public function duplicateFile(#[Autowire] App $app, int $index, string $path): string
     {
         $drive = $app->getDrive($index);
@@ -48,6 +54,9 @@ class DriveController
 
     #[Mutation(name: "lightDriveUploadTempFile")]
     #[Right("fs.file.upload")]
+    /**
+     * @deprecated Use lightFSUploadTempFile instead.
+     */
     public function uploadTempFile(#[Autowire] App $app, int $index, UploadedFileInterface $file): File
     {
         //get path extension
@@ -89,6 +98,9 @@ class DriveController
 
     #[Mutation(name: "lightDriveUploadFile")]
     #[Right("fs.file.upload")]
+    /**
+     * @deprecated Use lightFSUploadFile instead.
+     */
     public function uploadFile(#[Autowire] App $app, int $index, string $path, UploadedFileInterface $file, ?bool $rename = false): string
     {
         $filename = $file->getClientFilename();
@@ -128,6 +140,9 @@ class DriveController
 
     #[Mutation(name: "lightDriveCreateFolder")]
     #[Right("fs.folder.create")]
+    /**
+     * @deprecated Use lightFSCreateFolder instead.
+     */
     public function createFolder(#[Autowire] App $app, int $index, string $path): bool
     {
         $drive = $app->getDrive($index);
@@ -144,6 +159,9 @@ class DriveController
 
     #[Mutation(name: "lightDriveDeleteFolder")]
     #[Right("fs.folder.delete")]
+    /**
+     * @deprecated Use lightFSDeleteFolder instead.
+     */
     public function deleteFolder(#[Autowire] App $app, int $index, string $path): bool
     {
         $drive = $app->getDrive($index);
@@ -153,6 +171,9 @@ class DriveController
 
     #[Mutation(name: "lightDriveRenameFolder")]
     #[Right("fs.folder.rename")]
+    /**
+     * @deprecated Use lightFSRenameFolder instead.
+     */
     public function renameFolder(#[Autowire] App $app, int $index, string $path, string $name): bool
     {
         $drive = $app->getDrive($index);
@@ -163,6 +184,9 @@ class DriveController
     //lightDriveWriteFile
     #[Mutation(name: "lightDriveWriteFile")]
     #[Right("fs.file.write")]
+    /**
+     * @deprecated Use lightFSWriteFile instead.
+     */
     public function writeFile(#[Autowire] App $app, int $index, string $path, string $content): bool
     {
         $drive = $app->getDrive($index);
@@ -173,6 +197,9 @@ class DriveController
     //lightDriveDeleteFile
     #[Mutation(name: "lightDriveDeleteFile")]
     #[Right("fs.file.delete")]
+    /**
+     * @deprecated Use lightFSDeleteFile instead.
+     */
     public function deleteFile(#[Autowire] App $app, int $index, string $path): bool
     {
         $drive = $app->getDrive($index);
@@ -183,6 +210,9 @@ class DriveController
     //lightDriveRenameFile
     #[Mutation(name: "lightDriveRenameFile")]
     #[Right("fs.file.rename")]
+    /**
+     * @deprecated Use lightFSRenameFile instead.
+     */
     public function renameFile(#[Autowire] App $app, int $index, string $path, string $name): bool
     {
         //check extension
@@ -197,6 +227,9 @@ class DriveController
     //lightDriveMoveFile
     #[Mutation(name: "lightDriveMoveFile")]
     #[Right("fs.file.move")]
+    /**
+     * @deprecated Use lightFSMove instead.
+     */
     public function moveFile(#[Autowire] App $app, int $index, string $source, string $destination): bool
     {
         $drive = $app->getDrive($index);

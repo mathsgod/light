@@ -126,6 +126,52 @@ class Filesystem
 
     #[Field]
     /**
+     * @return File[]
+     */
+    public function listFiles(
+        #[Autowire()] MountManager $mountManager,
+        string $location,
+        ?string $type = null,
+        ?string $search = null,
+    ): array {
+        $TYPES = [
+            "image"    => ["jpg", "jpeg", "png", "gif", "svg", "webp", "bmp", "ico"],
+            "video"    => ["mp4", "webm", "ogg", "avi", "mov", "flv", "wmv", "mkv"],
+            "audio"    => ["mp3", "wav", "ogg", "m4a", "flac", "aac"],
+            "document" => ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "csv", "rtf", "odt", "ods", "odp"],
+        ];
+
+        if ($type !== null && !isset($TYPES[$type])) {
+            throw new \Exception("Invalid type: $type");
+        }
+
+        $deep = ($search !== null || $type !== null);
+        $files = [];
+
+        foreach ($mountManager->listContents($location, $deep) as $item) {
+            if (!$item instanceof FileAttributes) continue;
+
+            $path = $item->path();
+            if (str_starts_with(basename($path), '.')) continue;
+
+            if ($type !== null) {
+                $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                if (!in_array($ext, $TYPES[$type])) continue;
+            }
+
+            if ($search !== null && stripos(basename($path), $search) === false) continue;
+
+            $files[] = new File($path, [
+                'size'          => $item->fileSize(),
+                'last_modified' => $item->lastModified(),
+            ]);
+        }
+
+        return $files;
+    }
+
+    #[Field]
+    /**
      * @return Node[]
      */
     public function find(

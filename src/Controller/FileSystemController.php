@@ -186,6 +186,52 @@ class FileSystemController
     }
 
 
+    #[Mutation(name: "lightFSDuplicateFile")]
+    #[Right("fs.file:duplicate")]
+    public function duplicateFile(#[Autowire] MountManager $mountManager, string $location): string
+    {
+        if (!$mountManager->fileExists($location)) {
+            throw new Error("File does not exist");
+        }
+
+        $basename = basename($location);
+        $pathParts = pathinfo($location);
+        $dirname = $pathParts['dirname'];
+        if (str_ends_with($dirname, ':')) {
+            $dirname .= '/';
+        }
+
+        $newFilename = $this->getNextFilename($mountManager, $dirname, $basename);
+        $newLocation = $dirname . '/' . $newFilename;
+
+        $stream = $mountManager->readStream($location);
+        $mountManager->writeStream($newLocation, $stream);
+        if (is_resource($stream)) {
+            fclose($stream);
+        }
+
+        return $newLocation;
+    }
+
+    #[Mutation(name: "lightFSUploadTempFile")]
+    #[Right("fs.file:write")]
+    public function uploadTempFile(#[Autowire] MountManager $mountManager, string $location, UploadedFileInterface $file): File
+    {
+        $filename = $file->getClientFilename();
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+
+        if (in_array(strtolower($ext), self::DISALLOW_EXT)) {
+            throw new Error("File type not allowed");
+        }
+
+        $tempFilename = Uuid::uuid4()->toString() . ($ext ? '.' . $ext : '');
+        $tempLocation = rtrim($location, '/') . '/' . $tempFilename;
+
+        $mountManager->write($tempLocation, $file->getStream()->getContents());
+
+        return new File($tempLocation);
+    }
+
     #[Mutation(name: "lightFSUploadBase64")]
     #[Right("fs.file:write")]
     public function uploadBase64(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location, string $base64): File

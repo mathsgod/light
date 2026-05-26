@@ -35,22 +35,20 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - name: Create .env for tests
+        run: |
+          cat > .env << 'EOF'
+          DATABASE_HOSTNAME=127.0.0.1
+          DATABASE_DATABASE=light_test
+          DATABASE_USERNAME=root
+          DATABASE_PASSWORD=test_password
+          DATABASE_PORT=3306
+          JWT_SECRET=ci_test_secret_1234567890
+          TZ=UTC
+          EOF
+
       - name: Create database schema
-        env:
-          DATABASE_HOSTNAME: 127.0.0.1
-          DATABASE_DATABASE: light_test
-          DATABASE_USERNAME: root
-          DATABASE_PASSWORD: test_password
-          DATABASE_PORT: 3306
         run: php tests/ci-setup.php
 
       - name: Run tests
-        env:
-          DATABASE_HOSTNAME: 127.0.0.1
-          DATABASE_DATABASE: light_test
-          DATABASE_USERNAME: root
-          DATABASE_PASSWORD: test_password
-          DATABASE_PORT: 3306
-          JWT_SECRET: ci_test_secret_1234567890
-          TZ: UTC
         run: ./vendor/bin/phpunit

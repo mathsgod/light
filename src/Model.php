@@ -6,17 +6,18 @@ use Light\Db\Proxy;
 use Light\Model\EventLog;
 use Light\Model\Revision;
 use Light\Model\User;
+use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 
 abstract class Model extends \Light\Db\Model
 {
-    public static $_log_insert = true;
-    public static $_log_delete = true;
-    public static $_log_update = true;
-    static $container;
+    public static bool $_log_insert = true;
+    public static bool $_log_delete = true;
+    public static bool $_log_update = true;
+    public static ?ContainerInterface $container = null;
 
-    public function __fields()
+    public function __fields(): array
     {
         return self::_table()->columns()->map(function ($column) {
             return $column->getName();
@@ -25,13 +26,10 @@ abstract class Model extends \Light\Db\Model
 
     public function bind($data)
     {
-
         $fields = $this->__fields();
-        foreach ($data as $k => $v) {
-            if ($v === null) continue;
-
+        $items = is_object($data) ? get_object_vars($data) : $data;
+        foreach ($items as $k => $v) {
             if (!in_array($k, $fields)) continue;
-
             $this->$k = $v;
         }
     }
@@ -74,7 +72,7 @@ abstract class Model extends \Light\Db\Model
         return $by !== null;
     }
 
-    public static function SetContainer($container)
+    public static function SetContainer(?ContainerInterface $container): void
     {
         self::$container = $container;
     }
@@ -92,7 +90,7 @@ abstract class Model extends \Light\Db\Model
     }
 
 
-    public function delete()
+    public function delete(): mixed
     {
         $key = $this->_key();
 
@@ -116,7 +114,7 @@ abstract class Model extends \Light\Db\Model
         return parent::delete();
     }
 
-    public function save()
+    public function save(): mixed
     {
         $user_id = null;
         if ($container = self::$container) {

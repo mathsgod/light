@@ -479,16 +479,7 @@ class AuthController
     #[Logged]
     public function updateMy(#[InjectUser] User $user, #[UseInputType(inputType: "UpdateMyInput")] InputUser $data): bool
     {
-        //filter out all null values
-        $d = [];
-        foreach ($data as $k => $v) {
-            if ($v !== null) {
-                $d[$k] = $v;
-            }
-        }
-
-
-        $user->bind($d);
+        $user->bind($data);
         $user->save();
         return true;
     }

@@ -16,14 +16,14 @@ use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 
 class Service implements AuthenticationServiceInterface, AuthorizationServiceInterface
 {
-    protected $is_logged = false;
-    protected $user = null;
-    protected $org_user = null;
+    protected bool $is_logged = false;
+    protected ?User $user = null;
+    protected ?User $org_user = null;
     protected \Light\App $app;
-    protected $view_as = false;
-    protected $token = null;
-    protected $jti = null;
-    protected $token_status = 'valid';
+    protected bool $view_as = false;
+    protected ?string $token = null;
+    protected ?string $jti = null;
+    protected string $token_status = 'valid';
 
 
     public function __construct(ServerRequestInterface $request)
@@ -87,12 +87,12 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
         }
     }
 
-    public function getToken()
+    public function getToken(): ?string
     {
         return $this->token;
     }
 
-    public function getJti()
+    public function getJti(): ?string
     {
         return $this->jti;
     }
@@ -112,7 +112,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
         return $this->is_logged;
     }
 
-    public function getUser(): ?object
+    public function getUser(): ?User
     {
         if ($this->token_status == 'expired') {
             throw new TokenExpiredException('TOKEN_EXPIRED');
@@ -120,14 +120,14 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
         return $this->user;
     }
 
-    public function getOrginalUser(): ?object
+    public function getOrginalUser(): ?User
     {
         if ($this->org_user)
             return $this->org_user;
         return $this->user;
     }
 
-    public function isAllowed(string $right, $subject = null): bool
+    public function isAllowed(string $right, mixed $subject = null): bool
     {
         $user = $this->getUser();
         if (!$user) {

@@ -24,6 +24,7 @@ use Light\Model\User;
 use Light\Model\UserLog;
 use Light\Model\UserRole;
 use Light\Drive\Drive;
+use Light\Mailer;
 use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -45,18 +46,18 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     protected Auth\Service $auth_service;
     protected MountManager $mountManager;
 
-    protected $container;
-    protected $factory;
+    protected \League\Container\Container $container;
+    protected SchemaFactory $factory;
 
-    protected $rbac;
+    protected Rbac $rbac;
 
-    protected $mode = "dev";
+    protected string $mode = "dev";
 
-    protected $cache;
+    protected CacheInterface $cache;
 
-    protected $menus = [];
+    protected array $menus = [];
 
-    protected $server;
+    protected \Light\Server $server;
 
     public function __construct()
     {
@@ -212,19 +213,19 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return $result;
     }
 
-    public function getMenus()
+    public function getMenus(): array
     {
         return $this->menus;
     }
 
-    public function addMenus(array $menus)
+    public function addMenus(array $menus): void
     {
         foreach ($menus as $m) {
             $this->menus[] = $m;
         }
     }
 
-    public function getDatabase()
+    public function getDatabase(): \Light\Db\Adapter
     {
         return \Light\Db\Adapter::Create();
     }
@@ -234,7 +235,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return $this->cache;
     }
 
-    public function getMailer()
+    public function getMailer(): Mailer
     {
         $mailer = new Mailer(true);
 
@@ -295,7 +296,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
      * @param string[] $permissions An array of permissions to add to the role.
      * @return void
      */
-    public function addRolePermissions(string $role, array $permissions)
+    public function addRolePermissions(string $role, array $permissions): void
     {
         if (!$this->rbac->hasRole($role)) {
             $this->rbac->addRole($role);
@@ -307,7 +308,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         }
     }
 
-    public function loadRbac()
+    public function loadRbac(): void
     {
         /** Roles */
         $this->rbac->addRole("Administrators")->addPermission("#administrators");
@@ -369,7 +370,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->container->add(Rbac::class, $this->rbac);
     }
 
-    private function getMenusPermission(array $menus)
+    private function getMenusPermission(array $menus): array
     {
         $p = [];
         foreach ($menus as $m) {
@@ -393,7 +394,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return $p;
     }
 
-    public function getPermissions()
+    public function getPermissions(): array
     {
         $permissions = [];
         foreach (glob(__DIR__ . "/Controller/*.php") as $file) {
@@ -496,7 +497,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return $this->factory;
     }
 
-    public function getAuthService()
+    public function getAuthService(): Auth\Service
     {
         return $this->auth_service;
     }
@@ -539,7 +540,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     }
 
 
-    public function getDriveResponse(int $index, string $path)
+    public function getDriveResponse(int $index, string $path): ResponseInterface
     {
         $config = json_decode(Config::Value("fs", "[]"), true);
         if (count($config) == 0) {
@@ -566,7 +567,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     }
 
 
-    public function execute(ServerRequestInterface $request)
+    public function execute(ServerRequestInterface $request): \GraphQL\Executor\ExecutionResult
     {
         $uploadCapture = new class($request) implements RequestHandlerInterface {
             public ServerRequestInterface $captured;
@@ -635,7 +636,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         ]);
     }
 
-    public function userLogin(User $user)
+    public function userLogin(User $user): void
     {
         $access_token_expire = $this->getAccessTokenExpire();
         $jti = Uuid::uuid4()->toString();
@@ -699,7 +700,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return true;
     }
 
-    public function getFSConfig()
+    public function getFSConfig(): array
     {
         $config = Config::Get(["name" => "fs"]);
         if (!$config) {
@@ -721,7 +722,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return $fss;
     }
 
-    public function getFS(int $index = 0)
+    public function getFS(int $index = 0): \League\Flysystem\FilesystemOperator
     {
         $fss = $this->getFSConfig();
 
@@ -793,7 +794,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         throw new \Exception("File system not found");
     }
 
-    public function isRevisionEnabled(string $model)
+    public function isRevisionEnabled(string $model): bool
     {
         if (!$config = Config::Get(["name" => "revision"])) {
             return false;
@@ -808,7 +809,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return true;
     }
 
-    public function getRpId()
+    public function getRpId(): string
     {
         $name = $_SERVER["SERVER_NAME"];
         if ($name == "0.0.0.0") {
@@ -820,7 +821,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return $name;
     }
 
-    public function getRpEntity()
+    public function getRpEntity(): PublicKeyCredentialRpEntity
     {
         $name = $_SERVER["SERVER_NAME"];
         if ($name == "0.0.0.0") {
@@ -838,7 +839,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return $rpEntity;
     }
 
-    public function getDrive(int $index)
+    public function getDrive(int $index): Drive
     {
         $config = $this->getFSConfig();
         $fs = $config[$index] ?? $config[0];
@@ -847,7 +848,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
 
 
-    public function run()
+    public function run(): void
     {
         $router = $this->server->getRouter();
 
@@ -928,7 +929,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->server->run();
     }
 
-    public function getIpLocation(string $ip)
+    public function getIpLocation(string $ip): mixed
     {
 
         $data = $this->cache->get("geoip_" . $ip);

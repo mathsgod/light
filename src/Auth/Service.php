@@ -137,10 +137,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
         if ($user instanceof User) {
             $rbac = $this->app->getRbac();
             $u = $rbac->getUser($user->user_id);
-            if ($u->is("Administrators")) {
-                return true;
-            }
-            return $u->can($right);
+            return $u?->can($right) ?? false;
         }
 
         return false;

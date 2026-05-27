@@ -5,6 +5,7 @@ namespace Light\Model;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Light\App;
+use Light\Rbac\Rbac;
 use Light\Security\TwoFactorAuthentication;
 use Light\Type\WebAuthn;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
@@ -269,9 +270,9 @@ class User extends \Light\Model
     {
         $result = [];
         $rbac = $app->getRbac();
-        if ($user = $rbac->getUser($this->user_id)) {
+        if ($u = $rbac->getUser($this->user_id)) {
             foreach ($rights as $right) {
-                if ($user->can($right)) {
+                if ($u->can($right)) {
                     $result[] = $right;
                 }
             }
@@ -282,12 +283,20 @@ class User extends \Light\Model
     #[Field]
     public function isGranted(#[Autowire] App $app, string $right): bool
     {
-        $rbac = $app->getRbac();
+        return $this->can($right, $app->getRbac());
+    }
 
-        if ($user = $rbac->getUser($this->user_id)) {
-            return $user->can($right);
-        }
-        return false;
+    /**
+     * Check a permission directly in PHP (e.g. from canDelete / canUpdate).
+     * Falls back to self::$container when no Rbac is passed.
+     */
+    public function can(string $right, ?Rbac $rbac = null): bool
+    {
+        $rbac ??= self::$container?->get(App::class)?->getRbac();
+        if (!$rbac) return false;
+        $u = $rbac->getUser($this->user_id);
+        if (!$u) return false;
+        return $u->can($right);
     }
 
     #[Field]

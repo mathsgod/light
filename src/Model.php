@@ -2,12 +2,10 @@
 
 namespace Light;
 
-use ArrayObject;
 use Light\Db\Proxy;
 use Light\Model\EventLog;
 use Light\Model\Revision;
 use Light\Model\User;
-use Light\Rbac\Rbac;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 
@@ -73,7 +71,7 @@ abstract class Model extends \Light\Db\Model
     #[Field]
     public function canDelete(#[InjectUser] ?User $by): bool
     {
-        return true;
+        return $by !== null;
     }
 
     public static function SetContainer($container)
@@ -84,36 +82,13 @@ abstract class Model extends \Light\Db\Model
     #[Field]
     public function canUpdate(#[InjectUser] ?User $by): bool
     {
-        /*        if ($container = self::GetSchema()->getContainer()) {
-            $rbac = $container->get(App::class)->getRbac();
-            assert($rbac instanceof Rbac);
-            if ($user = $rbac->getUser($by->user_id)) {
-                if ($user->can(static::class . "." . $this->_key() . ".write")) {
-                    return true;
-                }
-            }
-        } */
-        return true;
+        return $by !== null;
     }
 
     #[Field]
     public function canView(#[InjectUser] ?User $by): bool
     {
-        /*         if ($container = self::GetSchema()->getContainer()) {
-            $rbac = $container->get(App::class)->getRbac();
-            assert($rbac instanceof Rbac);
-            if ($user = $rbac->getUser($by->user_id)) {
-                if (
-                    $user->can(static::class . "." . $this->_key() . ".read")
-                    || $user->can(static::class . "." . $this->_key() . ".write")
-                ) {
-                    return true;
-                }
-            }
-        } */
-
-
-        return true;
+        return $by !== null;
     }
 
 

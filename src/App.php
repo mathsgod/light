@@ -130,6 +130,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->factory->addTypeMapperFactory(new \Light\Db\GraphQLite\Mappers\TypeMapperFactory);
 
         $this->rbac = new Rbac();
+        $this->rbac->setPermissionSeparator(".");
         $this->loadRbac();
         $this->loadMenu();
 

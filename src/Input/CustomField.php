@@ -4,42 +4,42 @@ namespace Light\Input;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
+use TheCodingMachine\GraphQLite\Undefined;
 
 #[Input(name: "CreateCustomFieldInput", default: true)]
-#[Input(name: "UpdateCustomFieldInput", update: true)]
+#[Input(name: "UpdateCustomFieldInput")]
 class CustomField
 {
     #[Field]
-    public ?string $name;
+    public string|null|Undefined $name = Undefined::VALUE;
 
     #[Field]
-    public ?string $label;
+    public string|null|Undefined $label = Undefined::VALUE;
 
     #[Field]
-    public ?string $model;
+    public string|null|Undefined $model = Undefined::VALUE;
 
     #[Field]
-    public ?string $type;
+    public string|null|Undefined $type = Undefined::VALUE;
 
     #[Field]
-    public ?string $placeholder;
+    public string|null|Undefined $placeholder = Undefined::VALUE;
 
     #[Field]
     /**
-     * @var string[]
+     * @var string[]|null
      */
-    public $options;
+    public array|null|Undefined $options = Undefined::VALUE;
 
     #[Field]
-    public ?string $validation;
+    public string|null|Undefined $validation = Undefined::VALUE;
 
     #[Field]
-    public ?string $default_value;
+    public string|null|Undefined $default_value = Undefined::VALUE;
 
     #[Field]
-    public ?int $order;
+    public int|null|Undefined $order = Undefined::VALUE;
 
     #[Field]
-    public ?string $help;
-
+    public string|null|Undefined $help = Undefined::VALUE;
 }

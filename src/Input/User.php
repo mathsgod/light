@@ -4,63 +4,77 @@ namespace Light\Input;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;
+use TheCodingMachine\GraphQLite\Undefined;
 
 #[Input(name: "CreateUserInput", default: true)]
-#[Input(name: "UpdateUserInput", update: true)]
-#[Input(name: "UpdateMyInput", update: true, default: false)]
+#[Input(name: "UpdateUserInput")]
+#[Input(name: "UpdateMyInput")]
 class User
 {
-    #[Field(for: "CreateUserInput")]
+    // create: required; updateUser: optional; not in updateMy
+    #[Field(for: "CreateUserInput", inputType: "String!")]
     #[Field(for: "UpdateUserInput")]
-    public string $username;
+    public string|Undefined $username = Undefined::VALUE;
 
+    // create only
     #[Field(for: "CreateUserInput")]
     public string $password;
 
+    // create: required; updateUser + updateMy: optional
+    #[Field(for: "CreateUserInput", inputType: "String!")]
+    #[Field(for: "UpdateUserInput")]
+    #[Field(for: "UpdateMyInput")]
+    public string|Undefined $first_name = Undefined::VALUE;
+
+    // optional in all 3
     #[Field]
-    public string $first_name;
+    public string|null|Undefined $last_name = Undefined::VALUE;
 
     #[Field]
-    public ?string $last_name;
+    public string|null|Undefined $phone = Undefined::VALUE;
+
+    // create: required; updateUser + updateMy: optional
+    #[Field(for: "CreateUserInput", inputType: "String!")]
+    #[Field(for: "UpdateUserInput")]
+    #[Field(for: "UpdateMyInput")]
+    public string|Undefined $email = Undefined::VALUE;
+
+    // optional in all 3
+    #[Field]
+    public string|null|Undefined $addr1 = Undefined::VALUE;
 
     #[Field]
-    public ?string $phone;
+    public string|null|Undefined $addr2 = Undefined::VALUE;
 
     #[Field]
-    public string $email;
+    public string|null|Undefined $addr3 = Undefined::VALUE;
 
     #[Field]
-    public ?string $addr1;
+    public string|null|Undefined $birthdate = Undefined::VALUE;
 
-    #[Field]
-    public ?string $addr2;
-
-    #[Field]
-    public ?string $addr3;
-
-    #[Field]
-    public ?string $birthdate;
+    // create + updateUser only
+    #[Field(for: "CreateUserInput")]
+    #[Field(for: "UpdateUserInput")]
+    public string|null|Undefined $join_date = Undefined::VALUE;
 
     #[Field(for: "CreateUserInput")]
     #[Field(for: "UpdateUserInput")]
-    public ?string $join_date;
+    public string|null|Undefined $expiry_date = Undefined::VALUE;
 
+    // optional in all 3
+    #[Field]
+    public string|null|Undefined $default_page = Undefined::VALUE;
+
+    // create + updateUser only
     #[Field(for: "CreateUserInput")]
     #[Field(for: "UpdateUserInput")]
-    public ?string $expiry_date;
+    public int|Undefined $status = Undefined::VALUE;
 
+    // optional in all 3
     #[Field]
-    public ?string $default_page;
+    public string|Undefined $language = Undefined::VALUE;
 
-
-    #[Field(for: "CreateUserInput")]
-    #[Field(for: "UpdateUserInput")]
-    public int $status = 0;
-
-    #[Field]
-    public string $language = "en";
-
-
+    // create only
     #[Field(for: "CreateUserInput")]
     /**
      * @var string[]

@@ -30,6 +30,7 @@ abstract class Model extends \Light\Db\Model
         $items = is_object($data) ? get_object_vars($data) : $data;
         foreach ($items as $k => $v) {
             if (!in_array($k, $fields)) continue;
+            if ($v === \TheCodingMachine\GraphQLite\Undefined::VALUE) continue;
             $this->$k = $v;
         }
     }

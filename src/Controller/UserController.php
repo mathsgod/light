@@ -58,14 +58,7 @@ class UserController
 
         if (!$obj->canUpdate($user)) return false;
 
-        //unset role
-        unset($data->roles);
-
-        foreach ($data as $k => $v) {
-            if ($v === null) continue;
-            $obj->$k = $v;
-        }
-
+        $obj->bind($data);
         $obj->save();
         return true;
     }

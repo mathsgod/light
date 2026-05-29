@@ -141,7 +141,7 @@ class AppController
     /**
      * @param ?mixed $menu
      */
-    public function updateMyMenu($menu = null, #[InjectUser] User $user): bool
+    public function updateMyMenu(#[InjectUser] User $user, $menu = null): bool
     {
         $user->menu = $menu;
         $user->save();

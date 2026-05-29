@@ -49,8 +49,9 @@ class MakeInputCommand extends Command
         $class = new ClassGenerator($name, "Input");
         $class->addUse("TheCodingMachine\\GraphQLite\\Annotations\\Field");
         $class->addUse("TheCodingMachine\\GraphQLite\\Annotations\\Input");
+        $class->addUse("TheCodingMachine\\GraphQLite\\Undefined");
         $class->addAttribute("#[Input(name: \"Create{$name}Input\", default: true)]");
-        $class->addAttribute("#[Input(name: \"Update{$name}Input\", update: true)]");
+        $class->addAttribute("#[Input(name: \"Update{$name}Input\")]");
 
         $table = $adapter->getTable($org_name);
         $keys = $table->getPrimaryKey();
@@ -74,19 +75,19 @@ class MakeInputCommand extends Command
 
             $type = $field->getDataType();
 
-            $php_type = match ($type) {
+            $base_type = match ($type) {
                 "int", "bigint", "smallint", "mediumint", "year" => "int",
                 "float", "double", "decimal" => "float",
                 "tinyint" => "bool",
                 default => "string"
             };
 
-            $php_type = "?{$php_type}";
-
             $property = new PropertyGenerator($fieldName);
-            $property->omitDefaultValue(true);
-            $property->setType(TypeGenerator::fromTypeString($php_type));
+            $property->setType(TypeGenerator::fromTypeString("{$base_type}|null|Undefined"));
             $property->addAttribute("#[Field]");
+            $property->setDefaultValue(
+                new \Laminas\Code\Generator\ValueGenerator('Undefined::VALUE', \Laminas\Code\Generator\ValueGenerator::TYPE_CONSTANT)
+            );
             $class->addPropertyFromGenerator($property);
         }
 

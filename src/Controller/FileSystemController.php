@@ -326,7 +326,7 @@ class FileSystemController
     /**
      * @param ?mixed $data
      */
-    public function updateFileSystem($data = null, #[Autowire] App $app): bool
+    public function updateFileSystem(#[Autowire] App $app, $data = null): bool
     {
         if (!$config = Config::Get(["name" => "fs"])) {
             return false;
@@ -361,7 +361,7 @@ class FileSystemController
     /**
      * @param ?mixed $data
      */
-    public function addFileSystem($data = null, #[Autowire] App $app): bool
+    public function addFileSystem(#[Autowire] App $app, $data = null): bool
     {
         if (!$config = Config::Get(["name" => "fs"])) {
             $config = Config::Create(["name" => "fs", "value" => "[]"]);

@@ -4,7 +4,7 @@
 
 A lightweight PHP 8.3+ GraphQL backend framework for building admin/CMS applications. Exposes a GraphQL API (plus a few REST endpoints for file serving) backed by a custom ORM ([mathsgod/light-db](https://github.com/mathsgod/light-db)), RBAC, and a PSR-15 middleware pipeline.
 
-The companion frontend module is [`nuxt-light`](../nuxt-light/) — a Nuxt 4 module using Quasar UI.
+The companion frontend module is [`nuxt-light`](https://github.com/hostlink/nuxt-light) — a Nuxt 4 module using Quasar UI.
 
 ---
 

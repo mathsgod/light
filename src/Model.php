@@ -91,7 +91,7 @@ abstract class Model extends \Light\Db\Model
     }
 
 
-    public function delete(): mixed
+    public function delete()
     {
         $key = $this->_key();
 
@@ -115,7 +115,7 @@ abstract class Model extends \Light\Db\Model
         return parent::delete();
     }
 
-    public function save(): mixed
+    public function save()
     {
         $user_id = null;
         if ($container = self::$container) {

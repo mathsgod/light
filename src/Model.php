@@ -27,10 +27,28 @@ abstract class Model extends \Light\Db\Model
     public function bind($data)
     {
         $fields = $this->__fields();
-        $items = is_object($data) ? get_object_vars($data) : $data;
-        foreach ($items as $k => $v) {
+
+        if (is_array($data)) {
+            foreach ($data as $k => $v) {
+                if (!in_array($k, $fields)) continue;
+                $this->$k = $v;
+            }
+            return;
+        }
+
+        $ref = new \ReflectionObject($data);
+        foreach ($ref->getProperties(\ReflectionProperty::IS_PUBLIC) as $prop) {
+            $k = $prop->getName();
             if (!in_array($k, $fields)) continue;
+            if (!$prop->isInitialized($data)) continue;
+
+            $v = $prop->getValue($data);
             if ($v === \TheCodingMachine\GraphQLite\Undefined::VALUE) continue;
+
+            // Old style (?int, ?string): null means "not provided" (GraphQLite schema default)
+            // New style (int|null|Undefined): null means explicitly provided — allow it
+            if ($v === null && $prop->getType() instanceof \ReflectionNamedType) continue;
+
             $this->$k = $v;
         }
     }

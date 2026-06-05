@@ -29,13 +29,16 @@ class CustomField
     /**
      * @var string[]|null
      */
-    public array|null|Undefined $options = Undefined::VALUE;
+    public ?array $options = null;
 
     #[Field]
     public string|null|Undefined $validation = Undefined::VALUE;
 
     #[Field]
-    public string|null|Undefined $default_value = Undefined::VALUE;
+    /**
+     * @var string[]|null
+     */
+    public ?array $default_value = null;
 
     #[Field]
     public int|null|Undefined $order = Undefined::VALUE;

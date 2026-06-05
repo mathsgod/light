@@ -2,6 +2,7 @@
 
 namespace Light\Command;
 
+use Laminas\Code\Generator\DocBlockGenerator;
 use Laminas\Code\Generator\TypeGenerator;
 use Light\Code\ClassGenerator;
 use Light\Code\PropertyGenerator;
@@ -46,7 +47,7 @@ class MakeInputCommand extends Command
 
         $adapter = \Light\Db\Adapter::Create();
 
-        $class = new ClassGenerator($name, "Input");
+        $class = new ClassGenerator($name, "Light\\Input");
         $class->addUse("TheCodingMachine\\GraphQLite\\Annotations\\Field");
         $class->addUse("TheCodingMachine\\GraphQLite\\Annotations\\Input");
         $class->addUse("TheCodingMachine\\GraphQLite\\Undefined");
@@ -83,11 +84,26 @@ class MakeInputCommand extends Command
             };
 
             $property = new PropertyGenerator($fieldName);
-            $property->setType(TypeGenerator::fromTypeString("{$base_type}|null|Undefined"));
             $property->addAttribute("#[Field]");
-            $property->setDefaultValue(
-                new \Laminas\Code\Generator\ValueGenerator('Undefined::VALUE', \Laminas\Code\Generator\ValueGenerator::TYPE_CONSTANT)
-            );
+
+            // JSON / JSONB columns are emitted as nullable arrays.
+            // Combining array + |Undefined in a native union is a GraphQL
+            // spec violation: input types cannot be unions, so an
+            // `array|null|Undefined` field kills the full IntrospectionQuery.
+            // (See CustomField::$options — only field that actually broke
+            //  __schema{types{...}}.)
+            if (in_array($type, ["json", "jsonb"], true)) {
+                $property->setType(TypeGenerator::fromTypeString("?array"));
+                $property->setDefaultValue(null);
+                $property->setDocBlock(new DocBlockGenerator("@var string[]|null"));
+            } else {
+                $property->setRawType("{$base_type}|null|Undefined");
+                $property->setDefaultValue(
+                    'Undefined::VALUE',
+                    \Laminas\Code\Generator\ValueGenerator::TYPE_CONSTANT
+                );
+            }
+
             $class->addPropertyFromGenerator($property);
         }
 

@@ -47,7 +47,7 @@ class MakeInputCommand extends Command
 
         $adapter = \Light\Db\Adapter::Create();
 
-        $class = new ClassGenerator($name, "Light\\Input");
+        $class = new ClassGenerator($name, "Input");
         $class->addUse("TheCodingMachine\\GraphQLite\\Annotations\\Field");
         $class->addUse("TheCodingMachine\\GraphQLite\\Annotations\\Input");
         $class->addUse("TheCodingMachine\\GraphQLite\\Undefined");

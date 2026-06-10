@@ -672,6 +672,55 @@
                 ]
             }
         ]
+    },
+    {
+        "name": "APIKey",
+        "columns": [
+            {
+                "name": "apikey_id",
+                "type": "int",
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "name",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "key",
+                "type": "varchar",
+                "length": 750
+            },
+            {
+                "name": "user_id",
+                "type": "int"
+            },
+            {
+                "name": "created_time",
+                "type": "datetime"
+            }
+        ],
+        "primary_key": [
+            "apikey_id"
+        ],
+        "keys": [
+            {
+                "name": "user_id",
+                "columns": [
+                    "user_id"
+                ]
+            },
+            {
+                "name": "key",
+                "columns": [
+                    "key"
+                ]
+            }
+        ],
+        "engine": "InnoDB",
+        "charset": "utf8mb4",
+        "collate": "utf8mb4_0900_ai_ci"
     },  {
         "name": "Revision",
         "columns": [

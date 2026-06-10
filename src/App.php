@@ -894,7 +894,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             return new TextResponse("Unauthorized", 401);
         });
 
-        $router->map('POST', $basePath . '/refresh_token', function (ServerRequestInterface $request, array $args) {
+        $refreshHandler = function (ServerRequestInterface $request) {
             $token = $request->getCookieParams()["refresh_token"] ?? null;
             try {
                 if (!$token) {
@@ -976,7 +976,10 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                 ]);
                 return new TextResponse($e->getMessage(), 401);
             }
-        });
+        };
+
+        $router->map('POST', $basePath . '/refresh_token', $refreshHandler);
+        $router->map('POST', $basePath . '/api/refresh_token', $refreshHandler);
         $this->server->run();
     }
 

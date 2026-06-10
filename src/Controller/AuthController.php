@@ -416,25 +416,19 @@ class AuthController
             throw new Error("user not found or password error");
         }
 
-        if ($user->secret) {
+        $user_has_2fa = !empty($user->secret);
+        $system_2fa = $app->isTwoFactorAuthentication();
+        $need_2fa = $user_has_2fa || $system_2fa;
+
+        if ($need_2fa) {
+            if (!$user->secret) {
+                // System 2FA is required but the user has not set one up yet
+                throw new Error("setup_2fa_required");
+            }
+
             if (!$code) {
                 throw new Error("two factor authentication code is required");
             }
-
-            if (!(new TwoFactorAuthentication)->checkCode($user->secret, $code, $user->user_id, $app->getCache())) {
-                throw new Error("two factor authentication error");
-            }
-        }
-
-        $need_2fa = $app->isTwoFactorAuthentication();
-
-        if ($need_2fa && !$user->secret) {
-            throw new Error("setup_2fa_required");
-        }
-
-
-        //check two factor authentication
-        if ($need_2fa) {
 
             if (!(new TwoFactorAuthentication)->checkCode($user->secret, $code, $user->user_id, $app->getCache())) {
                 throw new Error("two factor authentication error");
@@ -621,14 +615,37 @@ class AuthController
     #[Mutation]
     public function forgetPassword(#[Autowire] App $app, string $username, string $email): string
     {
+        $cache = $app->getCache();
+        $ip = $_SERVER["REMOTE_ADDR"] ?? "unknown";
+
+        // Rate limit by IP — prevents email bombing
+        $ip_key = "forget_password_ip_" . hash('sha256', $ip);
+        $ip_attempts = $cache->get($ip_key, 0);
+        if ($ip_attempts >= 10) {
+            // Return silent success to avoid revealing rate limit state
+            return "";
+        }
+
+        // Rate limit by email target — prevents targeted attacks
+        $email_key = "forget_password_email_" . hash('sha256', $email);
+        $email_attempts = $cache->get($email_key, 0);
+        if ($email_attempts >= 3) {
+            // Return silent success without sending email
+            return "";
+        }
+
         if (!$user = User::Get([
             "username" => $username,
             "email" => $email
         ])) {
+            $cache->set($ip_key, $ip_attempts + 1, 3600);
             return "";
         }
 
-        $code = rand(100000, 999999);
+        $cache->set($ip_key, $ip_attempts + 1, 3600);
+        $cache->set($email_key, $email_attempts + 1, 3600);
+
+        $code = random_int(100000, 999999);
 
         // send email
         $mailer = $app->getMailer();

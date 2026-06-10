@@ -97,7 +97,7 @@ class TwoFactorAuthentication
     {
         $secret = "";
         for ($i = 1; $i <= self::$SECRET_LENGTH; $i++) {
-            $c = rand(0, 255);
+            $c = random_int(0, 255);
             $secret .= pack("c", $c);
         }
         $base32 = new FixedBitNotation(5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567', TRUE, TRUE);

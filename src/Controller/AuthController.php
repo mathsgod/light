@@ -396,6 +396,9 @@ class AuthController
 
         $user = User::Get(["username" => $username]);
         if (!$user) {
+            // Dummy password_verify to keep response time constant
+            // and prevent user enumeration via timing oracle.
+            password_verify($password, "$2y$10$" . str_repeat("0", 53));
             throw new Error("user not found or password error");
         }
 
@@ -414,6 +417,10 @@ class AuthController
             ]);
 
             throw new Error("user not found or password error");
+        }
+
+        if ($user->status != 0) {
+            throw new Error("user is disabled");
         }
 
         $user_has_2fa = !empty($user->secret);

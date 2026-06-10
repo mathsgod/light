@@ -28,9 +28,6 @@ class UserControllerTest extends TestCase
         $_SERVER["SCRIPT_FILENAME"] = getcwd() . "/index.php";
         $_SERVER["HTTPS"] = "";
 
-        if (!is_dir(getcwd() . "/pages")) {
-            mkdir(getcwd() . "/pages", 0777, true);
-        }
 
         // Create admin user before App (so loadRbac sees the UserRole)
         $this->adminUser = User::Create([

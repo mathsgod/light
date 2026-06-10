@@ -17,10 +17,6 @@ class ConfigTest extends TestCase
         $_SERVER["SCRIPT_NAME"] = "/index.php";
         $_SERVER["SCRIPT_FILENAME"] = getcwd() . "/index.php";
 
-        if (!is_dir(getcwd() . "/pages")) {
-            mkdir(getcwd() . "/pages", 0777, true);
-        }
-
         $this->getApp();
     }
 

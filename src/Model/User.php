@@ -206,16 +206,16 @@ class User extends \Light\Model
 
     public function isAuthLocked()
     {
-        $ip = $_SERVER["REMOTE_ADDR"];
+        $ip = $_SERVER["REMOTE_ADDR"] ?? "unknown";
         $total = 0;
         $q = UserLog::Query(["user_id" => $this->user_id, "ip" => $ip]);
-        // within 180 seconds 
 
-        $auth_lock_time = intval(Config::Value("auth_lockout_duration", 15));  // default 15 minutes
+        // Lockout window in minutes (default 15)
+        $auth_lockout_minutes = intval(Config::Value("auth_lockout_duration", 15));
 
         $auth_lockout_attempts = intval(Config::Value("auth_lockout_attempts", 5));  // default 5 attempts
 
-        $q->where->greaterThan("login_dt", date("Y-m-d H:i:s", time() - ($auth_lock_time * 60)));
+        $q->where->greaterThan("login_dt", date("Y-m-d H:i:s", time() - ($auth_lockout_minutes * 60)));
         foreach ($q->order("userlog_id")->limit($auth_lockout_attempts) as $ul) {
             if ($ul->result == "FAIL") {
                 $total++;

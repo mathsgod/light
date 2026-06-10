@@ -41,6 +41,18 @@ class AuthController
 
         $user = User::Get(["username" => $username]);
         if (!$user) {
+            // Dummy password_verify to keep response time constant
+            password_verify($password, "$2y$10$" . str_repeat("0", 53));
+            throw new Error("update two factor authentication failed");
+        }
+
+        if ($user->status != 0) {
+            throw new Error("update two factor authentication failed");
+        }
+
+        // Verify password before revealing whether 2FA is already set up,
+        // to avoid user enumeration (which users have 2FA enabled).
+        if (!self::PasswordVerify($password, $user->password)) {
             throw new Error("update two factor authentication failed");
         }
 
@@ -48,11 +60,7 @@ class AuthController
             throw new Error("update two factor authentication failed");
         }
 
-        if (!password_verify($password, $user->password)) {
-            throw new Error("update two factor authentication failed");
-        }
-
-        if (!(new TwoFactorAuthentication)->checkCode($secret, $code)) {
+        if (!(new TwoFactorAuthentication)->checkCode($secret, $code, $user->user_id, $app->getCache())) {
             throw new Error("setup two factor authentication failed");
         }
 
@@ -67,6 +75,12 @@ class AuthController
 
         $user = User::Get(["username" => $username]);
         if (!$user) {
+            // Dummy password_verify to keep response time constant
+            password_verify($old_password, "$2y$10$" . str_repeat("0", 53));
+            throw new Error("User not found");
+        }
+
+        if ($user->status != 0) {
             throw new Error("User not found");
         }
 
@@ -77,12 +91,17 @@ class AuthController
 
         //check duration of password
         $duration = Config::Value("password_expiration_duration", 90); //90 days
-        $diff = strtotime(date("Y-m-d")) - strtotime($user->password_dt);
+        $diff = strtotime(date("Y-m-d")) - strtotime($user->password_dt ?: "1970-01-01");
         if ($diff < $duration * 24 * 60 * 60) {
             throw new Error("Password is not expired");
         }
 
         if (!self::PasswordVerify($old_password, $user->password)) {
+            throw new Error("Old password is not correct");
+        }
+
+        if ($user->secret) {
+            // 2FA-protected accounts must use the regular reset flow
             throw new Error("Old password is not correct");
         }
 

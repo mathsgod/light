@@ -3,6 +3,7 @@ vendor
 
 test.php
 uploads
-pages
+pages/*
+!pages/api/
 
 upload2.phpunit.result.cache

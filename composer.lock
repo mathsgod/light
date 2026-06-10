@@ -2248,16 +2248,16 @@
         },
         {
             "name": "mathsgod/light-server",
-            "version": "1.1.0",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mathsgod/light-server.git",
-                "reference": "3188467480918b95bf23d1636c46ec249aa4d577"
+                "reference": "f5d7b1f499c4ced717f7fab39ed464360c4ad98c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mathsgod/light-server/zipball/3188467480918b95bf23d1636c46ec249aa4d577",
-                "reference": "3188467480918b95bf23d1636c46ec249aa4d577",
+                "url": "https://api.github.com/repos/mathsgod/light-server/zipball/f5d7b1f499c4ced717f7fab39ed464360c4ad98c",
+                "reference": "f5d7b1f499c4ced717f7fab39ed464360c4ad98c",
                 "shasum": ""
             },
             "require": {
@@ -2286,11 +2286,12 @@
                     "email": "mathsgod@yahoo.com"
                 }
             ],
+            "description": "A lightweight PHP 8.1+ file-based routing server inspired by Nuxt.js pages, built on PSR-7/PSR-15 with League Route and Laminas.",
             "support": {
                 "issues": "https://github.com/mathsgod/light-server/issues",
-                "source": "https://github.com/mathsgod/light-server/tree/1.1.0"
+                "source": "https://github.com/mathsgod/light-server/tree/v1.2.1"
             },
-            "time": "2025-12-30T09:33:02+00:00"
+            "time": "2026-06-01T03:00:12+00:00"
         },
         {
             "name": "mathsgod/mysql-schema-migrate",

@@ -637,6 +637,28 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         ]);
     }
 
+    public function getRefreshTokenCookiePath(): string
+    {
+        if ($_ENV["API_PREFIX"]) {
+            $currentDir = rtrim($_ENV["API_PREFIX"], '/\\');
+        } else {
+            $currentDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+        }
+        return $currentDir . "/refresh_token";
+    }
+
+    public function setRefreshTokenCookie(string $token, int $expire): void
+    {
+        setcookie("refresh_token", $token, [
+            "path" => $this->getRefreshTokenCookiePath(),
+            "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
+            "secure" => $_ENV["COOKIE_SECURE"] ?? false,
+            "httponly" => true,
+            "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax",
+            "expires" => time() + $expire
+        ]);
+    }
+
     public function userLogin(User $user): void
     {
         $access_token_expire = $this->getAccessTokenExpire();
@@ -665,11 +687,12 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             "jti" => $jti
         ]);
 
-        //set refresh token
+        //set refresh token — uses independent jti from access token
         $refresh_token_expire = intval(Config::Value("refresh_token_expire", 3600 * 24 * 7));
+        $refresh_jti = Uuid::uuid4()->toString();
         $refresh_payload = [
             "iss" => "light server",
-            "jti" => $jti,
+            "jti" => $refresh_jti,
             "iat" => time(),
             "exp" => time() + $refresh_token_expire,
             "id" => $user->user_id,
@@ -677,20 +700,8 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         ];
 
 
-        if ($_ENV["API_PREFIX"]) {
-            $currentDir = rtrim($_ENV["API_PREFIX"], '/\\');
-        } else {
-            $currentDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-        }
         $refresh_token = JWT::encode($refresh_payload, $_ENV["JWT_SECRET"], "HS256");
-        setcookie("refresh_token", $refresh_token, [
-            "path" => $currentDir . "/refresh_token",
-            "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
-            "secure" => $_ENV["COOKIE_SECURE"] ?? false,
-            "httponly" => true,
-            "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax",
-            "expires" => time() + $refresh_token_expire
-        ]);
+        $this->setRefreshTokenCookie($refresh_token, $refresh_token_expire);
     }
 
     public function hasFavorite(): bool
@@ -900,24 +911,63 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                     throw new Exception("User not found", 404);
                 }
 
+                $cache = $this->getCache();
+                $user_id = $user->user_id;
+                $old_refresh_jti = $payload->jti;
+                $refresh_token_expire = $this->getRefreshTokenExpire();
+
+                // Reuse detection: if this refresh token's jti was already used, treat as token theft
+                if ($cache->has("revoked_refresh_token_" . $old_refresh_jti)) {
+                    // Revoke all sessions for this user
+                    $cache->set("user_sessions_revoked_" . $user_id, true, $refresh_token_expire);
+                    throw new Exception("Token reuse detected", 401);
+                }
+
+                // Mark old refresh token as used (rotation)
+                $cache->set("revoked_refresh_token_" . $old_refresh_jti, true, $refresh_token_expire);
+
+                // Issue new access token (new jti)
                 $access_token_expire = $this->getAccessTokenExpire();
-                $payload = [
+                $access_jti = Uuid::uuid4()->toString();
+                $access_payload = [
                     "iss" => "light server",
-                    "jti" => $payload->jti,
+                    "jti" => $access_jti,
                     "iat" => time(),
                     "exp" => time() + $access_token_expire,
                     "role" => "Users",
                     "id" => $user->user_id,
                     "type" => "access_token"
                 ];
-                $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
-                $this->setAccessTokenCookie($token);
+                $access_token = JWT::encode($access_payload, $_ENV["JWT_SECRET"], "HS256");
+                $this->setAccessTokenCookie($access_token);
+
+                // Issue new refresh token (new jti) — rotation
+                $new_refresh_jti = Uuid::uuid4()->toString();
+                $refresh_payload = [
+                    "iss" => "light server",
+                    "jti" => $new_refresh_jti,
+                    "iat" => time(),
+                    "exp" => time() + $refresh_token_expire,
+                    "id" => $user->user_id,
+                    "type" => "refresh_token"
+                ];
+                $refresh_token = JWT::encode($refresh_payload, $_ENV["JWT_SECRET"], "HS256");
+                $this->setRefreshTokenCookie($refresh_token, $refresh_token_expire);
 
                 return new TextResponse("Token refreshed", 200);
             } catch (Exception $e) {
                 //clear access token cookie
                 setcookie("access_token", "", [
                     "path" => "/",
+                    "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
+                    "secure" => $_ENV["COOKIE_SECURE"] ?? false,
+                    "httponly" => true,
+                    "samesite" => $_ENV["COOKIE_SAMESITE"] ?? "Lax",
+                    "expires" => time() - 3600
+                ]);
+                //clear refresh token cookie
+                setcookie("refresh_token", "", [
+                    "path" => $this->getRefreshTokenCookiePath(),
                     "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
                     "secure" => $_ENV["COOKIE_SECURE"] ?? false,
                     "httponly" => true,

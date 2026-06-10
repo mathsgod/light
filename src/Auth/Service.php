@@ -60,6 +60,11 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                     return;
                 }
 
+                // If a refresh token reuse was detected, all sessions for this user are revoked
+                if (!empty($payload->id) && $cache->has("user_sessions_revoked_" . $payload->id)) {
+                    return;
+                }
+
                 // If token has a name field, it's an API key — verify the record still exists
                 if (!empty($payload->name)) {
                     if (!APIKey::Get(["key" => $this->token])) {

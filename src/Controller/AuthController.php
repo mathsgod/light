@@ -17,7 +17,6 @@ use Light\Model\Config;
 use Light\Type\System;
 use Light\Model\User;
 use Light\Model\UserLog;
-use Light\Model\UserRole;
 use Light\Security\TwoFactorAuthentication;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -335,12 +334,29 @@ class AuthController
 
 
     #[Mutation]
-    public function logout(#[Autowire] Service $service, #[Autowire] App $app): bool
+    public function logout(#[Autowire] Service $service, #[Autowire] App $app, #[Autowire] \Psr\Http\Message\ServerRequestInterface $request): bool
     {
         $refresh_token_expire = $app->getRefreshTokenExpire();
-        if ($jti = $service->getJti()) {
+        $jti = $service->getJti();
+        if ($jti) {
             $cache = $app->getCache();
             $cache->set("revoked_token_" . $jti, true, $refresh_token_expire);
+        }
+
+        // Also revoke the refresh token from the cookie so the session is fully terminated
+        $cookies = $request->getCookieParams();
+        if (!empty($cookies["refresh_token"])) {
+            try {
+                $refresh_payload = \Firebase\JWT\JWT::decode(
+                    $cookies["refresh_token"],
+                    new \Firebase\JWT\Key($_ENV["JWT_SECRET"], "HS256")
+                );
+                if ($refresh_payload->type === "refresh_token" && !empty($refresh_payload->jti)) {
+                    $app->getCache()->set("revoked_refresh_token_" . $refresh_payload->jti, true, $refresh_token_expire);
+                }
+            } catch (\Exception $e) {
+                // ignore: refresh token may be expired or malformed
+            }
         }
 
 
@@ -363,7 +379,7 @@ class AuthController
         //set cookie
         setcookie("refresh_token", "", [
             "expires" => time() - 3600,
-            "path" => "/refresh_token",
+            "path" => $app->getRefreshTokenCookiePath(),
             "domain" => $_ENV["COOKIE_DOMAIN"] ?? "",
             "secure" => $_ENV["COOKIE_SECURE"] ?? false,
             "httponly" => true,
@@ -377,27 +393,6 @@ class AuthController
     #[Mutation]
     public function login(#[Autowire] App $app, string $username, string $password, ?string $code = null): bool
     {
-
-        //check no users, create first user
-        if (User::Query()->count() == 0) {
-            $user = User::Create([
-                "username" => $username,
-                "first_name" => "Admin",
-                "email" => "admin@localhost",
-                "password" => password_hash($password, PASSWORD_DEFAULT),
-                "join_date" => date("Y-m-d"),
-                "status" => 0,
-                "language" => "en",
-                "password_dt" => date("Y-m-d H:i:s")
-            ]);
-            //add user to admin group
-            UserRole::Create([
-                "user_id" => $user->user_id,
-                "role" => "Administrators"
-            ])->save();
-        }
-
-
 
         $user = User::Get(["username" => $username]);
         if (!$user) {

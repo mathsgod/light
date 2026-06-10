@@ -421,7 +421,7 @@ class AuthController
                 throw new Error("two factor authentication code is required");
             }
 
-            if (!(new TwoFactorAuthentication)->checkCode($user->secret, $code)) {
+            if (!(new TwoFactorAuthentication)->checkCode($user->secret, $code, $user->user_id, $app->getCache())) {
                 throw new Error("two factor authentication error");
             }
         }
@@ -436,7 +436,7 @@ class AuthController
         //check two factor authentication
         if ($need_2fa) {
 
-            if (!(new TwoFactorAuthentication)->checkCode($user->secret, $code)) {
+            if (!(new TwoFactorAuthentication)->checkCode($user->secret, $code, $user->user_id, $app->getCache())) {
                 throw new Error("two factor authentication error");
             }
         }

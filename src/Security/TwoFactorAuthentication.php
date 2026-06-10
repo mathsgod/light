@@ -13,6 +13,8 @@ namespace Light\Security;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use Psr\SimpleCache\CacheInterface;
+
 
 class TwoFactorAuthentication
 {
@@ -20,17 +22,42 @@ class TwoFactorAuthentication
     static $PIN_MODULO;
     static $SECRET_LENGTH = 10;
 
+    // TTL (seconds) for replay-protection cache entries. Covers the full
+    // +/- 1 step window (60s) plus 30s of grace.
+    private const REPLAY_TTL = 90;
+
     public function __construct()
     {
         self::$PIN_MODULO = pow(10, self::$PASS_CODE_LENGTH);
     }
 
-    public function checkCode($secret, $code)
+    /**
+     * Verify a TOTP code. Optionally enforces replay protection when
+     * $user_id and $cache are supplied: a code whose counter has been
+     * used within the past REPLAY_TTL seconds is rejected.
+     */
+    public function checkCode($secret, $code, ?int $user_id = null, ?CacheInterface $cache = null)
     {
         $time = floor(time() / 30);
         for ($i = -1; $i <= 1; $i++) {
 
             if ($this->getCode($secret, $time + $i) == $code) {
+
+                // Replay protection: skip counter that has already been used
+                if ($user_id !== null && $cache !== null) {
+                    $key = "totp_used_" . $user_id . "_" . ($time + $i);
+                    if ($cache->has($key)) {
+                        // Code at this counter is already used; keep looking
+                        // for a fresh counter in the window
+                        continue;
+                    }
+                }
+
+                // Mark this counter as used (best-effort, non-atomic)
+                if ($user_id !== null && $cache !== null) {
+                    $cache->set("totp_used_" . $user_id . "_" . ($time + $i), true, self::REPLAY_TTL);
+                }
+
                 return true;
             }
         }

@@ -107,7 +107,10 @@ class WebAuthnController
 
         //load back the challenge from the cache
         $cache = $app->getCache();
-        $request_options = $cache->get("webauthn_request");
+        $cookies = $request->getCookieParams();
+        $sid = is_string($cookies["webauthn_sid"] ?? null) ? $cookies["webauthn_sid"] : "";
+        $cacheKey = preg_match('/^[a-f0-9]{32}$/', $sid) ? "webauthn_request_" . $sid : "webauthn_request";
+        $request_options = $cache->get($cacheKey);
         if (!$request_options) {
             throw new Error("Invalid challenge");
             return false;
@@ -131,7 +134,7 @@ class WebAuthnController
         );
 
         //remove the challenge from cache
-        $cache->delete("webauthn_request");
+        $cache->delete($cacheKey);
 
 
         $user = User::Get(["user_id" => $publicKeyCredentialSource->userHandle]);

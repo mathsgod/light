@@ -13,6 +13,7 @@ use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Type;
+use Psr\Http\Message\ServerRequestInterface;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\AuthenticatorSelectionCriteria;
@@ -59,8 +60,21 @@ class Auth
     /**
      * @return mixed
      */
-    public function getWebAuthnRequestOptions(#[Autowire] App $app)
+    public function getWebAuthnRequestOptions(#[Autowire] App $app, #[Autowire] ServerRequestInterface $request)
     {
+
+        $cookies = $request->getCookieParams();
+        $sid = $cookies["webauthn_sid"] ?? null;
+        if (!is_string($sid) || !preg_match('/^[a-f0-9]{32}$/', $sid)) {
+            $sid = bin2hex(random_bytes(16));
+            setcookie("webauthn_sid", $sid, [
+                "expires" => time() + 300,
+                "path" => "/",
+                "secure" => true,
+                "httponly" => true,
+                "samesite" => "Lax",
+            ]);
+        }
 
         $challenge = random_bytes(32);
         $publicKeyCredentialRequestOptions = PublicKeyCredentialRequestOptions::create(
@@ -71,7 +85,7 @@ class Auth
         );
 
         $cache = $app->getCache();
-        $cache->set("webauthn_request", serialize($publicKeyCredentialRequestOptions), 60 * 5);
+        $cache->set("webauthn_request_" . $sid, serialize($publicKeyCredentialRequestOptions), 60 * 5);
 
         $json = $publicKeyCredentialRequestOptions->jsonSerialize();
 

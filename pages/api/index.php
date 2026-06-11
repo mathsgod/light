@@ -9,6 +9,11 @@ use Psr\Http\Message\ServerRequestInterface;
 
 return new class {
 
+    public function Get(ServerRequestInterface $request): ResponseInterface
+    {
+        return new \Laminas\Diactoros\Response\TextResponse("Light API");
+    }
+
     public function POST(ServerRequestInterface $request, App $app): ResponseInterface
     {
         $result = $app->execute($request);

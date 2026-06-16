@@ -17,6 +17,7 @@ class UserControllerTest extends TestCase
 {
     protected ?App $app = null;
     protected ?string $adminToken = null;
+    protected ?string $currentToken = null;
     protected ?User $adminUser = null;
 
     protected function setUp(): void
@@ -50,6 +51,7 @@ class UserControllerTest extends TestCase
         $this->app = new App();
 
         $this->adminToken = $this->makeToken($this->adminUser->user_id);
+        $this->currentToken = $this->adminToken;
 
         // Set up auth service for the admin on the factory
         $this->processRequest($this->app, $this->adminToken);
@@ -88,13 +90,14 @@ class UserControllerTest extends TestCase
      */
     private function gql(string $query, array $variables = []): array
     {
+        $token = $this->currentToken ?? $this->adminToken;
         $request = (new ServerRequest())
             ->withMethod("POST")
-            ->withHeader("Authorization", "Bearer " . $this->adminToken)
+            ->withHeader("Authorization", "Bearer $token")
             ->withParsedBody(["query" => $query, "variables" => $variables]);
 
         // Re-process so Auth\Service on factory sees this request's token
-        $this->processRequest($this->app, $this->adminToken);
+        $this->processRequest($this->app, $token);
 
         return $this->app->execute($request)->toArray(\GraphQL\Error\DebugFlag::INCLUDE_DEBUG_MESSAGE);
     }
@@ -103,17 +106,19 @@ class UserControllerTest extends TestCase
     // addUser
     // -----------------------------------------------------------------------
 
-    private function addUserGql(string $username, string $password = "Test@1234"): array
+    private function addUserGql(string $username, string $password = "Test@1234", array $roles = []): array
     {
+        $roleList = implode(",", array_map(fn($r) => "\"" . addslashes($r) . "\"", $roles));
         return $this->gql(
-            'mutation($u:String!,$p:String!,$f:String!,$e:String!){
-                addUser(data: { username:$u, password:$p, first_name:$f, email:$e })
+            'mutation($u:String!,$p:String!,$f:String!,$e:String!,$r:[String!]){
+                addUser(data: { username:$u, password:$p, first_name:$f, email:$e, roles:$r })
             }',
             [
                 "u" => $username,
                 "p" => $password,
                 "f" => "Test",
                 "e" => "$username@test.local",
+                "r" => $roles,
             ]
         );
     }
@@ -143,6 +148,67 @@ class UserControllerTest extends TestCase
         $errEntry = $out["errors"][0];
         $msg = $errEntry["extensions"]["debugMessage"] ?? $errEntry["message"];
         $this->assertStringContainsString("already exist", $msg);
+    }
+
+    public function testAdminCanAddAnotherAdmin(): void
+    {
+        $username = "admin2_" . uniqid();
+        $out = $this->addUserGql($username, "Test@1234", ["Administrators"]);
+
+        $this->assertArrayNotHasKey("errors", $out, json_encode($out));
+        $uid = $out["data"]["addUser"];
+        $this->assertGreaterThan(0, $uid);
+
+        $created = User::Get($uid);
+        $this->assertNotNull($created);
+        $this->assertTrue($created->is("Administrators"));
+    }
+
+    public function testNonAdminCannotAddAdministrator(): void
+    {
+        // Build a non-admin actor (Editor role; no Administrators).
+        $editor = User::Create([
+            "username" => "editor_" . uniqid(),
+            "first_name" => "Ed",
+            "email" => "editor_" . uniqid() . "@test.local",
+            "password" => password_hash("editor_pw", PASSWORD_DEFAULT),
+            "join_date" => date("Y-m-d"),
+            "status" => 0,
+            "language" => "en",
+            "password_dt" => date("Y-m-d H:i:s"),
+        ]);
+        $editor->save();
+
+        UserRole::Create([
+            "user_id" => $editor->user_id,
+            "role" => "Editor",
+        ])->save();
+
+        $editorToken = $this->makeToken($editor->user_id);
+        $this->currentToken = $editorToken;
+        $this->processRequest($this->app, $editorToken);
+
+        // Editor (no `user.add` right) must be blocked at the GraphQLite
+        // RBAC layer (#[Right("user.add")] on UserController::addUser,
+        // light/src/Controller/UserController.php:106), regardless of the
+        // per-role skip at L143-148.
+        $username = "sneaky_" . uniqid();
+        $out = $this->addUserGql($username, "Test@1234", ["Administrators"]);
+
+        $this->assertArrayHasKey("errors", $out, json_encode($out));
+        $this->assertStringContainsString(
+            "do not have sufficient rights",
+            json_encode($out["errors"])
+        );
+        $this->assertSame(
+            0,
+            User::Query(["username" => $username])->count(),
+            "RBAC-blocked addUser must not persist any user"
+        );
+        $this->assertSame(
+            0,
+            UserRole::Query(["user_id" => $editor->user_id, "role" => "Administrators"])->count()
+        );
     }
 
     // -----------------------------------------------------------------------

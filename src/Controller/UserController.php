@@ -104,7 +104,7 @@ class UserController
 
     #[Mutation]
     #[Right("user.add")]
-    public function addUser(InputUser $data): int
+    public function addUser(InputUser $data, #[InjectUser] \Light\Model\User $current): int
     {
 
         $user = User::Create();
@@ -143,7 +143,7 @@ class UserController
         foreach ($data->roles as $role) {
 
             //only administrators can add administrators
-            if ($role == "Administrators" && !$user->is("Administrators")) {
+            if ($role == "Administrators" && !$current->is("Administrators")) {
                 continue;
             }
 

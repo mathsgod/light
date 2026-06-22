@@ -12,10 +12,8 @@ use Ramsey\Uuid\Uuid;
 use Light\App;
 use Light\Auth\Service;
 use Light\Input\User as InputUser;
-use Light\Model;
 use Light\Model\APIKey;
 use Light\Model\Config;
-use Light\Model\Notification;
 use Light\Type\System;
 use Light\Model\User;
 use Light\Model\UserLog;
@@ -487,71 +485,6 @@ class AuthController
 
 
     #[Query]
-    #[Logged]
-    /**
-     * @param ?mixed $filters
-     * @return \Light\Model\Notification[]
-     */
-    public function listNotification(#[InjectUser] User $user, $filters = null, ?string $sort = ''): \Light\Db\Query
-    {
-        $q = Notification::Query(['user_id' => $user->user_id]);
-        if ($filters) {
-            $q = $q->filters($filters);
-        }
-        if ($sort) {
-            $q = $q->sort($sort);
-        }
-        return $q;
-    }
-
-    #[Query]
-    #[Logged]
-    public function unreadNotificationCount(#[InjectUser] User $user): int
-    {
-        return Notification::Query(['user_id' => $user->user_id, 'is_read' => 0])->count();
-    }
-
-    #[Mutation]
-    #[Logged]
-    public function markNotificationRead(#[InjectUser] User $user, int $id): bool
-    {
-        if ($n = Notification::Get(['notification_id' => $id, 'user_id' => $user->user_id])) {
-            $n->is_read = 1;
-            $n->save();
-            return true;
-        }
-        return false;
-    }
-
-    #[Mutation]
-    #[Logged]
-    public function markAllNotificationsRead(#[InjectUser] User $user): bool
-    {
-        Notification::_table()->update(['is_read' => 1], ['user_id' => $user->user_id, 'is_read' => 0]);
-        return true;
-    }
-
-    #[Mutation]
-    #[Logged]
-    public function deleteNotification(#[InjectUser] User $user, int $id): bool
-    {
-        if ($n = Notification::Get(['notification_id' => $id, 'user_id' => $user->user_id])) {
-            $n->delete();
-            return true;
-        }
-        return false;
-    }
-
-    #[Mutation]
-    #[Logged]
-    #[Right("notification.send")]
-    public function sendNotification(int $user_id, string $type, string $title, string $message, ?string $link = null): bool
-    {
-        Model::Notify($user_id, $type, $title, $message, $link);
-        return true;
-    }
-
-    #[Query]
     public function getMy(#[InjectUser] ?User $user): ?User
     {
         return $user;
@@ -604,6 +537,46 @@ class AuthController
             "host" => $host,
             "image" => $png->getDataUri()
         ];
+    }
+
+    #[Mutation]
+    #[Logged]
+    public function markNotificationRead(#[InjectUser] User $user, int $id): bool
+    {
+        if ($n = \Light\Model\Notification::Get(['notification_id' => $id, 'user_id' => $user->user_id])) {
+            $n->is_read = 1;
+            $n->save();
+            return true;
+        }
+        return false;
+    }
+
+    #[Mutation]
+    #[Logged]
+    public function markAllNotificationsRead(#[InjectUser] User $user): bool
+    {
+        \Light\Model\Notification::_table()->update(['is_read' => 1], ['user_id' => $user->user_id, 'is_read' => 0]);
+        return true;
+    }
+
+    #[Mutation]
+    #[Logged]
+    public function deleteNotification(#[InjectUser] User $user, int $id): bool
+    {
+        if ($n = \Light\Model\Notification::Get(['notification_id' => $id, 'user_id' => $user->user_id])) {
+            $n->delete();
+            return true;
+        }
+        return false;
+    }
+
+    #[Mutation]
+    #[Logged]
+    #[Right("notification.send")]
+    public function sendNotification(int $user_id, string $type, string $title, string $message, ?string $link = null): bool
+    {
+        \Light\Model::Notify($user_id, $type, $title, $message, $link);
+        return true;
     }
 
     #[Mutation]

@@ -11,6 +11,7 @@ use Light\Model\Config;
 use Light\Model\CustomField;
 use Light\Model\EventLog;
 use Light\Model\MailLog;
+use Light\Model\Notification;
 use Light\Model\Permission;
 use Light\Model\Role;
 use Light\Model\SystemValue;
@@ -95,6 +96,25 @@ class App
         return new Auth;
     }
 
+
+    #[Field]
+    #[Logged]
+    /**
+     * @return \Light\Model\Notification[]
+     * @param ?mixed $filters
+     */
+    public function listNotification(#[InjectUser] User $user, $filters = null, ?string $sort = ''): \Light\Db\Query
+    {
+        $q = Notification::Query(['user_id' => $user->user_id]);
+        return $q->filters($filters)->sort($sort);
+    }
+
+    #[Field]
+    #[Logged]
+    public function unreadNotificationCount(#[InjectUser] User $user): int
+    {
+        return Notification::Query(['user_id' => $user->user_id, 'is_read' => 0])->count();
+    }
 
     #[Field]
     #[Logged]

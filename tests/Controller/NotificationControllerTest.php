@@ -202,4 +202,47 @@ class NotificationControllerTest extends TestCase
         $this->assertFalse($out["data"]["markNotificationRead"]);
         $this->assertEquals(0, Notification::Get($n->notification_id)->is_read);
     }
+
+    public function testDeleteNotificationsBulk(): void
+    {
+        $n1 = \Light\Model::Notify($this->adminUser->user_id, "info", "One", "First");
+        $n2 = \Light\Model::Notify($this->adminUser->user_id, "info", "Two", "Second");
+
+        $out = $this->gql(
+            'mutation($ids:[Int!]!){ deleteNotifications(ids:$ids) }',
+            ["ids" => [$n1->notification_id, $n2->notification_id]]
+        );
+
+        $this->assertArrayNotHasKey("errors", $out, json_encode($out));
+        $this->assertTrue($out["data"]["deleteNotifications"]);
+
+        $remaining = Notification::Query(["user_id" => $this->adminUser->user_id])->count();
+        $this->assertEquals(0, $remaining);
+    }
+
+    public function testUserCannotDeleteAnotherUsersNotificationsBulk(): void
+    {
+        $other = User::Create([
+            "username" => "other_bulk_" . uniqid(),
+            "first_name" => "Other",
+            "email" => "other_bulk_" . uniqid() . "@test.local",
+            "password" => password_hash("other_pw", PASSWORD_DEFAULT),
+            "join_date" => date("Y-m-d"),
+            "status" => 0,
+            "language" => "en",
+            "password_dt" => date("Y-m-d H:i:s"),
+        ]);
+        $other->save();
+
+        $n = \Light\Model::Notify($other->user_id, "info", "Private", "Not yours");
+
+        $out = $this->gql(
+            'mutation($ids:[Int!]!){ deleteNotifications(ids:$ids) }',
+            ["ids" => [$n->notification_id]]
+        );
+
+        $this->assertArrayNotHasKey("errors", $out, json_encode($out));
+        $this->assertTrue($out["data"]["deleteNotifications"]);
+        $this->assertNotNull(Notification::Get($n->notification_id));
+    }
 }

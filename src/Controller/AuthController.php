@@ -572,6 +572,21 @@ class AuthController
 
     #[Mutation]
     #[Logged]
+    /**
+     * @param int[] $ids
+     */
+    public function deleteNotifications(#[InjectUser] User $user, array $ids): bool
+    {
+        foreach ($ids as $id) {
+            if ($n = \Light\Model\Notification::Get(['notification_id' => $id, 'user_id' => $user->user_id])) {
+                $n->delete();
+            }
+        }
+        return true;
+    }
+
+    #[Mutation]
+    #[Logged]
     #[Right("notification.send")]
     public function sendNotification(int $user_id, string $type, string $title, string $message, ?string $link = null): bool
     {

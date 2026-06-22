@@ -4,6 +4,7 @@ namespace Light;
 
 use Light\Db\Proxy;
 use Light\Model\EventLog;
+use Light\Model\Notification;
 use Light\Model\Revision;
 use Light\Model\User;
 use Psr\Container\ContainerInterface;
@@ -16,6 +17,21 @@ abstract class Model extends \Light\Db\Model
     public static bool $_log_delete = true;
     public static bool $_log_update = true;
     public static ?ContainerInterface $container = null;
+
+    public static function Notify(int $user_id, string $type, string $title, string $message, ?string $link = null): Notification
+    {
+        $n = Notification::Create([
+            'user_id' => $user_id,
+            'type' => $type,
+            'title' => $title,
+            'message' => $message,
+            'link' => $link,
+            'is_read' => 0,
+            'created_time' => date('Y-m-d H:i:s'),
+        ]);
+        $n->save();
+        return $n;
+    }
 
     public function __fields(): array
     {

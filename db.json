@@ -674,6 +674,87 @@
         ]
     },
     {
+        "name": "Notification",
+        "columns": [
+            {
+                "name": "notification_id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false,
+                "auto_increment": true
+            },
+            {
+                "name": "user_id",
+                "type": "int",
+                "unsigned": true,
+                "nullable": false
+            },
+            {
+                "name": "type",
+                "type": "varchar",
+                "length": 32
+            },
+            {
+                "name": "title",
+                "type": "varchar",
+                "length": 255
+            },
+            {
+                "name": "message",
+                "type": "text"
+            },
+            {
+                "name": "link",
+                "type": "varchar",
+                "length": 500
+            },
+            {
+                "name": "is_read",
+                "type": "tinyint",
+                "unsigned": true,
+                "nullable": false,
+                "default": "0"
+            },
+            {
+                "name": "created_time",
+                "type": "datetime"
+            }
+        ],
+        "primary_key": [
+            "notification_id"
+        ],
+        "keys": [
+            {
+                "name": "user_id",
+                "columns": [
+                    "user_id"
+                ]
+            },
+            {
+                "name": "is_read",
+                "columns": [
+                    "is_read"
+                ]
+            }
+        ],
+        "foreign_keys": [
+            {
+                "columns": [
+                    "user_id"
+                ],
+                "reference_table": "User",
+                "reference_columns": [
+                    "user_id"
+                ],
+                "on_delete": "CASCADE",
+                "on_update": "CASCADE"
+            }
+        ],
+        "engine": "InnoDB",
+        "charset": "utf8mb4",
+        "collate": "utf8mb4_0900_ai_ci"
+    },
+    {
         "name": "APIKey",
         "columns": [
             {

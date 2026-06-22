@@ -5,6 +5,7 @@ namespace Light\Model;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Light\App;
+use Light\Model\Notification;
 use Light\Rbac\Rbac;
 use Light\Security\TwoFactorAuthentication;
 use Light\Type\WebAuthn;
@@ -206,6 +207,12 @@ class User extends \Light\Model
             return $u->getPermissions();
         }
         return [];
+    }
+
+    #[Field]
+    public function getUnreadNotificationCount(): int
+    {
+        return Notification::Query(['user_id' => $this->user_id, 'is_read' => 0])->count();
     }
 
     public function saveLastAccessTime(string $jti)

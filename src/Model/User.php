@@ -100,10 +100,19 @@ class User extends \Light\Model
         if ($path == "/") return true;
         $permissions = [];
         foreach ($app->getFlatMenus() as $m) {
-            if ($m["path"] === $path) {
+            if ($m["to"] === $path) {
                 if ($m["permission"]) {
-                    $permissions = $m["permission"];
+                    $permissions = is_array($m["permission"]) ? $m["permission"] : [$m["permission"]];
                 }
+            }
+        }
+
+        // fallback: derive module-level wildcard permission from path segments
+        if (empty($permissions)) {
+            $parts = explode("/", trim($path, "/"));
+            if (count($parts) >= 1) {
+                $module = strtolower($parts[0]);
+                $permissions = [$module . ".*"];
             }
         }
 

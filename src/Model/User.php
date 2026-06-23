@@ -101,17 +101,25 @@ class User extends \Light\Model
         if ($path == "/") return true;
         $permissions = [];
         $matchedMenu = false;
+        $matchedPrefix = false;
         foreach ($app->getFlatMenus() as $m) {
-            if ($m["to"] === $path) {
+            $menuPath = $m["to"] ?? "";
+            if ($menuPath === $path) {
                 $matchedMenu = true;
+                if ($m["permission"]) {
+                    $permissions = is_array($m["permission"]) ? $m["permission"] : [$m["permission"]];
+                }
+            } elseif ($menuPath && str_starts_with($path, rtrim($menuPath, "/") . "/")) {
+                // path is a sub-page of an accessible menu item
+                $matchedPrefix = true;
                 if ($m["permission"]) {
                     $permissions = is_array($m["permission"]) ? $m["permission"] : [$m["permission"]];
                 }
             }
         }
 
-        // If the path is explicitly listed in menus without a permission, allow access
-        if ($matchedMenu && empty($permissions)) {
+        // If the path is under a menu item without an explicit permission, allow access
+        if (($matchedMenu || $matchedPrefix) && empty($permissions)) {
             return true;
         }
 

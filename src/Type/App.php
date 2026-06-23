@@ -312,6 +312,13 @@ class App
 
 
     #[Field]
+    public function isNotificationBellEnabled(): bool
+    {
+        $value = Config::Value("notification_bell_enabled");
+        return $value === null || $value === "" || $value === "1" || $value === true;
+    }
+
+    #[Field]
     public function isForgetPasswordEnabled(): bool
     {
         return Config::Value("forget_password_enabled", true);

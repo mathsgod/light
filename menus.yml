@@ -146,10 +146,6 @@
       to: /EventLog
       permission: eventlog.list
 
-    - label: Notification
-      icon: sym_o_notifications
-      to: /Notification
-      
     - label: System Value
       icon: sym_o_description
       children:

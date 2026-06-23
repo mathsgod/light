@@ -104,6 +104,7 @@ class User extends \Light\Model
         $pagePermissions = [
             '/User/profile' => ['user.self'],
             '/User/setting' => ['user.self'],
+            '/Notification' => ['notification.self'],
         ];
         if (isset($pagePermissions[$path])) {
             $permissions = $pagePermissions[$path];

@@ -99,6 +99,15 @@ class User extends \Light\Model
     public function isAllowedPath(string $path, #[Autowire] App $app): bool
     {
         if ($path == "/") return true;
+
+        // User-specific pages are always accessible to the logged-in user
+        $publicUserPaths = ['/User/profile', '/User/setting'];
+        foreach ($publicUserPaths as $publicPath) {
+            if ($path === $publicPath || str_starts_with($path, $publicPath . '/')) {
+                return true;
+            }
+        }
+
         $permissions = [];
         $matchedMenu = false;
         $matchedPrefix = false;

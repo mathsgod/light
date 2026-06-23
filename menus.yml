@@ -172,15 +172,4 @@
       icon: sym_o_deployed_code
       to: /CustomField
       permission: customfield.list
-
-- label: My Account
-  icon: sym_o_person
-  children:
-    - label: Profile
-      icon: sym_o_person
-      to: /User/profile
-
-    - label: Settings
-      icon: sym_o_settings_account_box
-      to: /User/setting
       

@@ -253,10 +253,11 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         if ($driver == "gmail") {
             $mailer->isSMTP();
             $mailer->SMTPAuth = true;
-            $mailer->Port = 465;
             $mailer->Host = "smtp.gmail.com";
-            $mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-            $mailer->AuthType = 'XOAUTH2';
+            $mailer->Port = 587;
+            $mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mailer->Username = Config::Value("mail_username");
+            $mailer->Password = Config::Value("mail_password");
         }
 
 

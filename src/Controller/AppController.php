@@ -2,7 +2,6 @@
 
 namespace Light\Controller;
 
-use League\OAuth2\Client\Provider\Google;
 use Light\App as LightApp;
 use Light\Input\Test;
 use Light\Model\Config;

@@ -30,12 +30,12 @@
         "symfony/property-info": "^7.4",
         "symfony/property-access": "^7.4",
         "web-auth/webauthn-lib": "^4.9",
-        "mathsgod/light-db": "^1.7",
+        "mathsgod/light-db": "^1.7.0",
         "mathsgod/light-db-graphqlite-mappers": "^1.0",
         "mathsgod/json-to-sql": "^1.0",
         "mathsgod/mysql-schema-migrate": "^1.0",
         "symfony/console": "^7.4",
-        "webonyx/graphql-php": "^15.30"
+        "thecodingmachine/graphqlite": "^8.3"
     },
     "require-dev": {
         "laminas/laminas-httphandlerrunner": "*",
@@ -59,7 +59,6 @@
             "function/base85.php"
         ]
     },
-    "repositories": {},
     "bin": "bin/light",
     "config": {
         "allow-plugins": {

@@ -100,12 +100,19 @@ class User extends \Light\Model
     {
         if ($path == "/") return true;
         $permissions = [];
+        $matchedMenu = false;
         foreach ($app->getFlatMenus() as $m) {
             if ($m["to"] === $path) {
+                $matchedMenu = true;
                 if ($m["permission"]) {
                     $permissions = is_array($m["permission"]) ? $m["permission"] : [$m["permission"]];
                 }
             }
+        }
+
+        // If the path is explicitly listed in menus without a permission, allow access
+        if ($matchedMenu && empty($permissions)) {
+            return true;
         }
 
         // fallback: derive module-level wildcard permission from path segments

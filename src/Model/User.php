@@ -100,12 +100,38 @@ class User extends \Light\Model
     {
         if ($path == "/") return true;
 
-        // User-specific pages are always accessible to the logged-in user
-        $publicUserPaths = ['/User/profile', '/User/setting'];
-        foreach ($publicUserPaths as $publicPath) {
-            if ($path === $publicPath || str_starts_with($path, $publicPath . '/')) {
-                return true;
+        // Static page-level permission overrides (not derived from menus)
+        $pagePermissions = [
+            '/User/profile' => ['user.self'],
+            '/User/setting' => ['user.self'],
+        ];
+        if (isset($pagePermissions[$path])) {
+            $permissions = $pagePermissions[$path];
+        } else {
+            foreach ($pagePermissions as $pagePath => $required) {
+                if (str_starts_with($path, rtrim($pagePath, "/") . "/")) {
+                    $permissions = $required;
+                    break;
+                }
             }
+        }
+
+        if (!empty($permissions)) {
+            $rbac = $app->getRbac();
+            $rbacUser = $rbac->getUser($this->user_id);
+
+            // If the user isn't in RBAC yet, register them with their roles so
+            // permission checks work for users without explicit UserRole rows.
+            if (!$rbacUser) {
+                $rbacUser = $rbac->addUser((string) $this->user_id, $this->getRoles());
+            }
+
+            foreach ($permissions as $permission) {
+                if ($rbacUser->can($permission)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         $permissions = [];
@@ -147,11 +173,17 @@ class User extends \Light\Model
         }
 
         $rbac = $app->getRbac();
-        if ($user = $rbac->getUser($this->user_id)) {
-            foreach ($permissions as $permission) {
-                if ($user->can($permission)) {
-                    return true;
-                }
+        $rbacUser = $rbac->getUser($this->user_id);
+
+        // If the user isn't in RBAC yet, register them with their roles so
+        // permission checks work for users without explicit UserRole rows.
+        if (!$rbacUser) {
+            $rbacUser = $rbac->addUser((string) $this->user_id, $this->getRoles());
+        }
+
+        foreach ($permissions as $permission) {
+            if ($rbacUser->can($permission)) {
+                return true;
             }
         }
         return false;

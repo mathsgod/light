@@ -13,4 +13,7 @@ Power Users:
   - user.changePassword
   - role.getUser
 
+Users:
+  - user.self
+
   

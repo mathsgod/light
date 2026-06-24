@@ -662,6 +662,11 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function userLogin(User $user): void
     {
+        // Successful credential login clears any prior session-revocation lock
+        // caused by refresh-token reuse detection, allowing the user to start a
+        // new legitimate session. Old refresh tokens remain revoked individually.
+        $this->getCache()->delete("user_sessions_revoked_" . $user->user_id);
+
         $access_token_expire = $this->getAccessTokenExpire();
         $jti = Uuid::uuid4()->toString();
 
@@ -917,15 +922,27 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                 $old_refresh_jti = $payload->jti;
                 $refresh_token_expire = $this->getRefreshTokenExpire();
 
-                // Reuse detection: if this refresh token's jti was already used, treat as token theft
-                if ($cache->has("revoked_refresh_token_" . $old_refresh_jti)) {
-                    // Revoke all sessions for this user
+                $revoked_key = "revoked_refresh_token_" . $old_refresh_jti;
+                $grace_key = "refresh_token_grace_" . $old_refresh_jti;
+
+                // Reuse detection: if this refresh token's jti was already used
+                if ($cache->has($revoked_key)) {
+                    // Within a short grace period, treat reuse as a benign race condition
+                    // (e.g. two tabs refreshing at the same time). Re-issue the same tokens.
+                    $grace = $cache->get($grace_key);
+                    if ($grace && is_array($grace) && !empty($grace['access_token']) && !empty($grace['refresh_token'])) {
+                        $this->setAccessTokenCookie($grace['access_token']);
+                        $this->setRefreshTokenCookie($grace['refresh_token'], $refresh_token_expire);
+                        return new TextResponse("Token refreshed", 200);
+                    }
+
+                    // Reuse after grace period: treat as token theft
                     $cache->set("user_sessions_revoked_" . $user_id, true, $refresh_token_expire);
                     throw new Exception("Token reuse detected", 401);
                 }
 
                 // Mark old refresh token as used (rotation)
-                $cache->set("revoked_refresh_token_" . $old_refresh_jti, true, $refresh_token_expire);
+                $cache->set($revoked_key, true, $refresh_token_expire);
 
                 // Issue new access token (new jti)
                 $access_token_expire = $this->getAccessTokenExpire();
@@ -954,6 +971,12 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                 ];
                 $refresh_token = JWT::encode($refresh_payload, $_ENV["JWT_SECRET"], "HS256");
                 $this->setRefreshTokenCookie($refresh_token, $refresh_token_expire);
+
+                // Cache the issued token pair for a short grace period to handle multi-tab races
+                $cache->set($grace_key, [
+                    "access_token" => $access_token,
+                    "refresh_token" => $refresh_token,
+                ], 5);
 
                 return new TextResponse("Token refreshed", 200);
             } catch (Exception $e) {

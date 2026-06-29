@@ -100,82 +100,30 @@ class User extends \Light\Model
     {
         if ($path == "/") return true;
 
-        // Static page-level permission overrides (not derived from menus)
-        $pagePermissions = [
-            '/User/profile' => ['user.self'],
-            '/User/setting' => ['user.self'],
-            '/User/createAccessToken' => ['user.self'],
-            '/Notification' => ['notification.self'],
-        ];
-        if (isset($pagePermissions[$path])) {
-            $permissions = $pagePermissions[$path];
-        } else {
-            foreach ($pagePermissions as $pagePath => $required) {
-                if (str_starts_with($path, rtrim($pagePath, "/") . "/")) {
-                    $permissions = $required;
-                    break;
-                }
-            }
-        }
-
-        if (!empty($permissions)) {
-            $rbac = $app->getRbac();
-            $rbacUser = $rbac->getUser($this->user_id);
-
-            // If the user isn't in RBAC yet, register them with their roles so
-            // permission checks work for users without explicit UserRole rows.
-            if (!$rbacUser) {
-                $rbacUser = $rbac->addUser((string) $this->user_id, $this->getRoles());
-            }
-
-            foreach ($permissions as $permission) {
-                if ($rbacUser->can($permission)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         $permissions = [];
-        $matchedMenu = false;
-        $matchedPrefix = false;
-        foreach ($app->getFlatMenus() as $m) {
-            $menuPath = $m["to"] ?? "";
-            if ($menuPath === $path) {
-                $matchedMenu = true;
-                if ($m["permission"]) {
-                    $permissions = is_array($m["permission"]) ? $m["permission"] : [$m["permission"]];
-                }
-            } elseif ($menuPath && str_starts_with($path, rtrim($menuPath, "/") . "/")) {
-                $matchedPrefix = true;
+
+        // Derive permission from path convention:
+        // /Module                -> module.list
+        // /Module/add            -> module.add
+        // /Module/[id]           -> module.view
+        // /Module/[id]/edit      -> module.edit
+        $parts = explode("/", trim($path, "/"));
+        if (count($parts) >= 1) {
+            $module = strtolower($parts[0]);
+            $permissions = [$module . ".*"];
+
+            if (count($parts) === 1) {
+                $permissions[] = $module . ".list";
+            } else {
+                $last = end($parts);
+                $action = is_numeric($last) ? 'view' : strtolower($last);
+                $permissions[] = $module . "." . $action;
             }
         }
 
-        // Exact menu match without permission = public menu item
-        if ($matchedMenu && empty($permissions)) {
-            return true;
-        }
-
-        // Path is under a known menu branch: derive permission from path segments
-        if (($matchedMenu || $matchedPrefix) && empty($permissions)) {
-            $parts = explode("/", trim($path, "/"));
-            if (count($parts) >= 1) {
-                $module = $parts[0];
-                $permissions = [$module . ".*"];
-                if (count($parts) >= 2) {
-                    $permissions[] = $module . "." . end($parts);
-                }
-            }
-        }
-
-        // Completely unknown path: keep legacy allow
-        if (!$matchedMenu && !$matchedPrefix) {
-            return true;
-        }
-
-        //if no permission is required, allow access
+        // No permission derived: deny by default
         if (empty($permissions)) {
-            return true;
+            return false;
         }
 
         $rbac = $app->getRbac();

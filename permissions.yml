@@ -2,8 +2,15 @@ Administrators:
   - '*'
   
 Power Users:
-  - user.*
+  - user.list
+  - user.read
+  - user.add
+  - user.delete
+  - user.update
   - role.list
+  - user.role.add
+  - user.role.remove
+  - user.changePassword
   - role.getUser
 
 Users:
@@ -11,3 +18,5 @@ Users:
   - user.setting
   - user.createaccesstoken
   - notification.*
+
+  

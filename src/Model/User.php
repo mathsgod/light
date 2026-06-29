@@ -147,26 +147,30 @@ class User extends \Light\Model
                     $permissions = is_array($m["permission"]) ? $m["permission"] : [$m["permission"]];
                 }
             } elseif ($menuPath && str_starts_with($path, rtrim($menuPath, "/") . "/")) {
-                // path is a sub-page of an accessible menu item
                 $matchedPrefix = true;
-                if ($m["permission"]) {
-                    $permissions = is_array($m["permission"]) ? $m["permission"] : [$m["permission"]];
+            }
+        }
+
+        // Exact menu match without permission = public menu item
+        if ($matchedMenu && empty($permissions)) {
+            return true;
+        }
+
+        // Path is under a known menu branch: derive permission from path segments
+        if (($matchedMenu || $matchedPrefix) && empty($permissions)) {
+            $parts = explode("/", trim($path, "/"));
+            if (count($parts) >= 1) {
+                $module = $parts[0];
+                $permissions = [$module . ".*"];
+                if (count($parts) >= 2) {
+                    $permissions[] = $module . "." . end($parts);
                 }
             }
         }
 
-        // If the path is under a menu item without an explicit permission, allow access
-        if (($matchedMenu || $matchedPrefix) && empty($permissions)) {
+        // Completely unknown path: keep legacy allow
+        if (!$matchedMenu && !$matchedPrefix) {
             return true;
-        }
-
-        // fallback: derive module-level wildcard permission from path segments
-        if (empty($permissions)) {
-            $parts = explode("/", trim($path, "/"));
-            if (count($parts) >= 1) {
-                $module = strtolower($parts[0]);
-                $permissions = [$module . ".*"];
-            }
         }
 
         //if no permission is required, allow access

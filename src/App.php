@@ -391,7 +391,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     {
         $p = [];
         foreach ($menus as $m) {
-            if ($m["permission"]) {
+            if (isset($m["permission"]) && $m["permission"]) {
                 if (is_array($m["permission"])) {
                     foreach ($m["permission"] as $p_) {
                         $p[] = $p_;
@@ -401,7 +401,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                 }
             }
 
-            if ($m["children"]) {
+            if (isset($m["children"]) && $m["children"]) {
                 foreach ($this->getMenusPermission($m["children"]) as $c_p) {
                     $p[] = $c_p;
                 }
@@ -481,16 +481,55 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             $permissions[] = $permission;
         }
 
-        //filter # from permissions
-        $permissions = array_filter($permissions, function ($p) {
-            return $p[0] != "#";
-        });
-
-        $permissions = array_unique($permissions);
+        $permissions = self::expandPermissions($permissions);
 
         //sort
         sort($permissions);
         return $permissions;
+    }
+
+    /**
+     * Expand a flat permission list by adding parent wildcard permissions
+     * whenever a parent has two or more direct children.
+     *
+     * @param string[] $permissions
+     * @return string[]
+     */
+    public static function expandPermissions(array $permissions): array
+    {
+        $permissions = array_filter($permissions, fn($p) => is_string($p) && $p !== "" && $p[0] !== "#");
+        $permissions = array_unique($permissions);
+
+        /** @var array<string, array<string, mixed>> $tree */
+        $tree = [];
+        foreach ($permissions as $p) {
+            $parts = explode(".", $p);
+            /** @var array<string, mixed> $node */
+            $node = &$tree;
+            foreach ($parts as $part) {
+                if (!isset($node[$part])) {
+                    $node[$part] = [];
+                }
+                /** @var array<string, mixed> $node */
+                $node = &$node[$part];
+            }
+            unset($node);
+        }
+
+        $collect = function (array $node, string $prefix = "") use (&$collect): array {
+            $result = [];
+            foreach ($node as $key => $children) {
+                $current = $prefix === "" ? $key : $prefix . "." . $key;
+                $result[] = $current;
+                if (count($children) >= 2) {
+                    $result[] = $current . ".*";
+                }
+                $result = array_merge($result, $collect($children, $current));
+            }
+            return $result;
+        };
+
+        return array_values(array_unique($collect($tree)));
     }
 
 

@@ -2,7 +2,7 @@ Administrators:
   - '*'
   
 Power Users:
-  - user
+  - user.index
   - user.view
   - user.update-role
   - user.list
@@ -10,6 +10,7 @@ Power Users:
   - user.create
   - user.delete
   - user.update
+  - role.index
   - role.list
   - user.role.add
   - user.role.remove

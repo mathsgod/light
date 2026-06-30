@@ -64,7 +64,7 @@ class UserController
     }
 
     #[Mutation]
-    #[Right("user.changePassword")]
+    #[Right("user.change-password")]
     public function updateUserPassword(int $id, string $password, #[InjectUser] \Light\Model\User $user): bool
     {
         if (!$obj = $this->listUser($user, ["user_id" => $id], "")->first()) return false;
@@ -103,7 +103,7 @@ class UserController
     }
 
     #[Mutation]
-    #[Right("user.add")]
+    #[Right("user.create")]
     public function addUser(InputUser $data, #[InjectUser] \Light\Model\User $current): int
     {
 

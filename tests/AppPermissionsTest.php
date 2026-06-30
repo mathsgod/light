@@ -48,6 +48,14 @@ class AppPermissionsTest extends TestCase
                 ["user.list", "user.add", "system.setting"],
                 ["user", "user.*", "user.add", "user.list", "system", "system.setting"],
             ],
+            "explicit wildcard adds matching index" => [
+                ["user.*"],
+                ["user", "user.*", "user.index"],
+            ],
+            "nested wildcard adds matching index" => [
+                ["system.user.*"],
+                ["system", "system.user", "system.user.*", "system.user.index"],
+            ],
         ];
     }
 }

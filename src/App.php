@@ -529,7 +529,16 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             return $result;
         };
 
-        return array_values(array_unique($collect($tree)));
+        $result = $collect($tree);
+
+        $indexPermissions = [];
+        foreach ($result as $p) {
+            if (str_ends_with($p, ".*")) {
+                $indexPermissions[] = substr($p, 0, -2) . ".index";
+            }
+        }
+
+        return array_values(array_unique(array_merge($result, $indexPermissions)));
     }
 
 

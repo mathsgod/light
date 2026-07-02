@@ -190,7 +190,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                     "label" => "File Manager",
                     "to" => "/FileManager",
                     "icon" => "sym_o_folder",
-                    "permission" => "fs"
+                    "permission" => "file_manager.index"
                 ]
             ]);
         }

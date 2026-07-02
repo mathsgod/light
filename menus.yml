@@ -144,7 +144,7 @@
     - label: Event log
       icon: sym_o_description
       to: /EventLog
-      permission: eventlog.list
+      permission: event_log.list
 
     - label: System Value
       icon: sym_o_description

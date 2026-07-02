@@ -22,7 +22,7 @@ class EventLogController
      * @param ?mixed $filters
      * @deprecated use app.eventLogs instead
      */
-    #[Right("eventlog.list")]
+    #[Right("event_log.list")]
     public function listEventLog(#[InjectUser] \Light\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         $app = new \Light\Type\App($filters, $sort);
@@ -31,7 +31,7 @@ class EventLogController
 
     #[Query]
     #[Logged]
-    #[Right("system.eventlog.cleanup")]
+    #[Right("system.event_log.cleanup")]
     public function getEventLogCleanup(#[Autowire] LightApp $app): LogCleanup
     {
         $db = $app->getDatabase();
@@ -49,7 +49,7 @@ class EventLogController
 
     #[Mutation]
     #[Logged]
-    #[Right("system.eventlog.cleanup")]
+    #[Right("system.event_log.cleanup")]
     public function setEventLogCleanup(bool $enabled, int $days, #[Autowire] LightApp $app): bool
     {
         $db = $app->getDatabase();
@@ -77,7 +77,7 @@ class EventLogController
 
     #[Query]
     #[Logged]
-    #[Right("system.eventlog.cleanup")]
+    #[Right("system.event_log.cleanup")]
     public function getUserLogCleanup(#[Autowire] LightApp $app): LogCleanup
     {
         $db = $app->getDatabase();
@@ -95,7 +95,7 @@ class EventLogController
 
     #[Mutation]
     #[Logged]
-    #[Right("system.eventlog.cleanup")]
+    #[Right("system.event_log.cleanup")]
     public function setUserLogCleanup(bool $enabled, int $days, #[Autowire] LightApp $app): bool
     {
         $db = $app->getDatabase();

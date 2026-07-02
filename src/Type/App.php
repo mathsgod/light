@@ -453,7 +453,7 @@ class App
      * @param ?mixed $filters
      * @return \Light\Model\EventLog[]
      */
-    #[Right("eventlog.list")]
+    #[Right("event_log.list")]
     public function listEventLog($filters = null,  ?string $sort = ''): \Light\Db\Query
     {
 

@@ -344,22 +344,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         /** Permissions */
         $all = Yaml::parseFile(dirname(__DIR__) . '/permissions.yml');
 
-        // Load optional user project permissions.yml
-        $projectPermissionsFile = null;
-        if (class_exists(\Composer\InstalledVersions::class)) {
-            $projectRoot = realpath(\Composer\InstalledVersions::getRootPackage()['install_path']);
-            if ($projectRoot) {
-                $projectPermissionsFile = $projectRoot . '/permissions.yml';
-            }
-        }
-
-        if ($projectPermissionsFile && file_exists($projectPermissionsFile) && is_file($projectPermissionsFile)) {
-            $projectPermissions = Yaml::parseFile($projectPermissionsFile);
-            if (is_array($projectPermissions)) {
-                $all = array_merge_recursive($all, $projectPermissions);
-            }
-        }
-
         foreach ($all as $role => $permissions) {
             $this->addRolePermissions($role, $permissions);
         }
@@ -499,6 +483,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     {
         $permissions = array_filter($permissions, fn($p) => is_string($p) && $p !== "" && $p[0] !== "#");
         $permissions = array_unique($permissions);
+        $explicit = array_flip($permissions);
 
         /** @var array<string, array<string, mixed>> $tree */
         $tree = [];
@@ -516,12 +501,18 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             unset($node);
         }
 
-        $collect = function (array $node, string $prefix = "") use (&$collect): array {
+        $collect = function (array $node, string $prefix = "") use (&$collect, $explicit): array {
             $result = [];
             foreach ($node as $key => $children) {
                 $current = $prefix === "" ? $key : $prefix . "." . $key;
-                $result[] = $current;
-                if (count($children) >= 2) {
+                $isLeaf = count($children) === 0;
+                $hasWildcard = count($children) >= 2;
+                $isExplicit = isset($explicit[$current]);
+
+                if ($isLeaf || $isExplicit) {
+                    $result[] = $current;
+                }
+                if ($hasWildcard) {
                     $result[] = $current . ".*";
                 }
                 $result = array_merge($result, $collect($children, $current));

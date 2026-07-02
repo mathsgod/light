@@ -19,7 +19,7 @@ class UserLogController
      * @param ?mixed $filters
      * @deprecated use { app { userlogs }}
      */
-    #[Right("userlog.list")]
+    #[Right("user_log.list")]
     public function listUserLog(#[InjectUser] \Light\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return UserLog::Query()->filters($filters)->sort($sort);

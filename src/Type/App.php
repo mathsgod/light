@@ -69,14 +69,6 @@ class App
 
 
 
-        return [
-            [
-                '$formkit' => 'l-input',
-                'name' => 'name',
-                'label' => 'Name',
-            ]
-
-        ];
     }
 
 
@@ -369,7 +361,7 @@ class App
 
     #[Field]
     #[Logged]
-    #[Right("config")]
+    #[Right("config.list")]
     /**
      * @return \Light\Model\Config[]
      */
@@ -442,7 +434,7 @@ class App
      * @param ?mixed $filters
      * @return \Light\Model\MailLog[]
      */
-    #[Right("maillog.list")]
+    #[Right("mail_log.list")]
     public function listMailLog($filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return MailLog::Query()->filters($filters)->sort($sort);
@@ -542,7 +534,7 @@ class App
      * @return \Light\Model\SystemValue[]
      * @param ?mixed $filters
      */
-    #[Right('systemvalue.list')]
+    #[Right('system_value.list')]
     public function listSystemValue($filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return SystemValue::Query()->filters($filters)->sort($sort);
@@ -554,7 +546,7 @@ class App
      * @return \Light\Model\UserLog[]
      * @param ?mixed $filters
      */
-    #[Right("userlog.list")]
+    #[Right("user_log.list")]
     public function listUserLog($filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return UserLog::Query()->filters($filters)->sort($sort);

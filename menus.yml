@@ -134,12 +134,12 @@
     - label: User log
       icon: sym_o_description
       to: /UserLog
-      permission: userlog.list
+      permission: user_log.list
 
     - label: Mail log
       icon: sym_o_description
       to: /MailLog
-      permission: maillog.list
+      permission: mail_log.list
 
     - label: Event log
       icon: sym_o_description
@@ -152,12 +152,12 @@
         - label: List
           icon: sym_o_list
           to: /SystemValue
-          permission: systemvalue.list
+          permission: system_value.list
         
         - label: Add
           icon: sym_o_add
           to: /SystemValue/add
-          permission: systemvalue.add
+          permission: system_value.add
 
     - label: File system
       icon: sym_o_folder
@@ -167,5 +167,5 @@
     - label: Custom Field
       icon: sym_o_deployed_code
       to: /CustomField
-      permission: customfield.list
+      permission: custom_field.list
       

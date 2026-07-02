@@ -37,7 +37,7 @@ class Util
         }
     }
 
-    static function Size($size, array $options = null)
+    static function Size($size, ?array $options = null)
     {
 
         $o = [

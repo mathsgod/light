@@ -67,6 +67,9 @@
         }
     },
     "scripts": {
-        "test": "phpunit tests --verbose"
+        "test": "phpunit tests --verbose",
+        "test:docker": "tests/run-with-mysql.sh",
+        "test:docker:setup": "docker compose -f compose.yml up -d --wait",
+        "test:docker:teardown": "docker compose -f compose.yml down -v --remove-orphans"
     }
 }

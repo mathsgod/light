@@ -34,27 +34,27 @@ class AppPermissionsTest extends TestCase
         return [
             "sibling top-level adds wildcard" => [
                 ["system.database", "system.mailtest"],
-                ["system", "system.*", "system.database", "system.mailtest"],
+                ["system.*", "system.database", "system.mailtest", "system.index"],
             ],
             "nested siblings add parent wildcard" => [
                 ["system.database.backup", "system.database.check"],
-                ["system", "system.database", "system.database.*", "system.database.backup", "system.database.check"],
+                ["system.database.*", "system.database.backup", "system.database.check", "system.database.index"],
             ],
             "single leaf does not add wildcard" => [
                 ["system.setting"],
-                ["system", "system.setting"],
+                ["system.setting"],
             ],
             "mixed hierarchy adds wildcards correctly" => [
                 ["user.list", "user.add", "system.setting"],
-                ["user", "user.*", "user.add", "user.list", "system", "system.setting"],
+                ["user.*", "user.list", "user.add", "user.index", "system.setting"],
             ],
             "explicit wildcard adds matching index" => [
                 ["user.*"],
-                ["user", "user.*", "user.index"],
+                ["user.*", "user.index"],
             ],
             "nested wildcard adds matching index" => [
                 ["system.user.*"],
-                ["system", "system.user", "system.user.*", "system.user.index"],
+                ["system.user.*", "system.user.index"],
             ],
         ];
     }

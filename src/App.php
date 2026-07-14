@@ -473,8 +473,10 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     }
 
     /**
-     * Expand a flat permission list by adding parent wildcard permissions
-     * whenever a parent has two or more direct children.
+     * Expand a flat permission list by adding index permissions for explicit
+     * wildcards and parent wildcard permissions whenever a parent has two or
+     * more direct children. Plain parent nodes are not added because the RBAC
+     * matcher only recognises exact permissions and `.*` wildcards.
      *
      * @param string[] $permissions
      * @return string[]

@@ -5,6 +5,7 @@ namespace Light\Tests\Controller;
 use Firebase\JWT\JWT;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\ServerRequest;
+use Laminas\Diactoros\UploadedFile;
 use Light\App;
 use Light\Model\Config;
 use Light\Model\User;
@@ -294,5 +295,66 @@ class FileSystemControllerTest extends TestCase
         $this->assertTrue($out["data"]["lightFSMove"]);
         $this->assertFileDoesNotExist($this->tmpDir . '/src/movable.txt');
         $this->assertFileExists($this->tmpDir . '/dst/movable.txt');
+    }
+
+    private function makeUploadedFile(string $filename, string $content): UploadedFile
+    {
+        $tmpPath = tempnam(sys_get_temp_dir(), 'light-upload-');
+        file_put_contents($tmpPath, $content);
+        return new UploadedFile(
+            $tmpPath,
+            strlen($content),
+            UPLOAD_ERR_OK,
+            $filename,
+            'text/plain'
+        );
+    }
+
+    public function testUploadFile(): void
+    {
+        $file = $this->makeUploadedFile('uploaded.txt', 'hello upload');
+
+        $out = $this->gql(
+            'mutation($l:String!,$f:Upload!){ lightFSUploadFile(location:$l, file:$f) }',
+            ["l" => "local://", "f" => $file]
+        );
+
+        $this->assertArrayNotHasKey("errors", $out, json_encode($out));
+        $this->assertEquals("local://uploaded.txt", $out["data"]["lightFSUploadFile"]);
+        $this->assertFileExists($this->tmpDir . '/uploaded.txt');
+        $this->assertEquals("hello upload", file_get_contents($this->tmpDir . '/uploaded.txt'));
+    }
+
+    public function testUploadFileWithRename(): void
+    {
+        $this->gql(
+            'mutation($l:String!,$c:String!){ lightFSWriteFile(location:$l, content:$c) }',
+            ["l" => "local://uploaded.txt", "c" => "existing"]
+        );
+
+        $file = $this->makeUploadedFile('uploaded.txt', 'second');
+
+        $out = $this->gql(
+            'mutation($l:String!,$f:Upload!,$r:Boolean!){ lightFSUploadFile(location:$l, file:$f, rename:$r) }',
+            ["l" => "local://", "f" => $file, "r" => true]
+        );
+
+        $this->assertArrayNotHasKey("errors", $out, json_encode($out));
+        $this->assertEquals("local://uploaded (1).txt", $out["data"]["lightFSUploadFile"]);
+        $this->assertFileExists($this->tmpDir . '/uploaded.txt');
+        $this->assertFileExists($this->tmpDir . '/uploaded (1).txt');
+    }
+
+    public function testUploadFileDisallowedExtensionIsRejected(): void
+    {
+        $file = $this->makeUploadedFile('malicious.php', '<?php echo 1;');
+
+        $out = $this->gql(
+            'mutation($l:String!,$f:Upload!){ lightFSUploadFile(location:$l, file:$f) }',
+            ["l" => "local://", "f" => $file]
+        );
+
+        $this->assertArrayHasKey("errors", $out);
+        $this->assertStringContainsString("File type not allowed", json_encode($out["errors"]));
     }
 }

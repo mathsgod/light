@@ -274,9 +274,23 @@ class FileSystemController
         return new File($event->location);
     }
 
+    private function getDirectory(string $location): string
+    {
+        $parts = explode('://', $location, 2);
+        if (count($parts) !== 2) {
+            return rtrim(dirname($location), '/') . '/';
+        }
+        [$protocol, $path] = $parts;
+        $dir = dirname($path);
+        if ($dir === '' || $dir === '.' || $dir === '/') {
+            return $protocol . '://';
+        }
+        return $protocol . '://' . trim($dir, '/') . '/';
+    }
+
     #[Mutation(name: "lightFSUploadFile")]
     #[Right("fs.file:write")]
-    public function uploadFile(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location, UploadedFileInterface $file, bool $rename = false): bool
+    public function uploadFile(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location, UploadedFileInterface $file, bool $rename = false): string
     {
 
         $filename = $file->getClientFilename();
@@ -285,14 +299,15 @@ class FileSystemController
         //check if extension is allowed
         if (in_array($ext, self::DISALLOW_EXT)) throw new Error("File type not allowed");
 
-        $location = $location . '/' . $filename;
+        $dir = $this->getDirectory($location);
+        $location = $dir . $filename;
 
         //check if file already exists
         if ($mountManager->fileExists($location)) {
 
             if ($rename) {
-                $filename = $this->getNextFilename($mountManager, $location, $filename);
-                $location = $location . '/' . $filename;
+                $filename = $this->getNextFilename($mountManager, $dir, $filename);
+                $location = $dir . $filename;
             } else {
                 throw new Error("File already exists");
             }
@@ -304,7 +319,7 @@ class FileSystemController
         //move file
         $mountManager->write($event->location, $file->getStream()->getContents());
 
-        return true;
+        return $event->location;
     }
 
     private function getNextFilename(MountManager $mountManager, string $path, string $filename): string

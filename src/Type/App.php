@@ -311,6 +311,12 @@ class App
     }
 
     #[Field]
+    public function isSkipRouteGuardCheck(): bool
+    {
+        return Config::Value("skip_route_guard_check") === "1";
+    }
+
+    #[Field]
     public function isForgetPasswordEnabled(): bool
     {
         return Config::Value("forget_password_enabled", true);

@@ -39,6 +39,12 @@ class TwoFactorAuthenticationTest extends TestCase
         });
     }
 
+    protected function tearDown(): void
+    {
+        Config::Invalidate("two_factor_authentication");
+        parent::tearDown();
+    }
+
     private function createUser(string $password = "current_password"): User
     {
         $username = "two_factor_" . uniqid();

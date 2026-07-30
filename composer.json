@@ -17,6 +17,7 @@
         "symfony/yaml": "^7.4",
         "ramsey/uuid": "^4.7",
         "league/flysystem": "^3.15",
+        "league/flysystem-path-prefixing": "^3.3",
         "phpmailer/phpmailer": "^6.8",
         "symfony/cache": "^7.4",
         "endroid/qr-code": "^4.8",

@@ -15,6 +15,7 @@ use Light\Filesystem\Event\FileDeleting;
 use Light\Filesystem\Event\FileRenaming;
 use Light\Filesystem\Event\NodeMoving;
 use Light\Filesystem\Event\FileUploading;
+use Light\Filesystem\FilesystemFactory;
 use Light\Model\EventLog;
 use Light\Filesystem\Node\File;
 use Psr\Http\Message\UploadedFileInterface;
@@ -341,18 +342,27 @@ class FileSystemController
     /**
      * @param ?mixed $data
      */
-    public function updateFileSystem(#[Autowire] App $app, $data = null): bool
+    public function updateFileSystem(
+        #[Autowire] FilesystemFactory $filesystemFactory,
+        $data = null,
+    ): bool
     {
+        if (!is_array($data)) {
+            throw new Error('Filesystem configuration must be an object');
+        }
+
         if (!$config = Config::Get(["name" => "fs"])) {
             return false;
         }
-        $fs = json_decode($config->value);
+        $fs = json_decode($config->value, true) ?? [];
 
         // find the file system by uuid
         $found = false;
         foreach ($fs as $k => $f) {
-            if ($f->uuid == $data["uuid"]) {
-                $fs[$k] = (array)$data;
+            if (($f['uuid'] ?? null) == ($data["uuid"] ?? null)) {
+                $data = $this->preserveFilesystemSecrets($data, $f);
+                $data['uuid'] = $f['uuid'];
+                $fs[$k] = $filesystemFactory->validateConfig($data);
                 $found = true;
                 break;
             }
@@ -376,16 +386,24 @@ class FileSystemController
     /**
      * @param ?mixed $data
      */
-    public function addFileSystem(#[Autowire] App $app, $data = null): bool
+    public function addFileSystem(
+        #[Autowire] FilesystemFactory $filesystemFactory,
+        $data = null,
+    ): bool
     {
+        if (!is_array($data)) {
+            throw new Error('Filesystem configuration must be an object');
+        }
+
         if (!$config = Config::Get(["name" => "fs"])) {
             $config = Config::Create(["name" => "fs", "value" => "[]"]);
         }
-        $fs = json_decode($config->value);
+        $fs = json_decode($config->value, true) ?? [];
 
+        $data = $filesystemFactory->validateConfig($data);
         $data["uuid"] = Uuid::uuid4()->toString();
 
-        $fs[] = (array)$data;
+        $fs[] = $data;
         $config->value = json_encode($fs, JSON_UNESCAPED_UNICODE);
         $config->save();
         return true;
@@ -411,15 +429,42 @@ class FileSystemController
         if (!$config = Config::Get(["name" => "fs"])) {
             return false;
         }
-        $fs = json_decode($config->value);
+        $fs = json_decode($config->value, true) ?? [];
         $newFs = [];
         foreach ($fs as $f) {
-            if ($f->uuid != $uuid) {
+            if (($f['uuid'] ?? null) != $uuid) {
                 $newFs[] = $f;
             }
         }
         $config->value = json_encode($newFs, JSON_UNESCAPED_UNICODE);
         $config->save();
         return true;
+    }
+
+    /**
+     * @param array<string, mixed> $newConfig
+     * @param array<string, mixed> $existingConfig
+     * @return array<string, mixed>
+     */
+    private function preserveFilesystemSecrets(array $newConfig, array $existingConfig): array
+    {
+        $newData = $newConfig['data'] ?? [];
+        $existingData = $existingConfig['data'] ?? [];
+        if (!is_array($newData) || !is_array($existingData)) {
+            return $newConfig;
+        }
+
+        foreach (['secret_key', 'secretKey', 'password', 'token', 'access_key_secret'] as $key) {
+            if (
+                (!isset($newData[$key]) || $newData[$key] === '')
+                && isset($existingData[$key])
+            ) {
+                $newData[$key] = $existingData[$key];
+            }
+        }
+
+        $newConfig['data'] = $newData;
+
+        return $newConfig;
     }
 }

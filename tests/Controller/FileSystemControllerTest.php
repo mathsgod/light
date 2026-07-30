@@ -35,21 +35,18 @@ class FileSystemControllerTest extends TestCase
         mkdir($this->tmpDir, 0777, true);
 
         // Configure a local filesystem pointing at a temp directory.
-        // Must be created before App is instantiated because App reads this
-        // config in its constructor to build the MountManager.
-        Config::Create([
-            "name" => "fs",
-            "value" => json_encode([
-                [
-                    "name" => "local",
-                    "type" => "local",
-                    "data" => [
-                        "location" => $this->tmpDir,
-                        "public_url" => "/api/uploads/",
-                    ],
+        $filesystemConfig = Config::Get(["name" => "fs"]) ?? Config::Create(["name" => "fs"]);
+        $filesystemConfig->value = json_encode([
+            [
+                "name" => "local",
+                "type" => "local",
+                "data" => [
+                    "location" => $this->tmpDir,
+                    "public_url" => "/api/uploads/",
                 ],
-            ], JSON_UNESCAPED_UNICODE),
-        ])->save();
+            ],
+        ], JSON_UNESCAPED_UNICODE);
+        $filesystemConfig->save();
 
         $this->adminUser = User::Create([
             "username" => "admin_" . uniqid(),
@@ -99,7 +96,7 @@ class FileSystemControllerTest extends TestCase
         rmdir($dir);
     }
 
-    private function makeToken(int $userId, int $ttl = 3600): string
+    private function makeToken(int $userId, int $ttl = 3600, ?int $viewAs = null): string
     {
         return JWT::encode([
             "iss"     => "light server",
@@ -109,7 +106,7 @@ class FileSystemControllerTest extends TestCase
             "role"    => "Administrators",
             "id"      => $userId,
             "type"    => "access_token",
-            "view_as" => null,
+            "view_as" => $viewAs,
         ], $_ENV["JWT_SECRET"], "HS256");
     }
 
@@ -129,14 +126,68 @@ class FileSystemControllerTest extends TestCase
 
     private function gql(string $query, array $variables = []): array
     {
+        return $this->gqlAs($this->adminToken, $query, $variables);
+    }
+
+    private function gqlAs(string $token, string $query, array $variables = []): array
+    {
         $request = (new ServerRequest())
             ->withMethod("POST")
-            ->withHeader("Authorization", "Bearer " . $this->adminToken)
+            ->withHeader("Authorization", "Bearer " . $token)
             ->withParsedBody(["query" => $query, "variables" => $variables]);
 
-        $this->processRequest($this->app, $this->adminToken);
+        $this->processRequest($this->app, $token);
 
         return $this->app->execute($request)->toArray(\GraphQL\Error\DebugFlag::INCLUDE_DEBUG_MESSAGE);
+    }
+
+    private function enableAuthenticatedUserScope(): void
+    {
+        $filesystemConfig = Config::Get(["name" => "fs"]);
+        $filesystemConfig->value = json_encode([
+            [
+                "name" => "local",
+                "type" => "local",
+                "data" => [
+                    "location" => $this->tmpDir,
+                    "public_url" => "/api/uploads/",
+                ],
+                "decorators" => [
+                    [
+                        "type" => "path_prefix",
+                        "data" => [
+                            "prefix" => "",
+                            "scope" => "authenticated_user",
+                        ],
+                    ],
+                ],
+            ],
+        ], JSON_UNESCAPED_UNICODE);
+        $filesystemConfig->save();
+
+        $this->app = new App();
+    }
+
+    private function createAdministrator(string $name): array
+    {
+        $user = User::Create([
+            "username" => $name . "_" . uniqid(),
+            "first_name" => ucfirst($name),
+            "email" => $name . "_" . uniqid() . "@test.local",
+            "password" => password_hash("password", PASSWORD_DEFAULT),
+            "join_date" => date("Y-m-d"),
+            "status" => 0,
+            "language" => "en",
+            "password_dt" => date("Y-m-d H:i:s"),
+        ]);
+        $user->save();
+
+        UserRole::Create([
+            "user_id" => $user->user_id,
+            "role" => "Administrators",
+        ])->save();
+
+        return [$user, $this->makeToken($user->user_id)];
     }
 
     public function testCreateFolder(): void
@@ -356,5 +407,148 @@ class FileSystemControllerTest extends TestCase
 
         $this->assertArrayHasKey("errors", $out);
         $this->assertStringContainsString("File type not allowed", json_encode($out["errors"]));
+    }
+
+    public function testAuthenticatedUsersAreIsolatedBehindTheSameVirtualPath(): void
+    {
+        [$secondUser, $secondToken] = $this->createAdministrator('second');
+        $this->enableAuthenticatedUserScope();
+
+        $firstWrite = $this->gqlAs(
+            $this->adminToken,
+            'mutation($l:String!,$c:String!){ lightFSWriteFile(location:$l, content:$c) }',
+            ["l" => "local://shared.txt", "c" => "first user"],
+        );
+        $secondWrite = $this->gqlAs(
+            $secondToken,
+            'mutation($l:String!,$c:String!){ lightFSWriteFile(location:$l, content:$c) }',
+            ["l" => "local://shared.txt", "c" => "second user"],
+        );
+
+        $this->assertArrayNotHasKey("errors", $firstWrite, json_encode($firstWrite));
+        $this->assertArrayNotHasKey("errors", $secondWrite, json_encode($secondWrite));
+        $this->assertSame(
+            "first user",
+            file_get_contents($this->tmpDir . '/' . $this->adminUser->user_id . '/shared.txt'),
+        );
+        $this->assertSame(
+            "second user",
+            file_get_contents($this->tmpDir . '/' . $secondUser->user_id . '/shared.txt'),
+        );
+
+        $firstRead = $this->gqlAs(
+            $this->adminToken,
+            '{ app { fs { node(location:"local://shared.txt") {'
+                . ' __typename ... on File { content publicUrl } } } } }',
+        );
+        $secondRead = $this->gqlAs(
+            $secondToken,
+            '{ app { fs { node(location:"local://shared.txt") {'
+                . ' __typename ... on File { content } } } } }',
+        );
+
+        $this->assertSame("first user", $firstRead["data"]["app"]["fs"]["node"]["content"]);
+        $this->assertSame("second user", $secondRead["data"]["app"]["fs"]["node"]["content"]);
+        $this->assertSame(
+            "/api/uploads/" . $this->adminUser->user_id . "/shared.txt",
+            $firstRead["data"]["app"]["fs"]["node"]["publicUrl"],
+        );
+
+        $this->processRequest($this->app, $this->adminToken);
+        $this->assertSame(
+            "first user",
+            $this->app->getDrive(0)->getFilesystem()->read("shared.txt"),
+        );
+        $this->processRequest($this->app, $secondToken);
+        $this->assertSame(
+            "second user",
+            $this->app->getDrive(0)->getFilesystem()->read("shared.txt"),
+        );
+
+        $legacyFirstWrite = $this->gqlAs(
+            $this->adminToken,
+            'mutation { fsWriteFile(path:"legacy.txt", content:"legacy first") }',
+        );
+        $legacySecondWrite = $this->gqlAs(
+            $secondToken,
+            'mutation { fsWriteFile(path:"legacy.txt", content:"legacy second") }',
+        );
+        $this->assertArrayNotHasKey("errors", $legacyFirstWrite, json_encode($legacyFirstWrite));
+        $this->assertArrayNotHasKey("errors", $legacySecondWrite, json_encode($legacySecondWrite));
+        $this->assertSame(
+            "legacy first",
+            file_get_contents($this->tmpDir . '/' . $this->adminUser->user_id . '/legacy.txt'),
+        );
+        $this->assertSame(
+            "legacy second",
+            file_get_contents($this->tmpDir . '/' . $secondUser->user_id . '/legacy.txt'),
+        );
+
+        $viewAsToken = $this->makeToken(
+            $this->adminUser->user_id,
+            viewAs: $secondUser->user_id,
+        );
+        $viewAsWrite = $this->gqlAs(
+            $viewAsToken,
+            'mutation($l:String!,$c:String!){ lightFSWriteFile(location:$l, content:$c) }',
+            ["l" => "local://view-as.txt", "c" => "viewed user"],
+        );
+        $this->assertArrayNotHasKey("errors", $viewAsWrite, json_encode($viewAsWrite));
+        $this->assertSame(
+            "viewed user",
+            file_get_contents($this->tmpDir . '/' . $secondUser->user_id . '/view-as.txt'),
+        );
+    }
+
+    public function testPathTraversalCannotEscapeAuthenticatedUserScope(): void
+    {
+        [$secondUser, $secondToken] = $this->createAdministrator('second');
+        $this->enableAuthenticatedUserScope();
+
+        $this->gqlAs(
+            $secondToken,
+            'mutation($l:String!,$c:String!){ lightFSWriteFile(location:$l, content:$c) }',
+            ["l" => "local://private.txt", "c" => "secret"],
+        );
+
+        $out = $this->gqlAs(
+            $this->adminToken,
+            '{ app { fs { node(location:"local://../'
+                . $secondUser->user_id
+                . '/private.txt") { __typename } } } }',
+        );
+
+        $this->assertArrayHasKey("errors", $out);
+        $this->assertStringContainsString(
+            "unable to check existence",
+            strtolower(json_encode($out["errors"])),
+        );
+        $this->assertSame(
+            "secret",
+            file_get_contents($this->tmpDir . '/' . $secondUser->user_id . '/private.txt'),
+        );
+    }
+
+    public function testFilesystemListDoesNotExposeConfigurationData(): void
+    {
+        $out = $this->gql('{ app { fs { list } } }');
+
+        $this->assertArrayNotHasKey("errors", $out, json_encode($out));
+        $this->assertSame([
+            [
+                "name" => "local",
+                "index" => 0,
+                "type" => "local",
+            ],
+        ], $out["data"]["app"]["fs"]["list"]);
+    }
+
+    public function testAnonymousRequestCanStartWithUserScopedFilesystemConfigured(): void
+    {
+        $this->enableAuthenticatedUserScope();
+
+        $this->processRequest($this->app);
+
+        $this->assertNotNull($this->app->getMountManager());
     }
 }

@@ -10,6 +10,7 @@ use Light\Filesystem\Node\Folder;
 use Light\Filesystem\Node\Node;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
+use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 
 #[Type()]
@@ -21,10 +22,21 @@ class Filesystem
      */
     public function list(#[Autowire] App $app)
     {
-        return $app->getFSConfig();
+        $configs = $app->getFSConfig();
+
+        return array_map(
+            static fn (array $config, int $index): array => [
+                'name' => $config['name'],
+                'index' => $index,
+                'type' => $config['type'],
+            ],
+            $configs,
+            array_keys($configs),
+        );
     }
 
     #[Field]
+    #[Right("filesystem.list")]
     /**
      * @return array<int,mixed>
      */
@@ -54,9 +66,20 @@ class Filesystem
                 "endpoint" => ["type" => "string", "description" => "AWS Endpoint", "required" => true],
                 "bucket" => ["type" => "string", "description" => "S3 Bucket Name", "required" => true],
                 "access_key" => ["type" => "string", "description" => "AWS Access Key", "required" => true],
-                "secret_key" => ["type" => "string", "description" => "AWS Secret Key", "required" => true],
+                "secret_key" => ["type" => "password", "description" => "AWS Secret Key", "required" => true],
                 "prefix" => ["type" => "string", "description" => "Path Prefix inside the bucket"],
                 "public_url" => ["type" => "string", "description" => "Public URL base path"],
+                "visibility" => [
+                    "type" => "select",
+                    "description" => "Default object visibility",
+                    "options" => ["private", "public"],
+                    "default" => "private",
+                ],
+                "use_path_style_endpoint" => [
+                    "type" => "boolean",
+                    "description" => "Use path-style S3 URLs (required by most MinIO deployments)",
+                    "default" => true,
+                ],
             ],
         ];
 
@@ -105,6 +128,37 @@ class Filesystem
         ];
 
         return $types;
+    }
+
+    #[Field]
+    #[Right("filesystem.list")]
+    /**
+     * @return array<int,mixed>
+     */
+    public function getDecoratorTypes(): array
+    {
+        return [
+            [
+                "label" => "Path Prefix",
+                "name" => "path_prefix",
+                "options" => [
+                    "prefix" => [
+                        "type" => "string",
+                        "description" => "Fixed path inside the filesystem",
+                    ],
+                    "scope" => [
+                        "type" => "select",
+                        "description" => "Optionally append the authenticated user ID",
+                        "options" => [
+                            "fixed",
+                            "authenticated_user",
+                        ],
+                        "default" => "fixed",
+                        "required" => true,
+                    ],
+                ],
+            ],
+        ];
     }
 
     #[Field]

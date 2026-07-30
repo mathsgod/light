@@ -3,6 +3,7 @@
 namespace Light\Controller;
 
 use GraphQL\Error\Error;
+use Light\App;
 use Light\Drive\Drive;
 use Light\Drive\File;
 use Psr\Http\Message\UploadedFileInterface;
@@ -15,18 +16,15 @@ class FileManagerController
 {
     const DISALLOW_EXT = ['zip', 'js', 'jsp', 'jsb', 'mhtml', 'mht', 'xhtml', 'xht', 'php', 'phtml', 'php3', 'php4', 'php5', 'phps', 'shtml', 'jhtml', 'pl', 'sh', 'py', 'cgi', 'exe', 'application', 'gadget', 'hta', 'cpl', 'msc', 'jar', 'vb', 'jse', 'ws', 'wsf', 'wsc', 'wsh', 'ps1', 'ps2', 'psc1', 'psc2', 'msh', 'msh1', 'msh2', 'inf', 'reg', 'scf', 'msp', 'scr', 'dll', 'msi', 'vbs', 'bat', 'com', 'pif', 'cmd', 'vxd', 'cpl', 'htpasswd', 'htaccess'];
 
-    protected $drive;
-
-    public function __construct(Drive $drive)
+    public function __construct(private App $app)
     {
-        $this->drive = $drive;
     }
 
     #[Mutation]
     #[Right("fs.file.write")]
     public function fsWriteFileBase64(string $path, string $content): bool
     {
-        $this->drive->getFilesystem()->write($path, base64_decode($content));
+        $this->getDrive()->getFilesystem()->write($path, base64_decode($content));
         return true;
     }
 
@@ -38,7 +36,7 @@ class FileManagerController
      */
     public function fsWriteFile(string $path, string $content): bool
     {
-        $this->drive->getFilesystem()->write($path, $content);
+        $this->getDrive()->getFilesystem()->write($path, $content);
         return true;
     }
 
@@ -46,6 +44,8 @@ class FileManagerController
     #[Right("fs.file.upload")]
     public function fsUploadTempFile(UploadedFileInterface $file): File
     {
+        $drive = $this->getDrive();
+
         //get path extension
         $filename = $file->getClientFilename();
         $ext = pathinfo($filename, PATHINFO_EXTENSION);
@@ -57,12 +57,12 @@ class FileManagerController
         $filename = UUID::uuid4()->toString() . "." . $ext;
 
         //move file
-        $this->drive->getFilesystem()->write("temp/" . $filename, $file->getStream()->getContents());
+        $drive->getFilesystem()->write("temp/" . $filename, $file->getStream()->getContents());
 
-        $list = $this->drive->getFilesystem()->listContents("temp", false);
+        $list = $drive->getFilesystem()->listContents("temp", false);
         foreach ($list as $file) {
             if ($file->path() === "temp/" . $filename) {
-                return new File($this->drive, $file);
+                return new File($drive, $file);
             }
         }
 
@@ -76,11 +76,12 @@ class FileManagerController
      */
     public function fsFile(string $path): ?File
     {
+        $drive = $this->getDrive();
 
-        $list = $this->drive->getFilesystem()->listContents(dirname($path), false);
+        $list = $drive->getFilesystem()->listContents(dirname($path), false);
         foreach ($list as $file) {
             if ($file->path() === $path) {
-                return new \Light\Drive\File($this->drive, $file);
+                return new \Light\Drive\File($drive, $file);
             }
         }
         return null;
@@ -94,6 +95,7 @@ class FileManagerController
     #[Right('fs.file.list')]
     public function fsListFiles(?string $path = "", ?string $type = null, ?string $search = null): array
     {
+        $drive = $this->getDrive();
 
         $TYPES = [
             "image" => ["jpg", "jpeg", "png", "gif", "svg", "webp", "bmp", "ico"],
@@ -111,7 +113,7 @@ class FileManagerController
         }
 
         $files = [];
-        foreach ($this->drive->getFilesystem()->listContents($path, $deep) as $file) {
+        foreach ($drive->getFilesystem()->listContents($path, $deep) as $file) {
             if (!$file->isFile()) continue;
             $path = $file->path();
             $ext = pathinfo($path, PATHINFO_EXTENSION);
@@ -126,7 +128,7 @@ class FileManagerController
                 if (strpos($filename, $search) === false) continue;
             }
 
-            $files[] = new \Light\Drive\File($this->drive, $file);
+            $files[] = new \Light\Drive\File($drive, $file);
         }
         return $files;
     }
@@ -139,10 +141,11 @@ class FileManagerController
     #[Right('fs.folder.list')]
     public function fsListFolders(?string $path = ""): array
     {
+        $drive = $this->getDrive();
         $files = [];
-        foreach ($this->drive->getFilesystem()->listContents($path, false) as $dir) {
+        foreach ($drive->getFilesystem()->listContents($path, false) as $dir) {
             if (!$dir->isDir()) continue;
-            $files[] = new \Light\Drive\Folder($this->drive, $dir);
+            $files[] = new \Light\Drive\Folder($drive, $dir);
         }
         return $files;
     }
@@ -154,7 +157,7 @@ class FileManagerController
      */
     public function fsCreateFolder(string $path): bool
     {
-        $this->drive->getFilesystem()->createDirectory($path);
+        $this->getDrive()->getFilesystem()->createDirectory($path);
         return true;
     }
 
@@ -165,7 +168,7 @@ class FileManagerController
      */
     public function fsDeleteFolder(string $path): bool
     {
-        $this->drive->getFilesystem()->deleteDirectory($path);
+        $this->getDrive()->getFilesystem()->deleteDirectory($path);
         return true;
     }
 
@@ -176,7 +179,7 @@ class FileManagerController
      */
     public function fsDeleteFile(string $path): bool
     {
-        $this->drive->getFilesystem()->delete($path);
+        $this->getDrive()->getFilesystem()->delete($path);
         return true;
     }
 
@@ -192,7 +195,7 @@ class FileManagerController
         $ext = pathinfo($name, PATHINFO_EXTENSION);
         if (in_array($ext, self::DISALLOW_EXT)) throw new Error("File type not allowed");
 
-        $this->drive->getFilesystem()->move($path, dirname($path) . "/" . $name);
+        $this->getDrive()->getFilesystem()->move($path, dirname($path) . "/" . $name);
         return true;
     }
 
@@ -203,7 +206,7 @@ class FileManagerController
      */
     public function fsRenameFolder(string $path, string $name): bool
     {
-        $this->drive->getFilesystem()->move($path, dirname($path) . "/" . $name);
+        $this->getDrive()->getFilesystem()->move($path, dirname($path) . "/" . $name);
         return true;
     }
 
@@ -211,13 +214,15 @@ class FileManagerController
     #[Right("fs.move")]
     public function fsMove(string $path, string $target): bool
     {
-        if ($this->drive->getFilesystem()->fileExists($path)) {
-            $this->drive->getFilesystem()->move($path, $target . "/" . basename($path));
+        $filesystem = $this->getDrive()->getFilesystem();
+
+        if ($filesystem->fileExists($path)) {
+            $filesystem->move($path, $target . "/" . basename($path));
             return true;
         }
 
-        if ($this->drive->getFilesystem()->directoryExists($path)) {
-            $this->drive->getFilesystem()->move($path, $target . "/" . basename($path));
+        if ($filesystem->directoryExists($path)) {
+            $filesystem->move($path, $target . "/" . basename($path));
             return true;
         }
 
@@ -226,11 +231,12 @@ class FileManagerController
 
     private function getNextFilename($path, $filename)
     {
+        $filesystem = $this->getDrive()->getFilesystem();
         $ext = pathinfo($filename, PATHINFO_EXTENSION);
         $filename = pathinfo($filename, PATHINFO_FILENAME);
 
         $i = 1;
-        while ($this->drive->getFilesystem()->fileExists($path . "/" . $filename . "($i)." . $ext)) {
+        while ($filesystem->fileExists($path . "/" . $filename . "($i)." . $ext)) {
             $i++;
         }
         return $filename . "($i)." . $ext;
@@ -243,6 +249,8 @@ class FileManagerController
      */
     public function fsUploadFile(string $path, UploadedFileInterface $file, ?bool $rename = false): string
     {
+        $filesystem = $this->getDrive()->getFilesystem();
+
         //get path extension
         $filename = $file->getClientFilename();
         $ext = pathinfo($filename, PATHINFO_EXTENSION);
@@ -251,7 +259,7 @@ class FileManagerController
         if (in_array($ext, self::DISALLOW_EXT)) throw new Error("File type not allowed");
 
         //check if file already exists
-        if ($this->drive->getFilesystem()->fileExists($path . "/" . $filename)) {
+        if ($filesystem->fileExists($path . "/" . $filename)) {
 
             if ($rename) {
                 $filename = $this->getNextFilename($path, $filename);
@@ -261,7 +269,7 @@ class FileManagerController
         }
 
         //move file
-        $this->drive->getFilesystem()->write($path . "/" . $filename, $file->getStream()->getContents());
+        $filesystem->write($path . "/" . $filename, $file->getStream()->getContents());
 
         return $path . "/" . $filename;
     }
@@ -273,7 +281,12 @@ class FileManagerController
     public function fsMoveFile(string $source, string $target): bool
     {
         $basename = basename($source);
-        $this->drive->getFilesystem()->move($source, $target . "/" . $basename);
+        $this->getDrive()->getFilesystem()->move($source, $target . "/" . $basename);
         return true;
+    }
+
+    private function getDrive(): Drive
+    {
+        return $this->app->getDrive(0);
     }
 }

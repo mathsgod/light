@@ -14,8 +14,8 @@ use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\Response\TextResponse;
 use League\Flysystem\MountManager;
+use Light\Filesystem\FilesystemFactory;
 use Light\Rbac\Rbac;
-use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Light\Model\Config;
 use Light\Model\MyFavorite;
 use Light\Model\Permission;
@@ -44,7 +44,8 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     use \League\Event\EventDispatcherAwareBehavior;
 
     protected Auth\Service $auth_service;
-    protected MountManager $mountManager;
+    protected ?MountManager $mountManager = null;
+    protected FilesystemFactory $filesystemFactory;
 
     protected \League\Container\Container $container;
     protected SchemaFactory $factory;
@@ -69,12 +70,17 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         }
 
         $this->container = new \League\Container\Container();
+        $this->filesystemFactory = new FilesystemFactory();
 
         $this->server = new \Light\Server($this->container);
 
         $this->server->pipe($this);
 
         $this->container->add(App::class, $this);
+        $this->container->add(FilesystemFactory::class, $this->filesystemFactory);
+        $this->container->add(MountManager::class, function (): MountManager {
+            return $this->getMountManager();
+        });
         $this->container->add(Controller\AppController::class);
         $this->container->add(Controller\SystemController::class);
         $this->container->add(Controller\AuthController::class);
@@ -87,7 +93,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->container->add(Controller\UserLogController::class);
         $this->container->add(Controller\MailLogController::class);
         $this->container->add(Controller\FileManagerController::class, function () {
-            return new Controller\FileManagerController($this->getDrive(0));
+            return new Controller\FileManagerController($this);
         });
         $this->container->add(Controller\TranslateController::class);
         $this->container->add(Controller\WebAuthnController::class);
@@ -133,26 +139,17 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->rbac->setPermissionSeparator(".");
         $this->loadRbac();
         $this->loadMenu();
-
-
-
-        //load Mount Manager
-
-        $filesystems = [];
-
-        foreach ($this->getFSConfig() as $index => $config) {
-
-            $filesystems[$config["name"]] = $this->getFS($index);
-        }
-
-
-        $mountManager = new \League\Flysystem\MountManager($filesystems);
-        $this->mountManager = $mountManager;
-        $this->container->add(\League\Flysystem\MountManager::class, $mountManager);
     }
 
     public function getMountManager(): MountManager
     {
+        if ($this->mountManager === null) {
+            $this->mountManager = $this->filesystemFactory->createMountManager(
+                $this->getFSConfig(),
+                $this->getFilesystemUser(),
+            );
+        }
+
         return $this->mountManager;
     }
 
@@ -586,13 +583,17 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
         $auth_service = new Auth\Service($request);
         $this->auth_service = $auth_service;
+        $this->mountManager = $this->filesystemFactory->createMountManager(
+            $this->getFSConfig(),
+            $this->getFilesystemUser(),
+        );
 
         $this->factory->setAuthenticationService($auth_service);
         $this->factory->setAuthorizationService($auth_service);
 
 
-        $this->container->add(ServerRequestInterface::class, $request);
-        $this->container->add(Auth\Service::class, $auth_service);
+        $this->container->add(ServerRequestInterface::class, $request, true);
+        $this->container->add(Auth\Service::class, $auth_service, true);
 
         return $handler->handle($request);
     }
@@ -605,7 +606,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             $config[] = ["name" => "default"];
         }
 
-        if ($index > count($config)) {
+        if ($index < 0 || $index >= count($config)) {
             return new \Laminas\Diactoros\Response\EmptyResponse(404);
         }
 
@@ -799,73 +800,27 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     public function getFS(int $index = 0): \League\Flysystem\FilesystemOperator
     {
         $fss = $this->getFSConfig();
-
-        $fs = $fss[$index];
-
-        if ($fs["type"] == "local") {
-            $data = $fs["data"];
-
-            $visibilityConverter = PortableVisibilityConverter::fromArray([
-                'file' => [
-                    'public' => 0640,
-                    'private' => 0640,
-                ],
-                'dir' => [
-                    'public' => 0777,
-                    'private' => 0777,
-                ],
-            ]);
-
-            $location = $data["location"];
-            $adapter = new \League\Flysystem\Local\LocalFilesystemAdapter($location, $visibilityConverter, lazyRootCreation: true);
-            $filesystem = new \League\Flysystem\Filesystem($adapter, [
-                "public_url" => $data["public_url"] ?? ""
-            ]);
-            return $filesystem;
+        if (!isset($fss[$index])) {
+            throw new \RuntimeException('Filesystem not found');
         }
 
-        if ($fs["type"] == "aliyun-oss") {
-            return (new \AlphaSnow\Flysystem\Aliyun\AliyunFactory())->createFilesystem($fs["data"]);
+        return $this->filesystemFactory->createFilesystem(
+            $fss[$index],
+            $this->getFilesystemUser(),
+        );
+    }
+
+    private function getFilesystemUser(): ?User
+    {
+        if (!isset($this->auth_service)) {
+            return null;
         }
 
-        if ($fs["type"] == "s3") {
-            $data = $fs["data"];
-            $client = new \Aws\S3\S3Client([
-                'version' => 'latest',
-                'region' => $data["region"],
-                'endpoint' => $data["endpoint"],
-                'use_path_style_endpoint' => true,
-                'credentials' => [
-                    'key' => $data["accessKey"],
-                    'secret' => $data["secretKey"],
-                ],
-            ]);
-            // The internal adapter
-            $adapter = new \League\Flysystem\AwsS3V3\AwsS3V3Adapter(
-                // S3Client
-                $client,
-                // Bucket name
-                $data['bucket'],
-                // Optional path prefix
-                $data["prefix"],
-                // Visibility converter (League\Flysystem\AwsS3V3\VisibilityConverter)
-                new \League\Flysystem\AwsS3V3\PortableVisibilityConverter(
-                    // Optional default for directories
-                    $data["visibility"]
-                )
-            );
-
-            // The FilesystemOperator
-            return new \League\Flysystem\Filesystem($adapter);
+        try {
+            return $this->auth_service->getUser();
+        } catch (TokenExpiredException) {
+            return null;
         }
-
-        if ($fs["type"] == "hostlink") {
-            $data = $fs["data"];
-            $adapter = new \HL\Storage\Adapter($data["token"], $data["endpoint"]);
-            return  new \League\Flysystem\Filesystem($adapter);
-        }
-
-        throw new \Exception("File system not found");
     }
 
     public function isRevisionEnabled(string $model): bool
@@ -916,7 +871,10 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     public function getDrive(int $index): Drive
     {
         $config = $this->getFSConfig();
-        $fs = $config[$index] ?? $config[0];
+        if (!isset($config[$index])) {
+            throw new \RuntimeException('Filesystem not found');
+        }
+        $fs = $config[$index];
         return new Drive($fs["name"], $this->getFS($index), $index, $fs["data"]);
     }
 

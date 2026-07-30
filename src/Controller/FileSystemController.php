@@ -35,7 +35,7 @@ class FileSystemController
     const DISALLOW_EXT = ['zip', 'js', 'jsp', 'jsb', 'mhtml', 'mht', 'xhtml', 'xht', 'php', 'phtml', 'php3', 'php4', 'php5', 'phps', 'shtml', 'jhtml', 'pl', 'sh', 'py', 'cgi', 'exe', 'application', 'gadget', 'hta', 'cpl', 'msc', 'jar', 'vb', 'jse', 'ws', 'wsf', 'wsc', 'wsh', 'ps1', 'ps2', 'psc1', 'psc2', 'msh', 'msh1', 'msh2', 'inf', 'reg', 'scf', 'msp', 'scr', 'dll', 'msi', 'vbs', 'bat', 'com', 'pif', 'cmd', 'vxd', 'cpl', 'htpasswd', 'htaccess'];
 
     #[Mutation(name: "lightFSCreateFolder")]
-    #[Right("fs.folder:create")]
+    #[Right("fs.folder.create")]
     public function createFolder(#[Autowire] App $app, string $location): bool
     {
         //check folder name starts with dot
@@ -52,7 +52,7 @@ class FileSystemController
     }
 
     #[Mutation(name: "lightFSDeleteFolder")]
-    #[Right("fs.folder:delete")]
+    #[Right("fs.folder.delete")]
     public function deleteFolder(#[Autowire] App $app, string $location): bool
     {
         //check folder name starts with dot
@@ -69,7 +69,7 @@ class FileSystemController
     }
 
     #[Mutation(name: "lightFSRenameFolder")]
-    #[Right("fs.folder:rename")]
+    #[Right("fs.folder.rename")]
     public function renameFolder(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location, string $newName): bool
     {
         //check newName starts with dot
@@ -92,7 +92,7 @@ class FileSystemController
     }
 
     #[Mutation(name: "lightFSWriteFile")]
-    #[Right("fs.file:write")]
+    #[Right("fs.file.write")]
     public function writeFile(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location, string $content): bool
     {
         //check filename starts with dot
@@ -109,7 +109,7 @@ class FileSystemController
     }
 
     #[Mutation(name: "lightFSDeleteFile")]
-    #[Right("fs.file:delete")]
+    #[Right("fs.file.delete")]
     public function deleteFile(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location): bool
     {
         //check filename starts with dot
@@ -126,7 +126,7 @@ class FileSystemController
     }
 
     #[Mutation(name: "lightFSRenameFile")]
-    #[Right("fs.file:rename")]
+    #[Right("fs.file.rename")]
     public function renameFile(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location, string $newName): bool
     {
 
@@ -156,7 +156,7 @@ class FileSystemController
     }
 
     #[Mutation(name: "lightFSMove")]
-    #[Right("fs.node:move")]
+    #[Right("fs.node.move")]
     public function moveNode(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $from, string $to): bool
     {
         //check if from starts with dot
@@ -188,7 +188,7 @@ class FileSystemController
 
 
     #[Mutation(name: "lightFSDuplicateFile")]
-    #[Right("fs.file:duplicate")]
+    #[Right("fs.file.duplicate")]
     public function duplicateFile(#[Autowire] MountManager $mountManager, string $location): string
     {
         if (!$mountManager->fileExists($location)) {
@@ -215,7 +215,7 @@ class FileSystemController
     }
 
     #[Mutation(name: "lightFSUploadTempFile")]
-    #[Right("fs.file:write")]
+    #[Right("fs.file.write")]
     public function uploadTempFile(#[Autowire] MountManager $mountManager, string $location, UploadedFileInterface $file): File
     {
         $filename = $file->getClientFilename();
@@ -234,7 +234,7 @@ class FileSystemController
     }
 
     #[Mutation(name: "lightFSUploadBase64")]
-    #[Right("fs.file:write")]
+    #[Right("fs.file.write")]
     public function uploadBase64(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location, string $base64): File
     {
         //check if extension is allowed
@@ -290,7 +290,7 @@ class FileSystemController
     }
 
     #[Mutation(name: "lightFSUploadFile")]
-    #[Right("fs.file:write")]
+    #[Right("fs.file.write")]
     public function uploadFile(#[Autowire] App $app, #[Autowire] MountManager $mountManager, string $location, UploadedFileInterface $file, bool $rename = false): string
     {
 

@@ -241,8 +241,8 @@ class AuthController
             throw new Error("Google login error");
         }
 
-        // reset all gmail
-        foreach (User::Query(["gmail" => $payload["sub"]]) as $u) {
+        // Reset any existing link for this Google account.
+        foreach (User::Query(["google" => $payload["sub"]]) as $u) {
             $u->google = "";
             $u->save();
         }

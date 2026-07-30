@@ -3,6 +3,7 @@ Administrators:
   
 Power Users:
   - user.index
+  - user.add
   - user.view
   - user.update-role
   - user.list
@@ -21,5 +22,5 @@ Users:
   - user.profile
   - user.setting
   - user.setting.*
-  - user.createaccesstoken
+  - user.create_access_token
   - notification.*

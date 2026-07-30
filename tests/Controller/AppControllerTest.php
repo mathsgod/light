@@ -6,6 +6,7 @@ use Firebase\JWT\JWT;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\ServerRequest;
 use Light\App;
+use Light\Auth\Service;
 use Light\Model\Config;
 use Light\Model\User;
 use Light\Model\UserLog;
@@ -167,6 +168,7 @@ class AppControllerTest extends TestCase
         $this->assertArrayNotHasKey("errors", $out, json_encode($out));
         $this->assertTrue($out["data"]["revokeSession"]);
         $this->assertNotNull(UserLog::Get(["jti" => $jti, "user_id" => $this->adminUser->user_id])->logout_dt);
+        $this->assertTrue($this->app->getCache()->has(Service::REVOKED_SESSION_PREFIX . $jti));
     }
 
     public function testUpdateMyStyle(): void

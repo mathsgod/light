@@ -16,13 +16,17 @@ use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
 
 class Service implements AuthenticationServiceInterface, AuthorizationServiceInterface
 {
+    public const REVOKED_SESSION_PREFIX = "revoked_session_";
+
     protected bool $is_logged = false;
     protected ?User $user = null;
     protected ?User $org_user = null;
     protected \Light\App $app;
     protected bool $view_as = false;
+    protected bool $is_api_key = false;
     protected ?string $token = null;
     protected ?string $jti = null;
+    protected ?string $session_id = null;
     protected string $token_status = 'valid';
 
 
@@ -55,18 +59,40 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                 //decode user
 
                 $this->jti = $payload->jti;
+                $this->is_api_key = !empty($payload->name);
+
+                // Browser sessions keep a stable sid while access-token jtis
+                // rotate. Legacy browser tokens fall back to their jti.
+                if (!$this->is_api_key) {
+                    $this->session_id = !empty($payload->sid)
+                        ? (string) $payload->sid
+                        : $this->jti;
+                }
 
                 if ($cache->has("revoked_token_" . $this->jti)) {
                     return;
                 }
 
-                // If a refresh token reuse was detected, all sessions for this user are revoked
-                if (!empty($payload->id) && $cache->has("user_sessions_revoked_" . $payload->id)) {
+                if (
+                    $this->session_id
+                    && $cache->has(self::REVOKED_SESSION_PREFIX . $this->session_id)
+                ) {
+                    return;
+                }
+
+                // A refresh-token reuse lock applies to interactive browser
+                // sessions only. API keys have their own database-backed
+                // revocation lifecycle and must remain independently usable.
+                if (
+                    !$this->is_api_key
+                    && !empty($payload->id)
+                    && $cache->has("user_sessions_revoked_" . $payload->id)
+                ) {
                     return;
                 }
 
                 // If token has a name field, it's an API key — verify the record still exists
-                if (!empty($payload->name)) {
+                if ($this->is_api_key) {
                     if (!APIKey::Get(["key" => $this->token])) {
                         return;
                     }
@@ -81,7 +107,11 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
                 } else {
                     $this->user = User::Get($payload->id);
 
-                    $this->user->saveLastAccessTime($this->jti);
+                    // API keys are not interactive browser sessions and do not
+                    // have a UserLog session row to update.
+                    if (!$this->is_api_key && $this->session_id) {
+                        $this->user->saveLastAccessTime($this->session_id);
+                    }
                 }
                 $this->is_logged = true;
             }
@@ -100,6 +130,11 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
     public function getJti(): ?string
     {
         return $this->jti;
+    }
+
+    public function getSessionId(): ?string
+    {
+        return $this->session_id;
     }
 
     public function isViewAsMode(): bool

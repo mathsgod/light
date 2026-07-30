@@ -356,10 +356,15 @@ class AuthController
     public function logout(#[Autowire] Service $service, #[Autowire] App $app, #[Autowire] \Psr\Http\Message\ServerRequestInterface $request): bool
     {
         $refresh_token_expire = $app->getRefreshTokenExpire();
+        $cache = $app->getCache();
         $jti = $service->getJti();
+        $session_id = $service->getSessionId();
+
         if ($jti) {
-            $cache = $app->getCache();
             $cache->set("revoked_token_" . $jti, true, $refresh_token_expire);
+        }
+        if ($session_id) {
+            $cache->set(Service::REVOKED_SESSION_PREFIX . $session_id, true, $refresh_token_expire);
         }
 
         // Also revoke the refresh token from the cookie so the session is fully terminated
@@ -371,7 +376,7 @@ class AuthController
                     new \Firebase\JWT\Key($_ENV["JWT_SECRET"], "HS256")
                 );
                 if ($refresh_payload->type === "refresh_token" && !empty($refresh_payload->jti)) {
-                    $app->getCache()->set("revoked_refresh_token_" . $refresh_payload->jti, true, $refresh_token_expire);
+                    $cache->set("revoked_refresh_token_" . $refresh_payload->jti, true, $refresh_token_expire);
                 }
             } catch (\Exception $e) {
                 // ignore: refresh token may be expired or malformed
@@ -379,11 +384,13 @@ class AuthController
         }
 
 
-        UserLog::_table()->update([
-            "logout_dt" => date("Y-m-d H:i:s")
-        ], [
-            "jti" => $jti
-        ]);
+        if ($session_id) {
+            UserLog::_table()->update([
+                "logout_dt" => date("Y-m-d H:i:s")
+            ], [
+                "jti" => $session_id
+            ]);
+        }
 
         //set cookie
         setcookie("access_token", "", [

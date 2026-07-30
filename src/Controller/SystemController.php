@@ -64,6 +64,10 @@ class SystemController
             "id" => $service->getOrginalUser()->user_id,
             "type" => "access_token"
         ];
+        if ($session_id = $service->getSessionId()) {
+            $payload["sid"] = $session_id;
+        }
+
         $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
         //set cookie
         setcookie("access_token", $token, time() + $access_token_expire, "/", "", true, true);
@@ -74,7 +78,12 @@ class SystemController
     #[Mutation]
     #[Logged]
     #[Right("system.view_as")]
-    public function viewAs(#[InjectUser] $user, int $user_id, #[Autowire] App $app): bool
+    public function viewAs(
+        #[InjectUser] $user,
+        int $user_id,
+        #[Autowire] App $app,
+        #[Autowire] \Light\Auth\Service $service
+    ): bool
     {
         $access_token_expire = $app->getAccessTokenExpire();
         $payload = [
@@ -87,6 +96,10 @@ class SystemController
             "view_as" => $user_id,
             "type" => "access_token"
         ];
+        if ($session_id = $service->getSessionId()) {
+            $payload["sid"] = $session_id;
+        }
+
         $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
         //set cookie
         // setcookie("access_token", $token, time() + $access_token_expire, "/", "", true, true);

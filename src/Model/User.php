@@ -51,6 +51,10 @@ class User extends \Light\Model
 {
     public function revokeSession(string $jti): bool
     {
+        if (!UserLog::Get(["jti" => $jti, "user_id" => $this->user_id])) {
+            return false;
+        }
+
         UserLog::_table()->update(["logout_dt" => date("Y-m-d H:i:s")], ["jti" => $jti, "user_id" => $this->user_id]);
         return true;
     }
@@ -58,18 +62,29 @@ class User extends \Light\Model
     #[Field(outputType: "[mixed]")]
     public function getSessions(#[Autowire] App $app): array
     {
-        $token_expire = $app->getAccessTokenExpire();
-        $jti = $app->getAuthService()->getJti();
+        $session_expire = $app->getRefreshTokenExpire();
+        $session_id = $app->getAuthService()->getSessionId();
+        $active_after = date("Y-m-d H:i:s", time() - $session_expire);
 
         $ul = UserLog::Query(["user_id" => $this->user_id, "result" => "SUCCESS"]);
         $ul->where->isNull("logout_dt");
-        $ul->where->greaterThan("login_dt", date("Y-m-d H:i:s", time() - $token_expire));
+
+        // A browser session stays active for the refresh-token window. Use
+        // last activity when available and fall back to login time for a
+        // newly-created session that has not made another request yet.
+        $active = $ul->where->nest();
+        $active->greaterThan("last_access_time", $active_after);
+        $without_last_access = $active->or->nest();
+        $without_last_access->isNull("last_access_time");
+        $without_last_access->greaterThan("login_dt", $active_after);
+        $without_last_access->unnest();
+        $active->unnest();
 
         $sessions = [];
         foreach ($ul as $log) {
 
             $sessions[] = [
-                "is_current" => $log->jti == $jti,
+                "is_current" => $session_id !== null && $log->jti === $session_id,
                 "jti" => $log->jti,
                 "ip" => $log->ip,
                 "login_dt" => $log->login_dt,
@@ -225,9 +240,12 @@ class User extends \Light\Model
         return Notification::Query(['user_id' => $this->user_id, 'is_read' => 0])->count();
     }
 
-    public function saveLastAccessTime(string $jti)
+    public function saveLastAccessTime(string $session_id): void
     {
-        UserLog::_table()->update(["last_access_time" => date("Y-m-d H:i:s")], ["jti" => $jti]);
+        UserLog::_table()->update(
+            ["last_access_time" => date("Y-m-d H:i:s")],
+            ["jti" => $session_id, "user_id" => $this->user_id]
+        );
     }
 
     public function isAuthLocked()

@@ -3,6 +3,7 @@
 namespace Light\Controller;
 
 use Light\App as LightApp;
+use Light\Auth\Service;
 use Light\Input\Test;
 use Light\Model\Config;
 use Light\Model\User;
@@ -22,7 +23,16 @@ class AppController
     #[Logged]
     public function revokeSession(string $jti, #[Autowire] LightApp $app, #[InjectUser] User $user): bool
     {
-        return $user->revokeSession($jti);
+        if (!$user->revokeSession($jti)) {
+            return false;
+        }
+
+        $app->getCache()->set(
+            Service::REVOKED_SESSION_PREFIX . $jti,
+            true,
+            $app->getRefreshTokenExpire()
+        );
+        return true;
     }
 
     #[Query]

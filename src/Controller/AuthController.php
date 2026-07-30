@@ -513,13 +513,50 @@ class AuthController
      */
     #[Mutation]
     #[Logged]
-    public function updateMy2FA(#[InjectUser] User $user, string $secret, string $code): bool
+    public function updateMy2FA(#[InjectUser] User $user, string $secret, string $code, #[Autowire] App $app): bool
     {
-        if (!(new TwoFactorAuthentication)->checkCode($secret, $code)) {
+        if ($user->isTwoFactorEnabled()) {
+            throw new Error("Two-factor authentication is already enabled");
+        }
+
+        if (!(new TwoFactorAuthentication)->checkCode($secret, $code, $user->user_id, $app->getCache())) {
             throw new Error("two factor authentication error");
         }
 
         $user->secret = $secret;
+        $user->save();
+        return true;
+    }
+
+    /**
+     * Disables two-factor authentication for the authenticated user after
+     * re-verifying both their password and current authenticator code.
+     */
+    #[Mutation]
+    #[Logged]
+    public function disableMy2FA(
+        #[InjectUser] User $user,
+        string $password,
+        string $code,
+        #[Autowire] App $app
+    ): bool {
+        if ($app->isTwoFactorAuthentication()) {
+            throw new Error("Two-factor authentication is required by the system");
+        }
+
+        if (!$user->isTwoFactorEnabled()) {
+            throw new Error("Two-factor authentication is not enabled");
+        }
+
+        if (!self::PasswordVerify($password, $user->password)) {
+            throw new Error("Password or two-factor authentication code is incorrect");
+        }
+
+        if (!(new TwoFactorAuthentication)->checkCode($user->secret, $code, $user->user_id, $app->getCache())) {
+            throw new Error("Password or two-factor authentication code is incorrect");
+        }
+
+        $user->secret = "";
         $user->save();
         return true;
     }
@@ -532,6 +569,10 @@ class AuthController
     #[Logged]
     public function getMy2FA(#[InjectUser] User $user)
     {
+        if ($user->isTwoFactorEnabled()) {
+            throw new Error("Two-factor authentication is already enabled");
+        }
+
         $secret = (new TwoFactorAuthentication())->generateSecret();
 
         $host = $_SERVER["HTTP_HOST"];

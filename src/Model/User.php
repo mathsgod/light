@@ -4,6 +4,7 @@ namespace Light\Model;
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use GraphQL\Error\Error;
 use Light\App;
 use Light\Model\Notification;
 use Light\Rbac\Rbac;
@@ -164,6 +165,9 @@ class User extends \Light\Model
     #[Field]
     public function getMy2FA()
     {
+        if ($this->isTwoFactorEnabled()) {
+            throw new Error("Two-factor authentication is already enabled");
+        }
 
         $secret = (new TwoFactorAuthentication())->generateSecret();
 

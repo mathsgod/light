@@ -30,7 +30,8 @@
         "symfony/serializer": "^7.4",
         "symfony/property-info": "^7.4",
         "symfony/property-access": "^7.4",
-        "web-auth/webauthn-lib": "^4.9",
+        "guzzlehttp/guzzle": "^7.15.2",
+        "web-auth/webauthn-lib": "^5.3",
         "mathsgod/light-db": "^1.7.0",
         "mathsgod/light-db-graphqlite-mappers": "^1.0",
         "mathsgod/json-to-sql": "^1.0",
@@ -62,6 +63,9 @@
     },
     "bin": "bin/light",
     "config": {
+        "platform": {
+            "php": "8.3.0"
+        },
         "allow-plugins": {
             "php-http/discovery": true,
             "tbachert/spi": true

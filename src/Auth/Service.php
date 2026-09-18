@@ -4,8 +4,6 @@ namespace Light\Auth;
 
 use Exception;
 use Firebase\JWT\ExpiredException;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 use Light\Model\APIKey;
 use Light\Model\User;
@@ -53,7 +51,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
         $this->token = $token;
 
         try {
-            $payload = JWT::decode($this->token, new Key($_ENV["JWT_SECRET"], "HS256"));
+            $payload = TokenManager::decode($this->token);
             if ($payload->type == "access_token") {
 
                 //decode user

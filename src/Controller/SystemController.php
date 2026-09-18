@@ -3,7 +3,7 @@
 namespace Light\Controller;
 
 use Exception;
-use Firebase\JWT\JWT;
+use Light\Auth\TokenManager;
 use GraphQL\Error\Error;
 use Light\App;
 use Light\Type\System;
@@ -68,7 +68,7 @@ class SystemController
             $payload["sid"] = $session_id;
         }
 
-        $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
+        $token = TokenManager::encode($payload);
         //set cookie
         setcookie("access_token", $token, time() + $access_token_expire, "/", "", true, true);
         return true;
@@ -100,7 +100,7 @@ class SystemController
             $payload["sid"] = $session_id;
         }
 
-        $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
+        $token = TokenManager::encode($payload);
         //set cookie
         // setcookie("access_token", $token, time() + $access_token_expire, "/", "", true, true);
         $samesite = $_ENV["COOKIE_SAMESITE"] ?? "Lax";

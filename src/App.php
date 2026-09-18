@@ -3,7 +3,7 @@
 namespace Light;
 
 use Exception;
-use Firebase\JWT\JWT;
+use Light\Auth\TokenManager;
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
 use GraphQL\Upload\UploadMiddleware;
@@ -740,7 +740,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         ];
 
 
-        $this->setAccessTokenCookie(JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256"));
+        $this->setAccessTokenCookie(TokenManager::encode($payload));
 
         //save UserLog
         UserLog::_table()->insert([
@@ -766,7 +766,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         ];
 
 
-        $refresh_token = JWT::encode($refresh_payload, $_ENV["JWT_SECRET"], "HS256");
+        $refresh_token = TokenManager::encode($refresh_payload);
         $this->setRefreshTokenCookie($refresh_token, $refresh_token_expire);
     }
 
@@ -889,7 +889,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                 throw new Exception("No refresh token", 401);
             }
 
-            $payload = JWT::decode($token, new \Firebase\JWT\Key($_ENV["JWT_SECRET"], "HS256"));
+            $payload = TokenManager::decode($token);
             if ($payload->type != "refresh_token") {
                 throw new Exception("Invalid token", 401);
             }
@@ -965,7 +965,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                 "id" => $user->user_id,
                 "type" => "access_token"
             ];
-            $access_token = JWT::encode($access_payload, $_ENV["JWT_SECRET"], "HS256");
+            $access_token = TokenManager::encode($access_payload);
             $this->setAccessTokenCookie($access_token);
 
             // Issue new refresh token (new jti) — rotation
@@ -979,7 +979,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
                 "id" => $user->user_id,
                 "type" => "refresh_token"
             ];
-            $refresh_token = JWT::encode($refresh_payload, $_ENV["JWT_SECRET"], "HS256");
+            $refresh_token = TokenManager::encode($refresh_payload);
             $this->setRefreshTokenCookie($refresh_token, $refresh_token_expire);
 
             // Cache the issued token pair for a short grace period to handle multi-tab races
@@ -1054,6 +1054,18 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
         $router->map('POST', $basePath . '/refresh_token', $refreshHandler);
         $router->map('POST', $basePath . '/api/refresh_token', $refreshHandler);
+        $jwksHandler = function (): ResponseInterface {
+            if (TokenManager::algorithm() !== 'RS256') {
+                return new TextResponse('JWKS is not available', 404);
+            }
+
+            return (new JsonResponse(TokenManager::jwks()))
+                ->withHeader('Cache-Control', 'public, max-age=300');
+        };
+        $router->map('GET', '/.well-known/jwks.json', $jwksHandler);
+        if ($basePath !== '') {
+            $router->map('GET', $basePath . '/.well-known/jwks.json', $jwksHandler);
+        }
         $this->server->run();
     }
 

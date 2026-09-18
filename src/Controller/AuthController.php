@@ -4,13 +4,12 @@ namespace Light\Controller;
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use GraphQL\Error\Error;
 use Ramsey\Uuid\Uuid;
 
 use Light\App;
 use Light\Auth\Service;
+use Light\Auth\TokenManager;
 use Light\Input\User as InputUser;
 use Light\Model\APIKey;
 use Light\Model\Config;
@@ -371,10 +370,7 @@ class AuthController
         $cookies = $request->getCookieParams();
         if (!empty($cookies["refresh_token"])) {
             try {
-                $refresh_payload = \Firebase\JWT\JWT::decode(
-                    $cookies["refresh_token"],
-                    new \Firebase\JWT\Key($_ENV["JWT_SECRET"], "HS256")
-                );
+                $refresh_payload = TokenManager::decode($cookies["refresh_token"]);
                 if ($refresh_payload->type === "refresh_token" && !empty($refresh_payload->jti)) {
                     $cache->set("revoked_refresh_token_" . $refresh_payload->jti, true, $refresh_token_expire);
                 }
@@ -646,7 +642,7 @@ class AuthController
     public function forgetPasswordVerifyCode(#[Autowire] App $app, string $jwt, string $code): bool
     {
         try {
-            $payload = JWT::decode($jwt, new Key($_ENV['JWT_SECRET'], 'HS256'));
+            $payload = TokenManager::decode($jwt);
         } catch (\Exception $e) {
             return false;
         }
@@ -661,14 +657,14 @@ class AuthController
         }
         $cache->set($cacheKey, $attempts + 1, 600); // 10分鐘過期
 
-        return ($payload->code_hash == hash('sha256', $code . $_ENV['JWT_SECRET']));
+        return ($payload->code_hash == hash('sha256', $code . TokenManager::applicationSecret()));
     }
 
     #[Mutation]
     public function resetPassword(#[Autowire] App $app, string $jwt,  string $password, string $code): bool
     {
         try {
-            $payload = JWT::decode($jwt, new Key($_ENV['JWT_SECRET'], 'HS256'));
+            $payload = TokenManager::decode($jwt);
         } catch (\Exception $e) {
             throw new Error("Code is expired or not valid");
         }
@@ -688,7 +684,7 @@ class AuthController
             throw new Error("User not found");
         }
 
-        if ($payload->code_hash != hash('sha256', $code . $_ENV['JWT_SECRET'])) {
+        if ($payload->code_hash != hash('sha256', $code . TokenManager::applicationSecret())) {
             throw new Error("Code is expired or not valid");
         }
 
@@ -729,7 +725,7 @@ class AuthController
             $payload["exp"] = time() + $expired_time;
         }
 
-        $token = JWT::encode($payload, $_ENV["JWT_SECRET"], "HS256");
+        $token = TokenManager::encode($payload);
 
         APIKey::_table()->insert([
             "name"         => $name,
@@ -789,7 +785,7 @@ class AuthController
         }
 
         // hash code
-        $code_hash = hash('sha256', $code . $_ENV['JWT_SECRET']);
+        $code_hash = hash('sha256', $code . TokenManager::applicationSecret());
 
         // 產生 JWT
         $payload = [
@@ -799,7 +795,7 @@ class AuthController
             'iat' => time(), // JWT 發行時間
             'type' => 'reset_password'
         ];
-        $jwt = JWT::encode($payload, $_ENV['JWT_SECRET'], 'HS256');
+        $jwt = TokenManager::encode($payload);
 
         // 前端收到 jwt，之後 resetPassword/verifyCode 時一齊傳返 server
         return $jwt;

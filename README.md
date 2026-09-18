@@ -39,13 +39,48 @@ DATABASE_PORT=
 DATABASE_CHARSET=
 ```
 
-### JWT Secret
+### JWT signing
 
-A random string used to sign JWT access/refresh tokens.
+HS256 remains the default for backwards compatibility:
 
 ```ini
-JWT_SECRET=
+JWT_ALGORITHM=HS256
+JWT_SECRET=replace-with-a-random-secret
 ```
+
+For an Auth API that issues tokens to other services, use RS256. Only the Auth
+API receives the private key:
+
+```ini
+JWT_ALGORITHM=RS256
+JWT_PRIVATE_KEY_PATH=/run/secrets/light-jwt-private.pem
+JWT_PUBLIC_KEY_PATH=/etc/light/light-jwt-public.pem
+JWT_KEY_ID=auth-2026-09
+JWT_ISSUER=https://auth.example.com
+JWT_AUDIENCE=business-api
+JWT_RESET_SECRET=replace-with-a-separate-random-secret
+```
+
+`JWT_PUBLIC_KEY_PATH` is optional because Light can derive the public key from
+the private key. `JWT_AUDIENCE` is also optional. `JWT_RESET_SECRET` protects
+password-reset verification codes and is required in RS256 deployments that do
+not retain the legacy `JWT_SECRET`.
+
+Generate an RSA key pair, for example:
+
+```bash
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out private.pem
+openssl pkey -in private.pem -pubout -out public.pem
+```
+
+When RS256 is enabled, Light publishes the public key at:
+
+```text
+GET /.well-known/jwks.json
+```
+
+JWTs include the configured `kid` header, allowing consumers to select the
+matching public key. The private key is never included in the JWKS response.
 
 ### Timezone
 

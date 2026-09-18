@@ -4,6 +4,7 @@ namespace Light;
 
 use Exception;
 use Light\Auth\TokenManager;
+use Light\Auth\AudienceRegistry;
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
 use GraphQL\Upload\UploadMiddleware;
@@ -55,6 +56,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     protected string $mode = "dev";
 
     protected CacheInterface $cache;
+    private ?AudienceRegistry $audienceRegistry = null;
 
     protected array $menus = [];
 
@@ -540,6 +542,11 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     public function getRbac(): Rbac
     {
         return $this->rbac;
+    }
+
+    public function getAudienceRegistry(): AudienceRegistry
+    {
+        return $this->audienceRegistry ??= new AudienceRegistry();
     }
 
     public function getContainer(): ContainerInterface

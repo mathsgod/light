@@ -1,0 +1,11 @@
+# Permissions that may be included in access tokens for each API audience.
+# Unknown audiences are rejected. Permissions not listed here are omitted.
+auth-api:
+  permissions:
+    - '*'
+
+business-api:
+  permissions: []
+
+infra-api:
+  permissions: []

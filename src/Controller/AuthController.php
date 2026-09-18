@@ -738,6 +738,49 @@ class AuthController
     }
 
     #[Mutation]
+    #[Logged]
+    public function createAudienceAccessToken(
+        string $audience,
+        #[InjectUser] User $user,
+        #[Autowire] App $app,
+        #[Autowire] Service $service,
+    ): string {
+        if (empty($_ENV['JWT_AUDIENCE'])) {
+            throw new Error('JWT_AUDIENCE must be configured before issuing audience tokens');
+        }
+
+        $rbacUser = $app->getRbac()->getUser((string) $user->user_id);
+        if ($rbacUser === null) {
+            $rbacUser = $app->getRbac()->addUser((string) $user->user_id, $user->getRoles());
+        }
+
+        try {
+            $permissions = $app->getAudienceRegistry()->filterPermissions(
+                $audience,
+                $rbacUser->getPermissions(),
+            );
+        } catch (\InvalidArgumentException) {
+            throw new Error('Unknown audience');
+        }
+
+        $payload = [
+            'aud' => $audience,
+            'jti' => Uuid::uuid4()->toString(),
+            'iat' => time(),
+            'exp' => time() + $app->getAccessTokenExpire(),
+            'id' => $user->user_id,
+            'roles' => $user->getRoles(),
+            'permissions' => $permissions,
+            'type' => 'access_token',
+        ];
+        if ($sessionId = $service->getSessionId()) {
+            $payload['sid'] = $sessionId;
+        }
+
+        return TokenManager::encode($payload);
+    }
+
+    #[Mutation]
     public function forgetPassword(#[Autowire] App $app, string $username, string $email): string
     {
         $cache = $app->getCache();

@@ -57,12 +57,13 @@ JWT_PRIVATE_KEY_PATH=/run/secrets/light-jwt-private.pem
 JWT_PUBLIC_KEY_PATH=/etc/light/light-jwt-public.pem
 JWT_KEY_ID=auth-2026-09
 JWT_ISSUER=https://auth.example.com
-JWT_AUDIENCE=business-api
+JWT_AUDIENCE=auth-api
 JWT_RESET_SECRET=replace-with-a-separate-random-secret
 ```
 
 `JWT_PUBLIC_KEY_PATH` is optional because Light can derive the public key from
-the private key. `JWT_AUDIENCE` is also optional. `JWT_RESET_SECRET` protects
+the private key. `JWT_AUDIENCE` identifies tokens accepted by this Auth API and
+is required before issuing tokens for other audiences. `JWT_RESET_SECRET` protects
 password-reset verification codes and is required in RS256 deployments that do
 not retain the legacy `JWT_SECRET`.
 
@@ -81,6 +82,41 @@ GET /.well-known/jwks.json
 
 JWTs include the configured `kid` header, allowing consumers to select the
 matching public key. The private key is never included in the JWKS response.
+
+### Audience-scoped access tokens
+
+Define which permissions may be issued to each API in `audiences.yml`:
+
+```yaml
+auth-api:
+  permissions:
+    - '*'
+
+business-api:
+  permissions:
+    - order.*
+    - customer.*
+
+infra-api:
+  permissions:
+    - server.*
+    - deployment.*
+```
+
+An authenticated user can request a short-lived token for a registered
+audience with the `createAudienceAccessToken` GraphQL mutation:
+
+```graphql
+mutation {
+  createAudienceAccessToken(audience: "business-api")
+}
+```
+
+The token contains only the intersection of the user's permissions and the
+patterns allowed for that audience. Unknown audiences are rejected, internal
+permissions beginning with `#` are omitted, and unclassified permissions are
+not issued. An administrator's global `*` is reduced to the requested
+audience's configured patterns.
 
 ### Timezone
 

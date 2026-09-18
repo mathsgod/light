@@ -13,7 +13,7 @@ final class AudienceRegistry
 
     public function __construct(?string $path = null)
     {
-        $path ??= dirname(__DIR__, 2) . '/audiences.yml';
+        $path ??= self::defaultPath();
         if (!is_file($path) || !is_readable($path)) {
             throw new RuntimeException("Audience configuration is not readable: {$path}");
         }
@@ -46,6 +46,21 @@ final class AudienceRegistry
                 'permissions' => array_values(array_unique($permissions)),
             ];
         }
+    }
+
+    private static function defaultPath(): string
+    {
+        $configuredPath = trim((string) ($_ENV['JWT_AUDIENCES_PATH'] ?? ''));
+        if ($configuredPath !== '') {
+            return $configuredPath;
+        }
+
+        $projectPath = getcwd() . '/audiences.yml';
+        if (is_file($projectPath)) {
+            return $projectPath;
+        }
+
+        return dirname(__DIR__, 2) . '/audiences.yml';
     }
 
     /** @return string[] */

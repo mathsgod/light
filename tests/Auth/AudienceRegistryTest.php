@@ -9,9 +9,13 @@ use PHPUnit\Framework\TestCase;
 class AudienceRegistryTest extends TestCase
 {
     private string $path;
+    private string|false $previousAudiencesPath;
 
     protected function setUp(): void
     {
+        $this->previousAudiencesPath = $_ENV['JWT_AUDIENCES_PATH'] ?? false;
+        unset($_ENV['JWT_AUDIENCES_PATH']);
+
         $path = tempnam(sys_get_temp_dir(), 'light-audiences-');
         $this->assertNotFalse($path);
         $this->path = $path;
@@ -28,9 +32,34 @@ YAML);
 
     protected function tearDown(): void
     {
+        if ($this->previousAudiencesPath === false) {
+            unset($_ENV['JWT_AUDIENCES_PATH']);
+        } else {
+            $_ENV['JWT_AUDIENCES_PATH'] = $this->previousAudiencesPath;
+        }
+
         if (is_file($this->path)) {
             unlink($this->path);
         }
+    }
+
+    public function testLoadsConfiguredAudiencePathFromEnvironment(): void
+    {
+        $_ENV['JWT_AUDIENCES_PATH'] = $this->path;
+
+        $registry = new AudienceRegistry();
+
+        $this->assertSame(['business-api', 'infra-api'], $registry->names());
+    }
+
+    public function testConfiguredAudiencePathDoesNotSilentlyFallBack(): void
+    {
+        $_ENV['JWT_AUDIENCES_PATH'] = $this->path . '-missing';
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage($this->path . '-missing');
+
+        new AudienceRegistry();
     }
 
     public function testFiltersUserPermissionsToAudienceScope(): void

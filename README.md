@@ -58,6 +58,7 @@ JWT_PUBLIC_KEY_PATH=/etc/light/light-jwt-public.pem
 JWT_KEY_ID=auth-2026-09
 JWT_ISSUER=https://auth.example.com
 JWT_AUDIENCE=auth-api
+JWT_AUDIENCES_PATH=/path/to/project/audiences.yml
 JWT_RESET_SECRET=replace-with-a-separate-random-secret
 ```
 
@@ -85,7 +86,10 @@ matching public key. The private key is never included in the JWKS response.
 
 ### Audience-scoped access tokens
 
-Define which permissions may be issued to each API in `audiences.yml`:
+Define which permissions may be issued to each API in `audiences.yml`.
+`JWT_AUDIENCES_PATH` may point to an explicit configuration file outside the
+package directory. If unset, Light checks `audiences.yml` in the current
+project directory before falling back to the bundled file:
 
 ```yaml
 auth-api:

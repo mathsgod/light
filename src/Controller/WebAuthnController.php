@@ -8,6 +8,7 @@ use Light\App;
 use Light\Model\User;
 use Light\Type\WebAuthn;
 use Light\WebAuthn\Serializer;
+use ParagonIE\ConstantTime\Base64UrlSafe;
 use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
@@ -68,7 +69,7 @@ class WebAuthnController
         return Serializer::create();
     }
 
-    private function getPublicKeyCredentialSourceById(string $publicKeyCredentialId): ?PublicKeyCredentialSource
+    protected function getPublicKeyCredentialSourceById(string $publicKeyCredentialId): ?PublicKeyCredentialSource
     {
         $serializer = $this->getSerializer();
         foreach (User::Query() as $user) {
@@ -85,7 +86,7 @@ class WebAuthnController
     /**
      * @param ?mixed $assertion
      */
-    public function webAuthnAssertion(?string $username, $assertion = null, #[Autowire] App $app, #[Autowire] ServerRequestInterface $request): bool
+    public function webAuthnAssertion(?string $username, $assertion, #[Autowire] App $app, #[Autowire] ServerRequestInterface $request): bool
     {
         $serializer = $this->getSerializer();
 
@@ -96,7 +97,7 @@ class WebAuthnController
             return false;
         }
 
-        $publicKeyCredentialSource  = $this->getPublicKeyCredentialSourceById($publicKeyCredential->id);
+        $publicKeyCredentialSource  = $this->getPublicKeyCredentialSourceById(Base64UrlSafe::encodeUnpadded($publicKeyCredential->rawId));
 
         if (!$publicKeyCredentialSource) {
             throw new Error("Invalid credential");
@@ -127,7 +128,7 @@ class WebAuthnController
             $publicKeyCredentialSource,
             $publicKeyCredential->response,
             $publicKeyCredentialRequestOptions,
-            $request,
+            $request->getUri()->getHost(),
             $publicKeyCredentialSource->userHandle
         );
 
@@ -153,7 +154,7 @@ class WebAuthnController
     /**
      * @param ?mixed $registration
      */
-    public function webAuthnRegister(#[InjectUser] User $user, #[Autowire] App $app, $registration = null, #[Autowire] ServerRequestInterface $request): bool
+    public function webAuthnRegister(#[InjectUser] User $user, #[Autowire] App $app, $registration, #[Autowire] ServerRequestInterface $request): bool
     {
 
         $csmFactory = new CeremonyStepManagerFactory();
@@ -191,7 +192,7 @@ class WebAuthnController
         $publicKeyCredentialSource = $authenticatorAttestationResponseValidator->check(
             $authenticatorAttestationResponse,
             $publicKeyCredentialCreationOptions,
-            $request
+            $request->getUri()->getHost()
         );
 
         if (!$publicKeyCredentialSource) {

@@ -7,6 +7,7 @@ use GraphQL\Error\Error;
 use Light\App;
 use Light\Model\User;
 use Light\Type\WebAuthn;
+use Light\WebAuthn\Serializer;
 use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
@@ -64,10 +65,7 @@ class WebAuthnController
 
     private function getSerializer()
     {
-        $attestationStatementSupportManager = AttestationStatementSupportManager::create();
-        $attestationStatementSupportManager->add(NoneAttestationStatementSupport::create());
-        $factory = new WebauthnSerializerFactory($attestationStatementSupportManager);
-        return $factory->create();
+        return Serializer::create();
     }
 
     private function getPublicKeyCredentialSourceById(string $publicKeyCredentialId): ?PublicKeyCredentialSource
@@ -207,7 +205,7 @@ class WebAuthnController
             "ip" => $_SERVER["REMOTE_ADDR"],
             "user-agent" => $_SERVER["HTTP_USER_AGENT"],
             "timestamp" => time(),
-            "credential" => $publicKeyCredentialSource->jsonSerialize()
+            "credential" => Serializer::toArray($publicKeyCredentialSource)
         ];
 
 

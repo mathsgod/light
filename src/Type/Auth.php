@@ -8,6 +8,7 @@ use Light\App;
 use Light\Model\Config;
 use Light\Model\User;
 use Light\WebAuthn\PublicKeyCredentialSourceRepository;
+use Light\WebAuthn\Serializer;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -87,7 +88,7 @@ class Auth
         $cache = $app->getCache();
         $cache->set("webauthn_request_" . $sid, serialize($publicKeyCredentialRequestOptions), 60 * 5);
 
-        $json = $publicKeyCredentialRequestOptions->jsonSerialize();
+        $json = Serializer::toArray($publicKeyCredentialRequestOptions);
 
         return $json;
     }
@@ -124,6 +125,6 @@ class Auth
         $cache = $app->getCache();
         $cache->set("webauthn_creation_" . $user->user_id, base64_encode($challenge), 60 * 5);
 
-        return $option->jsonSerialize();
+        return Serializer::toArray($option);
     }
 }

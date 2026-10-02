@@ -15,6 +15,7 @@ use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialRpEntity;
 use Webauthn\PublicKeyCredentialSource;
+use Webauthn\CredentialRecord;
 use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\TrustPath\EmptyTrustPath;
 
@@ -48,7 +49,8 @@ final class WebAuthnSerializationTest extends TestCase
     {
         $credential = new PublicKeyCredentialSource(random_bytes(32), 'public-key', ['internal'], 'none', EmptyTrustPath::create(), Uuid::v4(), random_bytes(64), '123', 7);
         $data = Serializer::toArray($credential);
-        $restored = Serializer::create()->deserialize(json_encode($data, JSON_THROW_ON_ERROR), PublicKeyCredentialSource::class, 'json');
+        $restored = Serializer::create()->deserialize(json_encode($data, JSON_THROW_ON_ERROR), CredentialRecord::class, 'json');
+        self::assertInstanceOf(CredentialRecord::class, $restored);
         self::assertSame($credential->publicKeyCredentialId, $restored->publicKeyCredentialId);
         self::assertSame($credential->credentialPublicKey, $restored->credentialPublicKey);
         self::assertSame('123', $restored->userHandle);

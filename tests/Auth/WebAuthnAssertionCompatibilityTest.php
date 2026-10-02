@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Uid\Uuid;
 use Webauthn\PublicKeyCredential;
-use Webauthn\PublicKeyCredentialSource;
+use Webauthn\CredentialRecord;
 use Webauthn\TrustPath\EmptyTrustPath;
 
 final class WebAuthnAssertionCompatibilityTest extends TestCase
@@ -47,9 +47,9 @@ final class WebAuthnAssertionCompatibilityTest extends TestCase
     public function testAssertionLooksUpEncodedRawIdAndRejectsExpiredChallenge(): void
     {
         $rawId = random_bytes(32);
-        $source = new PublicKeyCredentialSource($rawId, 'public-key', ['internal'], 'none', EmptyTrustPath::create(), Uuid::v4(), 'test-key', '123', 7);
-        $controller = $this->getMockBuilder(WebAuthnController::class)->onlyMethods(['getPublicKeyCredentialSourceById'])->getMock();
-        $controller->expects(self::once())->method('getPublicKeyCredentialSourceById')->with(Base64UrlSafe::encodeUnpadded($rawId))->willReturn($source);
+        $source = new CredentialRecord($rawId, 'public-key', ['internal'], 'none', EmptyTrustPath::create(), Uuid::v4(), 'test-key', '123', 7);
+        $controller = $this->getMockBuilder(WebAuthnController::class)->onlyMethods(['getStoredCredentials'])->getMock();
+        $controller->expects(self::once())->method('getStoredCredentials')->willReturn([Serializer::toArray($source)]);
         $cache = $this->createMock(CacheInterface::class);
         $cache->expects(self::once())->method('get')->with('webauthn_request_' . str_repeat('a', 32))->willReturn(null);
         $app = $this->getMockBuilder(App::class)->disableOriginalConstructor()->onlyMethods(['getCache'])->getMock();
@@ -62,8 +62,8 @@ final class WebAuthnAssertionCompatibilityTest extends TestCase
 
     public function testUnknownCredentialReturnsControlledError(): void
     {
-        $controller = $this->getMockBuilder(WebAuthnController::class)->onlyMethods(['getPublicKeyCredentialSourceById'])->getMock();
-        $controller->expects(self::once())->method('getPublicKeyCredentialSourceById')->willReturn(null);
+        $controller = $this->getMockBuilder(WebAuthnController::class)->onlyMethods(['getStoredCredentials'])->getMock();
+        $controller->expects(self::once())->method('getStoredCredentials')->willReturn([]);
         $app = $this->createStub(App::class);
         $this->expectException(Error::class);
         $this->expectExceptionMessage('Invalid credential');

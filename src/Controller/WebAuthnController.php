@@ -29,7 +29,7 @@ use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\CeremonyStep\CeremonyStepManagerFactory;
 use Webauthn\Denormalizer\WebauthnSerializerFactory;
 use Webauthn\PublicKeyCredential;
-use Webauthn\PublicKeyCredentialSource;
+use Webauthn\CredentialRecord;
 
 class WebAuthnController
 {
@@ -69,14 +69,22 @@ class WebAuthnController
         return Serializer::create();
     }
 
-    protected function getPublicKeyCredentialSourceById(string $publicKeyCredentialId): ?PublicKeyCredentialSource
+    /** @return iterable<array<string, mixed>> */
+    protected function getStoredCredentials(): iterable
     {
-        $serializer = $this->getSerializer();
         foreach (User::Query() as $user) {
             foreach ($user->credential as $credential) {
-                if ($credential["credential"]["publicKeyCredentialId"] == $publicKeyCredentialId) {
-                    return $serializer->deserialize(json_encode($credential["credential"]), PublicKeyCredentialSource::class, "json");
-                }
+                yield $credential['credential'];
+            }
+        }
+    }
+
+    protected function getPublicKeyCredentialSourceById(string $publicKeyCredentialId): ?CredentialRecord
+    {
+        $serializer = $this->getSerializer();
+        foreach ($this->getStoredCredentials() as $credential) {
+            if ($credential['publicKeyCredentialId'] === $publicKeyCredentialId) {
+                return $serializer->deserialize(json_encode($credential, JSON_THROW_ON_ERROR), CredentialRecord::class, 'json');
             }
         }
         return null;

@@ -28,9 +28,13 @@ final class TokenManager
         return $_ENV['JWT_KEY_ID'] ?? 'light-default';
     }
 
-    /** @param array<string, mixed> $payload */
-    public static function encode(array $payload): string
+    /** @param array<string, mixed> $payload @param array<string, mixed>|null $headers */
+    public static function encode(array $payload, ?array $headers = null): string
     {
+        if (($payload['type'] ?? null) === 'access_token') {
+            $headers = array_merge(['typ' => 'at+jwt'], $headers ?? []);
+            unset($payload['type']);
+        }
         $payload['iss'] = self::issuer();
         if (isset($payload['id']) && !isset($payload['sub'])) {
             $payload['sub'] = (string) $payload['id'];
@@ -40,18 +44,19 @@ final class TokenManager
         }
 
         if (self::algorithm() === 'RS256') {
-            return JWT::encode($payload, self::privateKey(), 'RS256', self::keyId());
+            return JWT::encode($payload, self::privateKey(), 'RS256', self::keyId(), $headers);
         }
 
-        return JWT::encode($payload, self::sharedSecret(), 'HS256');
+        return JWT::encode($payload, self::sharedSecret(), 'HS256', null, $headers);
     }
 
-    public static function decode(string $token): object
+    public static function decode(string $token, ?\stdClass &$headers = null): object
     {
+        $headers = new \stdClass();
         if (self::algorithm() === 'RS256') {
-            $payload = JWT::decode($token, new Key(self::publicKeyPem(), 'RS256'));
+            $payload = JWT::decode($token, new Key(self::publicKeyPem(), 'RS256'), $headers);
         } else {
-            $payload = JWT::decode($token, new Key(self::sharedSecret(), 'HS256'));
+            $payload = JWT::decode($token, new Key(self::sharedSecret(), 'HS256'), $headers);
         }
 
         if (!isset($payload->iss) || !hash_equals(self::issuer(), (string) $payload->iss)) {
@@ -66,6 +71,13 @@ final class TokenManager
         }
 
         return $payload;
+    }
+
+    /** Call only after successfully verifying the token with decode(). */
+    public static function isAccessToken(object $payload, object $headers): bool
+    {
+        return ($headers->typ ?? null) === 'at+jwt'
+            || (($headers->typ ?? null) === 'JWT' && ($payload->type ?? null) === 'access_token');
     }
 
     /**

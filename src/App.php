@@ -897,7 +897,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             }
 
             $payload = TokenManager::decode($token);
-            if ($payload->type != "refresh_token") {
+            if (($payload->type ?? null) != "refresh_token") {
                 throw new Exception("Invalid token", 401);
             }
 

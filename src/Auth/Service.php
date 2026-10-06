@@ -51,8 +51,8 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
         $this->token = $token;
 
         try {
-            $payload = TokenManager::decode($this->token);
-            if ($payload->type == "access_token") {
+            $payload = TokenManager::decode($this->token, $headers);
+            if (TokenManager::isAccessToken($payload, $headers)) {
 
                 //decode user
 

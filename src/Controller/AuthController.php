@@ -371,7 +371,7 @@ class AuthController
         if (!empty($cookies["refresh_token"])) {
             try {
                 $refresh_payload = TokenManager::decode($cookies["refresh_token"]);
-                if ($refresh_payload->type === "refresh_token" && !empty($refresh_payload->jti)) {
+                if (($refresh_payload->type ?? null) === "refresh_token" && !empty($refresh_payload->jti)) {
                     $cache->set("revoked_refresh_token_" . $refresh_payload->jti, true, $refresh_token_expire);
                 }
             } catch (\Exception $e) {
@@ -670,7 +670,7 @@ class AuthController
         }
 
         //verify code
-        if ($payload->type != "reset_password") {
+        if (($payload->type ?? null) != "reset_password") {
             throw new Error("Code is expired or not valid");
         }
 
@@ -765,6 +765,7 @@ class AuthController
 
         $payload = [
             'aud' => $audience,
+            'client_id' => $_ENV['JWT_CLIENT_ID'] ?? 'hostlink-app',
             'jti' => Uuid::uuid4()->toString(),
             'iat' => time(),
             'exp' => time() + $app->getAccessTokenExpire(),
@@ -777,7 +778,7 @@ class AuthController
             $payload['sid'] = $sessionId;
         }
 
-        return TokenManager::encode($payload);
+        return TokenManager::encode($payload, ['typ' => 'at+jwt']);
     }
 
     #[Mutation]

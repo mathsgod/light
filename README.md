@@ -58,6 +58,7 @@ JWT_PUBLIC_KEY_PATH=/etc/light/light-jwt-public.pem
 JWT_KEY_ID=auth-2026-09
 JWT_ISSUER=https://auth.example.com
 JWT_AUDIENCE=auth-api
+JWT_CLIENT_ID=hostlink-app
 JWT_AUDIENCES_PATH=/path/to/project/audiences.yml
 JWT_RESET_SECRET=replace-with-a-separate-random-secret
 ```

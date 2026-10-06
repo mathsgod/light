@@ -8,6 +8,7 @@ use Light\App;
 use Light\Model\User;
 use Light\Type\WebAuthn;
 use Light\WebAuthn\Serializer;
+use Light\WebAuthn\OriginPolicy;
 use ParagonIE\ConstantTime\Base64UrlSafe;
 use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
@@ -128,8 +129,8 @@ class WebAuthnController
 
 
         //check
-        $csmFactory = new CeremonyStepManagerFactory();
-        $creationCSM = $csmFactory->requestCeremony([$app->getRpId()]);
+        $csmFactory = OriginPolicy::factory($app->getRpId());
+        $creationCSM = $csmFactory->requestCeremony();
         $authenticatorAssertionResponseValidator = AuthenticatorAssertionResponseValidator::create(ceremonyStepManager: $creationCSM);
 
         $publicKeyCredentialSource = $authenticatorAssertionResponseValidator->check(
@@ -165,8 +166,8 @@ class WebAuthnController
     public function webAuthnRegister(#[InjectUser] User $user, #[Autowire] App $app, $registration, #[Autowire] ServerRequestInterface $request): bool
     {
 
-        $csmFactory = new CeremonyStepManagerFactory();
-        $creationCSM = $csmFactory->creationCeremony([$app->getRpId()]);
+        $csmFactory = OriginPolicy::factory($app->getRpId());
+        $creationCSM = $csmFactory->creationCeremony();
         $authenticatorAttestationResponseValidator = AuthenticatorAttestationResponseValidator::create(ceremonyStepManager: $creationCSM);
 
         $cache = $app->getCache();

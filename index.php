@@ -4,6 +4,8 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
 require_once __DIR__ . "/vendor/autoload.php";
 
+Dotenv\Dotenv::createImmutable(__DIR__)->safeLoad();
+
 header('Access-Control-Allow-Origin: http://localhost:5173');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');

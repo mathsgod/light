@@ -19,6 +19,7 @@ use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
+use Webauthn\PublicKeyCredentialParameters;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialRpEntity;
 use Webauthn\PublicKeyCredentialSource;
@@ -115,7 +116,10 @@ class Auth
                 $rpEntity,
                 $userEntity,
                 $challenge,
-                [],
+                [
+                    PublicKeyCredentialParameters::createPk(-7), // ES256
+                    PublicKeyCredentialParameters::createPk(-257), // RS256
+                ],
                 $authenticatorSelectionCriteria,
             );
         } catch (Exception $e) {

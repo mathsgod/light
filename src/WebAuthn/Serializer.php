@@ -22,6 +22,13 @@ final class Serializer
     {
         // WebAuthn v5 uses its normalizers, including base64url binary encoding,
         // rather than JsonSerializable on options and credential records.
-        return json_decode(self::create()->serialize($value, 'json'), true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode(self::create()->serialize($value, 'json'), true, 512, JSON_THROW_ON_ERROR);
+        if (($data['authenticatorSelection']['authenticatorAttachment'] ?? null) === null) {
+            unset($data['authenticatorSelection']['authenticatorAttachment']);
+        }
+        if ($value instanceof \Webauthn\AuthenticatorSelectionCriteria && ($data['authenticatorAttachment'] ?? null) === null) {
+            unset($data['authenticatorAttachment']);
+        }
+        return $data;
     }
 }

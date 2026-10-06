@@ -854,7 +854,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         if ($name == "0.0.0.0") {
             $name = "localhost";
         }
-        if ($_ENV["RP_ID"]) {
+        if (!empty($_ENV["RP_ID"])) {
             return $_ENV["RP_ID"];
         }
         return $name;

@@ -75,6 +75,7 @@
         "test": "phpunit tests --verbose",
         "test:docker": "tests/run-with-mysql.sh",
         "test:docker:setup": "docker compose -f compose.yml up -d --wait",
-        "test:docker:teardown": "docker compose -f compose.yml down -v --remove-orphans"
+        "test:docker:teardown": "docker compose -f compose.yml down -v --remove-orphans",
+        "serve": "php -S 127.0.0.1:8888 index.php"
     }
 }

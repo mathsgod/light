@@ -27,7 +27,7 @@ use Light\Model\UserRole;
 use Light\Drive\Drive;
 use Light\Mailer;
 use PHPMailer\PHPMailer\PHPMailer;
-use Psr\Container\ContainerInterface;
+use League\Container\DefinitionContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -559,7 +559,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return $this->audienceRegistry ??= new AudienceRegistry();
     }
 
-    public function getContainer(): ContainerInterface
+    public function getContainer(): DefinitionContainerInterface
     {
         return $this->container;
     }

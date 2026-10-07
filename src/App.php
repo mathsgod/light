@@ -60,6 +60,8 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     private ?AudienceRegistry $audienceRegistry = null;
 
     protected array $menus = [];
+    /** @var string[] Permissions exposed by registered extensions. */
+    protected array $extensionPermissions = [];
 
     protected \Light\Server $server;
 
@@ -136,6 +138,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->cache = $gql->getCache();
         $this->factory = $gql->getSchemaFactory();
         $this->factory->addNamespace("Light");
+        $this->factory->setFinder(\Light\GraphQL\ControllerDiscovery::finder($this->container));
         $this->factory->addTypeMapperFactory(new \Light\Db\GraphQLite\Mappers\TypeMapperFactory);
 
         $this->rbac = new Rbac();
@@ -371,6 +374,12 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->container->add(Rbac::class, $this->rbac);
     }
 
+    /** @param string[] $permissions */
+    public function addPermissions(array $permissions): void
+    {
+        $this->extensionPermissions = array_values(array_unique([...$this->extensionPermissions, ...$permissions]));
+    }
+
     private function getMenusPermission(array $menus): array
     {
         $p = [];
@@ -465,7 +474,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             $permissions[] = $permission;
         }
 
-        $permissions = self::expandPermissions($permissions);
+        $permissions = self::expandPermissions([...$permissions, ...$this->extensionPermissions]);
 
         //sort
         sort($permissions);

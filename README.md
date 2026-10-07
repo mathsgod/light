@@ -39,6 +39,47 @@ DATABASE_PORT=
 DATABASE_CHARSET=
 ```
 
+### Local OAuth 2.0 provider
+
+`./dev-setup.sh` links the sibling `../light-oauth2` package through Composer.
+`index.php` calls `Light\OAuth2\ProviderFactory::registerFromEnvironment($app)`
+from that package before running Light when
+`OAUTH_ENABLED=true`. The provider uses the existing database through a separate,
+non-persistent PDO connection. Apply `light-oauth2/migrations/001_oauth.sql` once
+if the OAuth tables have not been installed; migrations do not run on requests.
+
+Configure the following in the application's `.env`:
+
+```dotenv
+OAUTH_ENABLED=true
+OAUTH_ISSUER=http://localhost:8888
+OAUTH_RESOURCE=http://localhost:8888/api
+OAUTH_PRIVATE_KEY_PATH=/absolute/path/outside-web-root/private.pem
+OAUTH_PUBLIC_KEY_PATH=/absolute/path/outside-web-root/public.pem
+OAUTH_ENCRYPTION_KEY=<at-least-32-random-characters>
+OAUTH_SCOPES=user.list,role.list,systemvalue.list
+```
+
+Generate a separate RSA key pair for OAuth and an encryption key, for example
+with `openssl genrsa -out private.pem 3072`,
+`openssl rsa -in private.pem -pubout -out public.pem`, and
+`openssl rand -hex 32`. Keep the key files outside the web root with permissions
+`600`; never commit private keys or encryption keys. Use HTTPS outside local
+development, and set `OAUTH_RESOURCE` to the actual GraphQL endpoint (including
+`API_PREFIX`). Keep the encryption key stable so refresh tokens remain usable.
+
+The `/OAuthClient` page in `nuxt-light` manages registered clients. The OAuth
+discovery URL is `/.well-known/oauth-authorization-server`, with authorization,
+token and revocation endpoints under `/oauth`. Authorization prompts for Light
+credentials and any required 2FA, then asks for explicit consent. Consent is
+bound to the request, user and browser session with a one-time CSRF token.
+Only the permissions listed in `OAUTH_SCOPES` can be delegated; users must also
+hold those permissions in Light RBAC.
+
+For a manual Composer update of this development root, use
+`COMPOSER_ROOT_VERSION=1.45.0 composer update mathsgod/light-oauth2 --with-dependencies`
+(adjust the root version to the checkout's latest release).
+
 ### JWT signing
 
 HS256 remains the default for backwards compatibility:

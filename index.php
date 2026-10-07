@@ -18,4 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-(new Light\App)->run();
+$app = new Light\App();
+Light\OAuth2\ProviderFactory::registerFromEnvironment($app);
+$app->run();

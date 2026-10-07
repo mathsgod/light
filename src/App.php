@@ -45,6 +45,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     use \League\Event\EventDispatcherAwareBehavior;
 
     protected Auth\Service $auth_service;
+    private ?\Closure $authServiceFactory = null;
     protected ?MountManager $mountManager = null;
     protected FilesystemFactory $filesystemFactory;
 
@@ -559,6 +560,29 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return $this->factory;
     }
 
+    public function getRouter(): \League\Route\Router
+    {
+        return $this->server->getRouter();
+    }
+
+    /** Register an authentication factory before handling requests. */
+    public function setAuthServiceFactory(callable $factory): void
+    {
+        $this->authServiceFactory = \Closure::fromCallable($factory);
+    }
+
+    public function createAuthService(ServerRequestInterface $request): Auth\Service
+    {
+        $request = $request->withAttribute(self::class, $this);
+        $service = $this->authServiceFactory
+            ? ($this->authServiceFactory)($request)
+            : new Auth\Service($request);
+        if (!$service instanceof Auth\Service) {
+            throw new \UnexpectedValueException('Authentication factory must return Light\\Auth\\Service');
+        }
+        return $service;
+    }
+
     public function getAuthService(): Auth\Service
     {
         return $this->auth_service;
@@ -588,7 +612,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $request = $request->withAttribute(self::class, $this);
 
 
-        $auth_service = new Auth\Service($request);
+        $auth_service = $this->createAuthService($request);
         $this->auth_service = $auth_service;
         $this->mountManager = $this->filesystemFactory->createMountManager(
             $this->getFSConfig(),
@@ -1030,7 +1054,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
         $router->map("GET", $basePath . "/fs/{protocol}/{path:.*}", function (ServerRequestInterface $request, array $args) {
 
-            $auth = new Auth\Service($request);
+            $auth = $this->createAuthService($request);
             if ($auth->isLogged()) {
                 $location = $args["protocol"] . "://" . urldecode($args["path"]);
                 if ($this->getMountManager()->has($location)) {
@@ -1047,7 +1071,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
         $router->map("GET", $basePath . "/drive/{index}/{path:.*}", function (ServerRequestInterface $request, array $args) {
 
-            $auth = new Auth\Service($request);
+            $auth = $this->createAuthService($request);
 
             if ($auth->isLogged()) {
                 return $this->getDriveResponse($args["index"], $args["path"]);

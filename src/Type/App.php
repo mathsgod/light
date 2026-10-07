@@ -499,6 +499,27 @@ class App
         return $q;
     }
 
+    /**
+     * Resolve display names without granting access to user management.
+     * @param int[] $user_ids
+     * @return UserIdentity[]
+     */
+    #[Field]
+    #[Logged]
+    public function userIdentities(array $user_ids): array
+    {
+        $user_ids = array_values(array_unique($user_ids));
+        if (!$user_ids) {
+            return [];
+        }
+
+        $identities = [];
+        foreach (User::Query()->where(['user_id' => $user_ids]) as $user) {
+            $identities[] = new UserIdentity((int) $user->user_id, $user->getName());
+        }
+        return $identities;
+    }
+
 
 
     #[Field]

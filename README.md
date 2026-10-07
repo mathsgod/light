@@ -41,7 +41,10 @@ DATABASE_CHARSET=
 
 ### Local OAuth 2.0 provider
 
-`./dev-setup.sh` links the sibling `../light-oauth2` package through Composer.
+`light-oauth2` is a development dependency. `./dev-setup.sh` links the sibling
+`../light-oauth2` package through Composer. Production applications that enable
+OAuth must require `mathsgod/light-oauth2` as a runtime dependency themselves.
+With OAuth disabled, Light also starts without the package after `composer install --no-dev`.
 `index.php` calls `Light\OAuth2\ProviderFactory::registerFromEnvironment($app)`
 from that package before running Light when
 `OAUTH_ENABLED=true`. The provider uses the existing database through a separate,

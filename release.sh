@@ -27,7 +27,10 @@ with open('composer.json') as f:
 
 # Remove path repositories
 if 'repositories' in d:
-    d['repositories'] = {k: v for k, v in d['repositories'].items() if v.get('type') != 'path'}
+    repos = d['repositories']
+    d['repositories'] = ([v for v in repos if v.get('type') != 'path']
+                         if isinstance(repos, list)
+                         else {k: v for k, v in repos.items() if v.get('type') != 'path'})
     if not d['repositories']:
         del d['repositories']
 
@@ -75,7 +78,12 @@ import json
 with open('composer.json') as f:
     d = json.load(f)
 
-d.setdefault('repositories', {})['light-db'] = {"type": "path", "url": "../light-db"}
+repos = d.setdefault('repositories', {})
+local_db = {"type": "path", "url": "../light-db"}
+if isinstance(repos, list):
+    repos.insert(0, local_db)
+else:
+    repos['light-db'] = local_db
 d.setdefault('require', {})['mathsgod/light-db'] = '@dev'
 
 with open('composer.json', 'w') as f:

@@ -11,7 +11,7 @@ composer require mathsgod/light-db:@dev --no-update
 
 echo "→ Adding local path repository for light-oauth2..."
 composer config repositories.light-oauth2 '{"type":"path","url":"../light-oauth2","options":{"symlink":true}}'
-composer require mathsgod/light-oauth2:@dev --no-update
+composer require --dev mathsgod/light-oauth2:@dev --no-update
 
 # light-oauth2 depends on a stable Light version; identify this dev checkout
 # by its latest release while resolving the circular root dependency.

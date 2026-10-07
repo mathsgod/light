@@ -19,5 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 $app = new Light\App();
-Light\OAuth2\ProviderFactory::registerFromEnvironment($app);
+if (class_exists(Light\OAuth2\ProviderFactory::class)) {
+    Light\OAuth2\ProviderFactory::registerFromEnvironment($app);
+} elseif (filter_var($_ENV['OAUTH_ENABLED'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+    throw new RuntimeException('OAUTH_ENABLED requires mathsgod/light-oauth2 to be installed');
+}
 $app->run();

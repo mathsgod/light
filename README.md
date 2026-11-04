@@ -22,6 +22,8 @@ The companion frontend module is [`nuxt-light`](https://github.com/hostlink/nuxt
 composer install
 ```
 
+Upgrading from Light 1.x? See the [Light 2.x migration guide](docs/migration-v2.md).
+
 ---
 
 ## Configuration
@@ -228,6 +230,39 @@ php bin/light make:model Name        # Generate an ORM model
 php bin/light make:input Name        # Generate a GraphQL input type
 php bin/light make:ts                # Generate TypeScript definitions from the schema
 ```
+
+## Extensions
+
+An extension groups application registrations in one place. Implement
+`Light\Framework\Extension\ExtensionInterface` and register it after creating
+the application and before creating a GraphQL schema or handling requests:
+
+```php
+use Light\Framework\App;
+use Light\Framework\Extension\ExtensionInterface;
+
+final class ExampleExtension implements ExtensionInterface
+{
+    public function register(App $app): void
+    {
+        $app->addPermissions(['example.view']);
+        $app->addMenus([
+            ['label' => 'Example', 'to' => '/example', 'permission' => 'example.view'],
+        ]);
+        // Register services or routes with $app->getContainer() or $app->getRouter().
+    }
+}
+
+$app = new App();
+$app->addExtension(new ExampleExtension());
+$app->run();
+```
+
+`addExtension()` calls `register()` immediately. Registering the same extension
+class twice on one application throws a `LogicException`. Declaring permissions
+does not grant them to a role; use the existing RBAC configuration to grant
+access. If registration throws, its exception propagates and any changes already
+made by the extension are not rolled back; discard the application before retrying.
 
 ---
 

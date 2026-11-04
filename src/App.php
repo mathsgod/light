@@ -5,6 +5,7 @@ namespace Light\Framework;
 use Exception;
 use Light\Framework\Auth\TokenManager;
 use Light\Framework\Auth\AudienceRegistry;
+use Light\Framework\Extension\ExtensionInterface;
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
 use GraphQL\Upload\UploadMiddleware;
@@ -58,6 +59,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     protected CacheInterface $cache;
     private ?AudienceRegistry $audienceRegistry = null;
+
+    /** @var array<class-string<ExtensionInterface>, true> */
+    private array $extensions = [];
 
     protected array $menus = [];
     /** @var string[] Permissions exposed by registered extensions. */
@@ -562,6 +566,23 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     public function getContainer(): DefinitionContainerInterface
     {
         return $this->container;
+    }
+
+    /** Register an extension once, before handling requests or creating the schema. */
+    public function addExtension(ExtensionInterface $extension): void
+    {
+        $class = $extension::class;
+        if (isset($this->extensions[$class])) {
+            throw new \LogicException("Extension {$class} is already registered");
+        }
+
+        $this->extensions[$class] = true;
+        try {
+            $extension->register($this);
+        } catch (\Throwable $error) {
+            unset($this->extensions[$class]);
+            throw $error;
+        }
     }
 
     public function getSchemaFactory(): SchemaFactory

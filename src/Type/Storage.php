@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Light\Type;
+namespace Light\Framework\Type;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;

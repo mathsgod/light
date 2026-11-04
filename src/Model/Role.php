@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Framework\Model;
 
 use Light\Rbac\Role as RbacRole;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;

@@ -1,8 +1,8 @@
 <?php
 
-namespace Light\Drive\Event;
+namespace Light\Framework\Drive\Event;
 
-use Light\Drive\Drive;
+use Light\Framework\Drive\Drive;
 use Psr\Http\Message\UploadedFileInterface;
 
 class FileUploading

@@ -1,11 +1,11 @@
 <?php
 
-namespace Light\Type;
+namespace Light\Framework\Type;
 
-use Light\App;
-use Light\Database\Schema;
-use Light\Model\Config;
-use Light\Util;
+use Light\Framework\App;
+use Light\Framework\Database\Schema;
+use Light\Framework\Model\Config;
+use Light\Framework\Util;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -108,14 +108,14 @@ class System
         $max_size = -1;
         if ($max_size < 0) {
             // Start with post_max_size.
-            $post_max_size = \Light\Util::ParseSize(ini_get('post_max_size'));
+            $post_max_size = \Light\Framework\Util::ParseSize(ini_get('post_max_size'));
             if ($post_max_size > 0) {
                 $max_size = $post_max_size;
             }
 
             // If upload_max_size is less, then reduce. Except if upload_max_size is
             // zero, which indicates no limit.
-            $upload_max = \Light\Util::ParseSize(ini_get('upload_max_filesize'));
+            $upload_max = \Light\Framework\Util::ParseSize(ini_get('upload_max_filesize'));
             if ($upload_max > 0 && $upload_max < $max_size) {
                 $max_size = $upload_max;
             }

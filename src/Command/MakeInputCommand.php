@@ -1,11 +1,11 @@
 <?php
 
-namespace Light\Command;
+namespace Light\Framework\Command;
 
 use Laminas\Code\Generator\DocBlockGenerator;
 use Laminas\Code\Generator\TypeGenerator;
-use Light\Code\ClassGenerator;
-use Light\Code\PropertyGenerator;
+use Light\Framework\Code\ClassGenerator;
+use Light\Framework\Code\PropertyGenerator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;

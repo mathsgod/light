@@ -1,8 +1,8 @@
 <?php
 
-namespace Light\Database;
+namespace Light\Framework\Database;
 
-use Light\App;
+use Light\Framework\App;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Type;

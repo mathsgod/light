@@ -1,12 +1,12 @@
 <?php
 
-namespace Light;
+namespace Light\Framework;
 
 use Light\Db\Proxy;
-use Light\Model\EventLog;
-use Light\Model\Notification;
-use Light\Model\Revision;
-use Light\Model\User;
+use Light\Framework\Model\EventLog;
+use Light\Framework\Model\Notification;
+use Light\Framework\Model\Revision;
+use Light\Framework\Model\User;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;

@@ -1,9 +1,9 @@
 <?php
 
-namespace Light\Tests\Model;
+namespace Light\Framework\Tests\Model;
 
-use Light\Model\User;
-use Light\Tests\TestCase;
+use Light\Framework\Model\User;
+use Light\Framework\Tests\TestCase;
 
 class UserTest extends TestCase
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Framework\Model;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
@@ -15,7 +15,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "link", outputType: "String")]
 #[MagicField(name: "is_read", outputType: "Int")]
 #[MagicField(name: "created_time", outputType: "String")]
-class Notification extends \Light\Model
+class Notification extends \Light\Framework\Model
 {
     public static bool $_log_insert = false;
     public static bool $_log_delete = false;

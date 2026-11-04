@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
 use Exception;
 use Firebase\JWT\JWT;
@@ -8,8 +8,8 @@ use Google\Service\MigrationCenterAPI\UploadFileInfo;
 use GraphQL\Error\Error;
 use JsonToSql;
 use Laminas\Db\Sql\Ddl\CreateTable;
-use Light\App;
-use Light\Type\System;
+use Light\Framework\App;
+use Light\Framework\Type\System;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -155,7 +155,7 @@ class DatabaseController
     #[Right("system.database.table.create")]
     #[Logged]
     /**
-     * @param \Light\Input\Table\Column[] $fields
+     * @param \Light\Framework\Input\Table\Column[] $fields
      */
     public function createDatabaseTable(#[Autowire] App $app, string $name, array $fields): bool
     {
@@ -219,7 +219,7 @@ class DatabaseController
     {
         $db = $app->getDatabase();
 
-        $schema = new \Light\Database\Schema();
+        $schema = new \Light\Framework\Database\Schema();
 
         $results = $schema->checkResult($app);
 

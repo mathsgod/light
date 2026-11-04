@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Light\GraphQL;
+namespace Light\Framework\GraphQL;
 
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use League\Container\DefinitionContainerInterface;

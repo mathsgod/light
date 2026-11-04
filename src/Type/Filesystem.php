@@ -1,13 +1,13 @@
 <?php
 
-namespace Light\Type;
+namespace Light\Framework\Type;
 
 use League\Flysystem\FileAttributes;
 use League\Flysystem\MountManager;
-use Light\App;
-use Light\Filesystem\Node\File;
-use Light\Filesystem\Node\Folder;
-use Light\Filesystem\Node\Node;
+use Light\Framework\App;
+use Light\Framework\Filesystem\Node\File;
+use Light\Framework\Filesystem\Node\Folder;
+use Light\Framework\Filesystem\Node\Node;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Right;

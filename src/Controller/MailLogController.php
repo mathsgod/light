@@ -1,8 +1,8 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
-use Light\Model\MailLog;
+use Light\Framework\Model\MailLog;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -15,12 +15,12 @@ class MailLogController
     #[Query]
     #[Logged]
     /**
-     * @return \Light\Model\MailLog[]
+     * @return \Light\Framework\Model\MailLog[]
      * @param ?mixed $filters
      * @deprecated use app.mailLogs instead
      */
     #[Right("maillog.list")]
-    public function listMailLog(#[InjectUser] \Light\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
+    public function listMailLog(#[InjectUser] \Light\Framework\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return MailLog::Query()->filters($filters)->sort($sort);
     }

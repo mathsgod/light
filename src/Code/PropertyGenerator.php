@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Code;
+namespace Light\Framework\Code;
 
 use Laminas\Code\Generator\PropertyGenerator as GeneratorPropertyGenerator;
 use Laminas\Code\Generator\TypeGenerator;

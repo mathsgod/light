@@ -1,6 +1,6 @@
 <?php
 
-namespace Light;
+namespace Light\Framework;
 
 class Util
 {

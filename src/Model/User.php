@@ -1,15 +1,15 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Framework\Model;
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use GraphQL\Error\Error;
-use Light\App;
-use Light\Model\Notification;
+use Light\Framework\App;
+use Light\Framework\Model\Notification;
 use Light\Rbac\Rbac;
-use Light\Security\TwoFactorAuthentication;
-use Light\Type\WebAuthn;
+use Light\Framework\Security\TwoFactorAuthentication;
+use Light\Framework\Type\WebAuthn;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -48,7 +48,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "facebook", outputType: "String")]
 
 
-class User extends \Light\Model
+class User extends \Light\Framework\Model
 {
     public function revokeSession(string $jti): bool
     {
@@ -186,7 +186,7 @@ class User extends \Light\Model
 
     #[Field]
     /**
-     * @return \Light\Type\WebAuthn[]
+     * @return \Light\Framework\Type\WebAuthn[]
      */
     public function getWebAuthn(): array
     {

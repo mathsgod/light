@@ -1,14 +1,14 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
 use Exception;
 use GraphQL\Error\Error;
-use Light\App;
-use Light\Model\User;
-use Light\Type\WebAuthn;
-use Light\WebAuthn\Serializer;
-use Light\WebAuthn\OriginPolicy;
+use Light\Framework\App;
+use Light\Framework\Model\User;
+use Light\Framework\Type\WebAuthn;
+use Light\Framework\WebAuthn\Serializer;
+use Light\Framework\WebAuthn\OriginPolicy;
 use ParagonIE\ConstantTime\Base64UrlSafe;
 use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
@@ -52,7 +52,7 @@ class WebAuthnController
     #[Query]
     #[Logged]
     /**
-     * @return \Light\Type\WebAuthn[]
+     * @return \Light\Framework\Type\WebAuthn[]
      * @deprecated use my{ webAuthn } instead
      */
     public function listWebAuthn(#[InjectUser] User $user): array

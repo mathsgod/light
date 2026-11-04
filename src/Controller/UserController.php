@@ -1,11 +1,11 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
-use Light\Input\User as InputUser;
-use Light\Type\System;
-use Light\Model\User;
-use Light\Model\UserRole;
+use Light\Framework\Input\User as InputUser;
+use Light\Framework\Type\System;
+use Light\Framework\Model\User;
+use Light\Framework\Model\UserRole;
 use Psr\Http\Message\ServerRequestInterface;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use \Light\Db\Query as DBQuery;
@@ -25,12 +25,12 @@ class UserController
     #[Query]
     #[Logged]
     /**
-     * @return \Light\Model\User[]
+     * @return \Light\Framework\Model\User[]
      * @param ?mixed $filters
      * @deprecated use { app { users }}
      */
     #[Right("user.list")]
-    public function listUser(#[InjectUser] \Light\Model\User $user, $filters = null, ?string $sort = ""): DBQuery
+    public function listUser(#[InjectUser] \Light\Framework\Model\User $user, $filters = null, ?string $sort = ""): DBQuery
     {
 
         //only administrators can list administrators
@@ -50,7 +50,7 @@ class UserController
     public function updateUser(
         int $id,
         #[UseInputType(inputType: "UpdateUserInput")] InputUser $data,
-        #[InjectUser] \Light\Model\User $user
+        #[InjectUser] \Light\Framework\Model\User $user
     ): bool {
         $obj = User::Get($id);
 
@@ -65,7 +65,7 @@ class UserController
 
     #[Mutation]
     #[Right("user.change-password")]
-    public function updateUserPassword(int $id, string $password, #[InjectUser] \Light\Model\User $user): bool
+    public function updateUserPassword(int $id, string $password, #[InjectUser] \Light\Framework\Model\User $user): bool
     {
         if (!$obj = $this->listUser($user, ["user_id" => $id], "")->first()) return false;
 
@@ -104,7 +104,7 @@ class UserController
 
     #[Mutation]
     #[Right("user.create")]
-    public function addUser(InputUser $data, #[InjectUser] \Light\Model\User $current): int
+    public function addUser(InputUser $data, #[InjectUser] \Light\Framework\Model\User $current): int
     {
 
         $user = User::Create();
@@ -158,7 +158,7 @@ class UserController
     #[Mutation]
     #[Logged]
     #[Right("user.delete")]
-    public function deleteUser(int $id, #[InjectUser] \Light\Model\User $user): bool
+    public function deleteUser(int $id, #[InjectUser] \Light\Framework\Model\User $user): bool
     {
         if (!$obj = User::Get($id)) return false;
         if (!$obj->canDelete($user)) return false;

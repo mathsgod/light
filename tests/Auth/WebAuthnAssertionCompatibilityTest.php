@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Light\Tests\Auth;
+namespace Light\Framework\Tests\Auth;
 
 use GraphQL\Error\Error;
 use Laminas\Diactoros\ServerRequest;
-use Light\App;
-use Light\Controller\WebAuthnController;
-use Light\WebAuthn\Serializer;
+use Light\Framework\App;
+use Light\Framework\Controller\WebAuthnController;
+use Light\Framework\WebAuthn\Serializer;
 use ParagonIE\ConstantTime\Base64UrlSafe;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;

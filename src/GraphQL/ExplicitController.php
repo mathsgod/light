@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Light\GraphQL;
+namespace Light\Framework\GraphQL;
 
 /** Optional controllers must be registered before GraphQL discovers them. */
 interface ExplicitController

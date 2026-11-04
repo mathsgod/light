@@ -1,9 +1,9 @@
 <?php
 
-namespace Light\Database;
+namespace Light\Framework\Database;
 
-use Light\App;
-use Light\Database\Table;
+use Light\Framework\App;
+use Light\Framework\Database\Table;
 use MysqlSchemaMigrate\Exporter;
 use MysqlSchemaMigrate\Importer;
 use Psr\Http\Message\UploadedFileInterface;

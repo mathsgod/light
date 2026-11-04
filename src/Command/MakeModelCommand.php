@@ -1,9 +1,9 @@
 <?php
 
-namespace Light\Command;
+namespace Light\Framework\Command;
 
-use Light\Code\ClassGenerator;
-use Light\Code\PropertyGenerator;
+use Light\Framework\Code\ClassGenerator;
+use Light\Framework\Code\PropertyGenerator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -49,7 +49,7 @@ class MakeModelCommand extends Command
         $class->addUse("TheCodingMachine\\GraphQLite\\Annotations\\Field");
         $class->addUse("TheCodingMachine\\GraphQLite\\Annotations\\MagicField");
         $class->addUse("TheCodingMachine\\GraphQLite\\Annotations\\Type");
-        $class->setExtendedClass("Light\\Model");
+        $class->setExtendedClass("Light\\Framework\\Model");
         $class->addAttribute("#[Type]");
 
         // Add $_table property if class name differs from table name

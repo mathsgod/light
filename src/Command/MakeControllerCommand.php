@@ -1,10 +1,10 @@
 <?php
 
-namespace Light\Command;
+namespace Light\Framework\Command;
 
-use Light\Code\ClassGenerator;
-use Light\Code\MethodGenerator;
-use Light\Code\ParameterGenerator;
+use Light\Framework\Code\ClassGenerator;
+use Light\Framework\Code\MethodGenerator;
+use Light\Framework\Code\ParameterGenerator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -61,7 +61,7 @@ class MakeControllerCommand extends Command
 
         $param1 = new ParameterGenerator("filters", null, []);
         $param2 = new ParameterGenerator("sort", "?string", "");
-        $param3 = new ParameterGenerator("user", "Light\\Model\\User");
+        $param3 = new ParameterGenerator("user", "Light\\Framework\\Model\\User");
         $param3->addAttribute("#[InjectUser]");
         $method->setParameters([$param1, $param2, $param3]);
         $method->setBody("return {$name}::Query()->filters(\$filters)->sort(\$sort);");
@@ -76,7 +76,7 @@ class MakeControllerCommand extends Command
         $method->addAttribute("#[Mutation]");
         $method->addAttribute("#[Logged]");
         $param1 = new ParameterGenerator("data", "Input\\$name");
-        $param2 = new ParameterGenerator("user", "Light\\Model\\User");
+        $param2 = new ParameterGenerator("user", "Light\\Framework\\Model\\User");
         $param2->addAttribute("#[InjectUser]");
         $method->setParameters([$param1, $param2]);
         $method->setBody(
@@ -97,7 +97,7 @@ EOT
         $param1 = new ParameterGenerator("id", "int");
         $param2 = new ParameterGenerator("data", "Input\\$name");
         $param2->addAttribute("#[UseInputType(inputType: \"Update{$name}Input\")]");
-        $param3 = new ParameterGenerator("user", "Light\\Model\\User");
+        $param3 = new ParameterGenerator("user", "Light\\Framework\\Model\\User");
         $param3->addAttribute("#[InjectUser]");
         $method->setParameters([$param1, $param2, $param3]);
         $method->setBody(
@@ -117,7 +117,7 @@ EOT
         $method->addAttribute("#[Mutation]");
         $method->addAttribute("#[Logged]");
         $param1 = new ParameterGenerator("id", "int");
-        $param2 = new ParameterGenerator("user", "Light\\Model\\User");
+        $param2 = new ParameterGenerator("user", "Light\\Framework\\Model\\User");
         $param2->addAttribute("#[InjectUser]");
         $method->setParameters([$param1, $param2]);
         $method->setBody(

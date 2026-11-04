@@ -1,11 +1,11 @@
 <?php
 
-namespace Light\Tests\Auth;
+namespace Light\Framework\Tests\Auth;
 
-use Light\Model\Config;
-use Light\Model\User;
-use Light\Model\UserLog;
-use Light\Tests\TestCase;
+use Light\Framework\Model\Config;
+use Light\Framework\Model\User;
+use Light\Framework\Model\UserLog;
+use Light\Framework\Tests\TestCase;
 
 class LoginTest extends TestCase
 {

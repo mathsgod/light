@@ -1,9 +1,9 @@
 <?php
 
-namespace Light\Tests\Auth;
+namespace Light\Framework\Tests\Auth;
 
 use InvalidArgumentException;
-use Light\Auth\AudienceRegistry;
+use Light\Framework\Auth\AudienceRegistry;
 use PHPUnit\Framework\TestCase;
 
 class AudienceRegistryTest extends TestCase

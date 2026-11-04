@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Code;
+namespace Light\Framework\Code;
 
 use Laminas\Code\Generator\ClassGenerator as GeneratorClassGenerator;
 

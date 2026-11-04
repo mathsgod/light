@@ -1,14 +1,14 @@
 <?php
 
-namespace Light\Tests\Controller;
+namespace Light\Framework\Tests\Controller;
 
 use Firebase\JWT\JWT;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\Response\EmptyResponse;
-use Light\App;
-use Light\Model\User;
-use Light\Model\UserRole;
-use Light\Tests\TestCase;
+use Light\Framework\App;
+use Light\Framework\Model\User;
+use Light\Framework\Model\UserRole;
+use Light\Framework\Tests\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;

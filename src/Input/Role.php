@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Input;
+namespace Light\Framework\Input;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Input;

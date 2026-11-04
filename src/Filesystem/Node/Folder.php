@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Filesystem\Node;
+namespace Light\Framework\Filesystem\Node;
 
 use League\Flysystem\FileAttributes;
 use League\Flysystem\MountManager;

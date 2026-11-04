@@ -1,11 +1,11 @@
 <?php
 
-namespace Light\Tests\Auth;
+namespace Light\Framework\Tests\Auth;
 
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use Light\Tests\TestCase;
+use Light\Framework\Tests\TestCase;
 use Ramsey\Uuid\Uuid;
 
 class JwtTest extends TestCase

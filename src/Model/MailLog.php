@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Framework\Model;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
@@ -17,6 +17,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "to_name", outputType: "String")]
 #[MagicField(name: "altbody", outputType: "String")]
 #[MagicField(name: "host", outputType: "String")]
-class MailLog extends \Light\Model
+class MailLog extends \Light\Framework\Model
 {
 }

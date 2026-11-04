@@ -1,17 +1,17 @@
 <?php
 
-namespace Light\Tests\Auth;
+namespace Light\Framework\Tests\Auth;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\ServerRequest;
-use Light\App;
-use Light\Auth\Service;
-use Light\Model\APIKey;
-use Light\Model\User;
-use Light\Model\UserLog;
-use Light\Tests\TestCase;
+use Light\Framework\App;
+use Light\Framework\Auth\Service;
+use Light\Framework\Model\APIKey;
+use Light\Framework\Model\User;
+use Light\Framework\Model\UserLog;
+use Light\Framework\Tests\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;

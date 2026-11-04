@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Light\Tests\Auth;
+namespace Light\Framework\Tests\Auth;
 
-use Light\App;
-use Light\Type\Auth;
-use Light\WebAuthn\Serializer;
+use Light\Framework\App;
+use Light\Framework\Type\Auth;
+use Light\Framework\WebAuthn\Serializer;
 use Laminas\Diactoros\ServerRequest;
 use ParagonIE\ConstantTime\Base64UrlSafe;
 use PHPUnit\Framework\TestCase;

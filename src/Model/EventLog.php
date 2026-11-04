@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Framework\Model;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
@@ -18,7 +18,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "user_id", outputType: "Int!")]
 #[MagicField(name: "created_time", outputType: "String!")]
 #[MagicField(name: "status", outputType: "Int")]
-class EventLog extends \Light\Model
+class EventLog extends \Light\Framework\Model
 {
     #[Field]
     public function getUsername(): ?string

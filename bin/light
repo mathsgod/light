@@ -3,11 +3,11 @@
 
 // Light CLI - Code generation tool using Symfony Console
 
-use Light\Command\DbInstallCommand;
-use Light\Command\MakeControllerCommand;
-use Light\Command\MakeInputCommand;
-use Light\Command\MakeModelCommand;
-use Light\Command\MakeTsCommand;
+use Light\Framework\Command\DbInstallCommand;
+use Light\Framework\Command\MakeControllerCommand;
+use Light\Framework\Command\MakeInputCommand;
+use Light\Framework\Command\MakeModelCommand;
+use Light\Framework\Command\MakeTsCommand;
 use Symfony\Component\Console\Application;
 
 require_once $_composer_autoload_path ?? __DIR__ . "/../vendor/autoload.php";

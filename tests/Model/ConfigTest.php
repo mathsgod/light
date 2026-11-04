@@ -1,11 +1,11 @@
 <?php
 
-namespace Light\Tests\Model;
+namespace Light\Framework\Tests\Model;
 
 use Laminas\Diactoros\ServerRequest;
-use Light\App;
-use Light\Model\Config;
-use Light\Tests\TestCase;
+use Light\Framework\App;
+use Light\Framework\Model\Config;
+use Light\Framework\Tests\TestCase;
 
 class ConfigTest extends TestCase
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Filesystem\Event;
+namespace Light\Framework\Filesystem\Event;
 
 class FileUploading
 {

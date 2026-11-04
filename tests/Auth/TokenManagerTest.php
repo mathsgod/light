@@ -1,10 +1,10 @@
 <?php
 
-namespace Light\Tests\Auth;
+namespace Light\Framework\Tests\Auth;
 
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
-use Light\Auth\TokenManager;
+use Light\Framework\Auth\TokenManager;
 use PHPUnit\Framework\TestCase;
 
 class TokenManagerTest extends TestCase

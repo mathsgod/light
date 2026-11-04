@@ -234,7 +234,7 @@ php bin/light make:ts                # Generate TypeScript definitions from the 
 ## Architecture
 
 ```
-index.php → Light\App::run()
+index.php → Light\Framework\App::run()
   → Middleware pipeline (CORS, JWT auth, file upload)
   → Router:
       GET  /fs/{protocol}/{path}   — Flysystem file serving
@@ -245,11 +245,11 @@ index.php → Light\App::run()
 
 **Schema generation** is annotation-driven via [TheCodingMachine/GraphQLite](https://graphqlite.thecodingmachine.io/). Controllers in `src/Controller/` declare queries and mutations using PHP 8 attributes (`#[Query]`, `#[Mutation]`, `#[Type]`, etc.).
 
-**ORM** — models live in `src/Model/` and extend `Light\Model`. The schema is defined in `db.json`. `save()` and `delete()` auto-populate audit fields (`created_time`, `updated_time`, `created_by`, `updated_by`) and write to `EventLog`.
+**ORM** — models live in `src/Model/` and extend `Light\Framework\Model`. The schema is defined in `db.json`. `save()` and `delete()` auto-populate audit fields (`created_time`, `updated_time`, `created_by`, `updated_by`) and write to `EventLog`.
 
 **RBAC** — role → permission mappings bootstrap from `permissions.yml`; menus bootstrap from `menus.yml`. The `Administrators` role always has `*` (wildcard) permission.
 
-**File storage** — file operations go through `Light\Drive` (Flysystem MountManager). Supported adapters: Local, AWS S3, Aliyun OSS, Hostlink.
+**File storage** — file operations go through `Light\Framework\Drive` (Flysystem MountManager). Supported adapters: Local, AWS S3, Aliyun OSS, Hostlink.
 
 ---
 
@@ -258,7 +258,7 @@ index.php → Light\App::run()
 | Path | Purpose |
 |------|---------|
 | `src/Controller/` | GraphQL controllers (queries & mutations) |
-| `src/Model/` | ORM models, extend `Light\Model` |
+| `src/Model/` | ORM models, extend `Light\Framework\Model` |
 | `src/Input/` | GraphQL input types for mutations |
 | `src/Type/` | GraphQL output types |
 | `src/Command/` | Symfony Console CLI commands |

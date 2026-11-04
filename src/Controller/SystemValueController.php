@@ -1,8 +1,8 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
-use Light\Model\SystemValue;
+use Light\Framework\Model\SystemValue;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -15,12 +15,12 @@ class SystemValueController
     #[Query]
     #[Logged]
     /**
-     * @return \Light\Model\SystemValue[]
+     * @return \Light\Framework\Model\SystemValue[]
      * @param ?mixed $filters
      * @deprecated use { app { listSystemvalues }}
      */
     #[Right('systemvalue.list')]
-    public function listSystemValue(#[InjectUser] \Light\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
+    public function listSystemValue(#[InjectUser] \Light\Framework\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return SystemValue::Query()->filters($filters)->sort($sort);
     }
@@ -28,7 +28,7 @@ class SystemValueController
     #[Mutation]
     #[Logged]
     #[Right('systemvalue.add')]
-    public function addSystemValue(\Light\Input\SystemValue $data, #[InjectUser] \Light\Model\User $user): int
+    public function addSystemValue(\Light\Framework\Input\SystemValue $data, #[InjectUser] \Light\Framework\Model\User $user): int
     {
         $obj = SystemValue::Create();
         $obj->bind($data);
@@ -39,7 +39,7 @@ class SystemValueController
     #[Mutation]
     #[Logged]
     #[Right('systemvalue.update')]
-    public function updateSystemValue(int $id,  \Light\Input\SystemValue $data, #[InjectUser] \Light\Model\User $user): bool
+    public function updateSystemValue(int $id,  \Light\Framework\Input\SystemValue $data, #[InjectUser] \Light\Framework\Model\User $user): bool
     {
         if (!$obj = SystemValue::Get($id)) return false;
         if (!$obj->canDelete($user)) return false;
@@ -51,7 +51,7 @@ class SystemValueController
     #[Mutation]
     #[Logged]
     #[Right('systemvalue.delete')]
-    public function deleteSystemValue(int $id, #[InjectUser] \Light\Model\User $user): bool
+    public function deleteSystemValue(int $id, #[InjectUser] \Light\Framework\Model\User $user): bool
     {
         if (!$obj = SystemValue::Get($id)) return false;
         if (!$obj->canDelete($user)) return false;

@@ -47,16 +47,16 @@
         "alphasnow/aliyun-oss-flysystem": "^3.4",
         "phpstan/phpstan": "^2.0",
         "phpunit/phpunit": "^12.0",
-        "mathsgod/light-oauth2": "dev-main"
+        "mathsgod/light-oauth2": "^1.0"
     },
     "autoload-dev": {
         "psr-4": {
-            "Light\\Tests\\": "tests/"
+            "Light\\Framework\\Tests\\": "tests/"
         }
     },
     "autoload": {
         "psr-4": {
-            "Light\\": "src/"
+            "Light\\Framework\\": "src/"
         },
         "files": [
             "function/base85.php"
@@ -78,11 +78,5 @@
         "test:docker:setup": "docker compose -f compose.yml up -d --wait",
         "test:docker:teardown": "docker compose -f compose.yml down -v --remove-orphans",
         "serve": "php -S 127.0.0.1:8888 index.php"
-    },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/mathsgod/light-oauth2"
-        }
-    ]
+    }
 }

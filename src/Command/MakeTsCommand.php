@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Command;
+namespace Light\Framework\Command;
 
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;

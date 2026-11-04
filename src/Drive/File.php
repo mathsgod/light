@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Drive;
+namespace Light\Framework\Drive;
 
 use League\Flysystem\FileAttributes;
 use TheCodingMachine\GraphQLite\Annotations\Field;

@@ -1,8 +1,8 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Framework\Model;
 
-use Light\App;
+use Light\Framework\App;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
@@ -11,7 +11,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "config_id", outputType: "Int!")]
 #[MagicField(name: "name", outputType: "String")]
 #[MagicField(name: "value", outputType: "String")]
-class Config extends \Light\Model
+class Config extends \Light\Framework\Model
 {
     private const CACHE_KEY_PREFIX = "config_value_";
     private const CACHE_TTL = 60;
@@ -55,7 +55,7 @@ class Config extends \Light\Model
 
     private static function getCache(): ?\Psr\SimpleCache\CacheInterface
     {
-        $container = \Light\Model::$container ?? null;
+        $container = \Light\Framework\Model::$container ?? null;
         if ($container === null) {
             return null;
         }

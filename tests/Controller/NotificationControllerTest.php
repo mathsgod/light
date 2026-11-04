@@ -1,15 +1,15 @@
 <?php
 
-namespace Light\Tests\Controller;
+namespace Light\Framework\Tests\Controller;
 
 use Firebase\JWT\JWT;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\Response\EmptyResponse;
-use Light\App;
-use Light\Model\Notification;
-use Light\Model\User;
-use Light\Model\UserRole;
-use Light\Tests\TestCase;
+use Light\Framework\App;
+use Light\Framework\Model\Notification;
+use Light\Framework\Model\User;
+use Light\Framework\Model\UserRole;
+use Light\Framework\Tests\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -118,7 +118,7 @@ class NotificationControllerTest extends TestCase
 
     public function testUnreadNotificationCount(): void
     {
-        \Light\Model::Notify($this->adminUser->user_id, "warning", "Low disk", "Disk is almost full");
+        \Light\Framework\Model::Notify($this->adminUser->user_id, "warning", "Low disk", "Disk is almost full");
 
         $out = $this->gql('{ my { unreadNotificationCount } }');
 
@@ -128,8 +128,8 @@ class NotificationControllerTest extends TestCase
 
     public function testListNotification(): void
     {
-        \Light\Model::Notify($this->adminUser->user_id, "info", "A", "Message A");
-        \Light\Model::Notify($this->adminUser->user_id, "success", "B", "Message B", "/Role");
+        \Light\Framework\Model::Notify($this->adminUser->user_id, "info", "A", "Message A");
+        \Light\Framework\Model::Notify($this->adminUser->user_id, "success", "B", "Message B", "/Role");
 
         $out = $this->gql('{ app { listNotification { data { notification_id title type link is_read } } } }');
 
@@ -143,7 +143,7 @@ class NotificationControllerTest extends TestCase
 
     public function testMarkNotificationRead(): void
     {
-        $n = \Light\Model::Notify($this->adminUser->user_id, "info", "Read me", "Please");
+        $n = \Light\Framework\Model::Notify($this->adminUser->user_id, "info", "Read me", "Please");
 
         $out = $this->gql('mutation($id:Int!){ markNotificationRead(id:$id) }', ["id" => $n->notification_id]);
 
@@ -156,8 +156,8 @@ class NotificationControllerTest extends TestCase
 
     public function testMarkAllNotificationsRead(): void
     {
-        \Light\Model::Notify($this->adminUser->user_id, "info", "One", "First");
-        \Light\Model::Notify($this->adminUser->user_id, "info", "Two", "Second");
+        \Light\Framework\Model::Notify($this->adminUser->user_id, "info", "One", "First");
+        \Light\Framework\Model::Notify($this->adminUser->user_id, "info", "Two", "Second");
 
         $out = $this->gql('mutation { markAllNotificationsRead }');
 
@@ -170,7 +170,7 @@ class NotificationControllerTest extends TestCase
 
     public function testDeleteNotification(): void
     {
-        $n = \Light\Model::Notify($this->adminUser->user_id, "info", "Delete me", "Bye");
+        $n = \Light\Framework\Model::Notify($this->adminUser->user_id, "info", "Delete me", "Bye");
         $id = $n->notification_id;
 
         $out = $this->gql('mutation($id:Int!){ deleteNotification(id:$id) }', ["id" => $id]);
@@ -194,7 +194,7 @@ class NotificationControllerTest extends TestCase
         ]);
         $other->save();
 
-        $n = \Light\Model::Notify($other->user_id, "info", "Private", "Not yours");
+        $n = \Light\Framework\Model::Notify($other->user_id, "info", "Private", "Not yours");
 
         $out = $this->gql('mutation($id:Int!){ markNotificationRead(id:$id) }', ["id" => $n->notification_id]);
 
@@ -205,8 +205,8 @@ class NotificationControllerTest extends TestCase
 
     public function testDeleteNotificationsBulk(): void
     {
-        $n1 = \Light\Model::Notify($this->adminUser->user_id, "info", "One", "First");
-        $n2 = \Light\Model::Notify($this->adminUser->user_id, "info", "Two", "Second");
+        $n1 = \Light\Framework\Model::Notify($this->adminUser->user_id, "info", "One", "First");
+        $n2 = \Light\Framework\Model::Notify($this->adminUser->user_id, "info", "Two", "Second");
 
         $out = $this->gql(
             'mutation($ids:[Int!]!){ deleteNotifications(ids:$ids) }',
@@ -234,7 +234,7 @@ class NotificationControllerTest extends TestCase
         ]);
         $other->save();
 
-        $n = \Light\Model::Notify($other->user_id, "info", "Private", "Not yours");
+        $n = \Light\Framework\Model::Notify($other->user_id, "info", "Private", "Not yours");
 
         $out = $this->gql(
             'mutation($ids:[Int!]!){ deleteNotifications(ids:$ids) }',

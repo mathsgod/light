@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Attributes;
+namespace Light\Framework\Attributes;
 
 use Attribute;
 use Laminas\Diactoros\Response\TextResponse;
@@ -14,7 +14,7 @@ class Logged implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $auth_service = new \Light\Auth\Service($request);
+        $auth_service = new \Light\Framework\Auth\Service($request);
         if ($auth_service->isLogged() == false) {
             return new TextResponse("You are not logged in", 403);
         }

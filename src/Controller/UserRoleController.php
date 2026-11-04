@@ -1,9 +1,9 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
 use Light\Rbac\Rbac;
-use Light\Model\UserRole;
+use Light\Framework\Model\UserRole;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -16,7 +16,7 @@ class UserRoleController
     #[Mutation]
     #[Logged]
     #[Right("user.role.add")]
-    public function addUserRole(#[InjectUser] \Light\Model\User $user, #[Autowire] Rbac $rbac, int $user_id, string $role): bool
+    public function addUserRole(#[InjectUser] \Light\Framework\Model\User $user, #[Autowire] Rbac $rbac, int $user_id, string $role): bool
     {
         if ($role == "Administrators") { // Only administrators can add administrators
             if (!$user->is("Administrators")) {
@@ -32,7 +32,7 @@ class UserRoleController
     #[Mutation]
     #[Logged]
     #[Right("user.role.remove")]
-    public function removeUserRole(#[InjectUser] \Light\Model\User $user, #[Autowire] Rbac $rbac, int $user_id, string $role): bool
+    public function removeUserRole(#[InjectUser] \Light\Framework\Model\User $user, #[Autowire] Rbac $rbac, int $user_id, string $role): bool
     {
         if ($role == "Administrators") { // Only administrators can remove administrators
             if (!$user->is("Administrators")) {
@@ -54,7 +54,7 @@ class UserRoleController
     /**
      * @param string[] $roles
      */
-    public function updateUserRole(#[Autowire] Rbac $rbac, int $user_id, array $roles, #[InjectUser] \Light\Model\User $user): bool
+    public function updateUserRole(#[Autowire] Rbac $rbac, int $user_id, array $roles, #[InjectUser] \Light\Framework\Model\User $user): bool
     {
         $user = $rbac->getUser($user->user_id);
         if (!$user->is("Administrators")) {

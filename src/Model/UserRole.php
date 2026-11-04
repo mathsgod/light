@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Framework\Model;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
@@ -10,7 +10,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "user_role_id", outputType: "Int!")]
 #[MagicField(name: "user_id", outputType: "Int!")]
 #[MagicField(name: "role", outputType: "String")]
-class UserRole extends \Light\Model
+class UserRole extends \Light\Framework\Model
 {
 
     

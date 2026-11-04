@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-$app = new Light\App();
+$app = new Light\Framework\App();
 if (class_exists(Light\OAuth2\ProviderFactory::class)) {
     Light\OAuth2\ProviderFactory::registerFromEnvironment($app);
 } elseif (filter_var($_ENV['OAUTH_ENABLED'] ?? false, FILTER_VALIDATE_BOOLEAN)) {

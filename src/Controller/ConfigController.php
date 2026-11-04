@@ -1,8 +1,8 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
-use Light\Model\Config;
+use Light\Framework\Model\Config;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -16,18 +16,18 @@ class ConfigController
     #[Right('config.list')]
     #[Logged]
     /**
-     * @return \Light\Model\Config[]
+     * @return \Light\Framework\Model\Config[]
      * @param ?mixed $filters
      * @deprecated use { app { configs }}
      */
-    public function listConfig(#[InjectUser] \Light\Model\User $user, $filters = null,  ?string $sort = '',): \Light\Db\Query
+    public function listConfig(#[InjectUser] \Light\Framework\Model\User $user, $filters = null,  ?string $sort = '',): \Light\Db\Query
     {
         return Config::Query()->filters($filters)->sort($sort);
     }
 
     #[Query]
     /**
-     * @return \Light\Model\Config[]
+     * @return \Light\Framework\Model\Config[]
      * @deprecated use { app { company companyLogo }}
      */
     public function listConfigBasic(): array
@@ -39,7 +39,7 @@ class ConfigController
 
     /*   #[Mutation]
     #[Logged]
-    public function addConfig(\Input\Config $data, #[InjectUser] \Light\Model\User $user): int
+    public function addConfig(\Input\Config $data, #[InjectUser] \Light\Framework\Model\User $user): int
     {
         $obj = Config::Create();
         $obj->bind($data);
@@ -49,7 +49,7 @@ class ConfigController
 
     #[Mutation]
     #[Logged]
-    public function updateConfig(int $id,  \Input\Config $data, #[InjectUser] \Light\Model\User $user): bool
+    public function updateConfig(int $id,  \Input\Config $data, #[InjectUser] \Light\Framework\Model\User $user): bool
     {
         if (!$obj = Config::Get($id)) return false;
         $obj->bind($data);
@@ -59,7 +59,7 @@ class ConfigController
 
     #[Mutation]
     #[Logged]
-    public function removeConfig(int $id, #[InjectUser] \Light\Model\User $user): bool
+    public function removeConfig(int $id, #[InjectUser] \Light\Framework\Model\User $user): bool
     {
         if (!$obj = Config::Get($id)) return false;
         $obj->delete();

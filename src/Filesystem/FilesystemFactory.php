@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Filesystem;
+namespace Light\Framework\Filesystem;
 
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
@@ -9,7 +9,7 @@ use League\Flysystem\MountManager;
 use League\Flysystem\PathPrefixing\PathPrefixedAdapter;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use League\Flysystem\Visibility;
-use Light\Model\User;
+use Light\Framework\Model\User;
 use RuntimeException;
 
 final class FilesystemFactory

@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Framework\Model;
 
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
 use TheCodingMachine\GraphQLite\Annotations\Type;
@@ -12,6 +12,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "user_id", outputType: "Int!")]
 #[MagicField(name: "created_time", outputType: "String")]
 
-class APIKey extends \Light\Model
+class APIKey extends \Light\Framework\Model
 {
 }

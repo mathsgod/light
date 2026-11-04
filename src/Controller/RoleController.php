@@ -1,10 +1,10 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
 use GraphQL\Error\Error;
 use Light\Rbac\Rbac;
-use Light\Model\Role;
+use Light\Framework\Model\Role;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -29,12 +29,12 @@ class RoleController
     #[Query]
     #[Logged]
     /**
-     * @return \Light\Model\Role[]
+     * @return \Light\Framework\Model\Role[]
      * @param ?mixed $filters
      * @deprecated use { app { roles }}
      */
     #[Right("role.list")]
-    public function listRole(#[Autowire] Rbac $rbac, #[InjectUser] \Light\Model\User $user): array
+    public function listRole(#[Autowire] Rbac $rbac, #[InjectUser] \Light\Framework\Model\User $user): array
     {
         $rs = [];
         foreach ($rbac->getRoles() as $role) {
@@ -55,8 +55,8 @@ class RoleController
     #[Logged]
     #[Right("role.add")]
     public function addRole(
-        \Light\Input\Role $data,
-        #[InjectUser] \Light\Model\User $user,
+        \Light\Framework\Input\Role $data,
+        #[InjectUser] \Light\Framework\Model\User $user,
         #[Autowire] Rbac $rbac
     ): bool {
 
@@ -75,7 +75,7 @@ class RoleController
     #[Mutation]
     #[Logged]
     #[Right("role.update")]
-    public function updateRole(int $id,  \Light\Input\Role $data, #[InjectUser] \Light\Model\User $user): bool
+    public function updateRole(int $id,  \Light\Framework\Input\Role $data, #[InjectUser] \Light\Framework\Model\User $user): bool
     {
         if (!$obj = Role::Get($id)) return false;
         $obj->bind($data);
@@ -86,7 +86,7 @@ class RoleController
     #[Mutation]
     #[Logged]
     #[Right("role.delete")]
-    public function deleteRole(string $name, #[InjectUser] \Light\Model\User $user): bool
+    public function deleteRole(string $name, #[InjectUser] \Light\Framework\Model\User $user): bool
     {
 
         foreach (Role::Query(['name' => $name]) as $role) {
@@ -103,7 +103,7 @@ class RoleController
     /**
      * @param string[] $childs
      */
-    public function updateRoleChild(string $name, array $childs, #[InjectUser] \Light\Model\User $user): bool
+    public function updateRoleChild(string $name, array $childs, #[InjectUser] \Light\Framework\Model\User $user): bool
     {
         //remove all roles
         foreach (Role::Query(['name' => $name]) as $role) {

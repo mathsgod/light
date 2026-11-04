@@ -3,7 +3,7 @@
 // Route is registered by light-server via pages/api/index.php scanning.
 
 use Laminas\Diactoros\Response\JsonResponse;
-use Light\App;
+use Light\Framework\App;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 

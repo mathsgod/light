@@ -1,9 +1,9 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
-use Light\Input\Translate as InputTranslate;
-use Light\Model\Translate;
+use Light\Framework\Input\Translate as InputTranslate;
+use Light\Framework\Model\Translate;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -60,7 +60,7 @@ class TranslateController
     #[Mutation]
     #[Logged]
     #[Right('translate.add')]
-    public function addTranslate(InputTranslate $data, #[InjectUser] \Light\Model\User $user): int
+    public function addTranslate(InputTranslate $data, #[InjectUser] \Light\Framework\Model\User $user): int
     {
         foreach ($data->values as $value) {
 

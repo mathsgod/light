@@ -1,11 +1,11 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
-use Light\App as LightApp;
-use Light\Model\Config;
-use Light\Model\EventLog;
-use Light\Type\LogCleanup;
+use Light\Framework\App as LightApp;
+use Light\Framework\Model\Config;
+use Light\Framework\Model\EventLog;
+use Light\Framework\Type\LogCleanup;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -18,14 +18,14 @@ class EventLogController
     #[Query]
     #[Logged]
     /**
-     * @return \Light\Model\EventLog[]
+     * @return \Light\Framework\Model\EventLog[]
      * @param ?mixed $filters
      * @deprecated use app.eventLogs instead
      */
     #[Right("event_log.list")]
-    public function listEventLog(#[InjectUser] \Light\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
+    public function listEventLog(#[InjectUser] \Light\Framework\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
     {
-        $app = new \Light\Type\App($filters, $sort);
+        $app = new \Light\Framework\Type\App($filters, $sort);
         return $app->listEventLog($filters, $sort);
     }
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
-use Light\App;
-use Light\Model\Permission;
-use Light\Model\User;
+use Light\Framework\App;
+use Light\Framework\Model\Permission;
+use Light\Framework\Model\User;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -53,12 +53,12 @@ class PermissionController
     #[Query]
     #[Logged]
     /**
-     * @return \Light\Model\Permission[]
+     * @return \Light\Framework\Model\Permission[]
      * @param ?mixed $filters
      * @deprecated use { app { permissions }}
      */
     #[Right("permission.list")]
-    public function listPermission(#[InjectUser] \Light\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
+    public function listPermission(#[InjectUser] \Light\Framework\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return Permission::Query()->filters($filters)->sort($sort);
     }

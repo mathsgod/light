@@ -1,10 +1,10 @@
 <?php
 
-namespace Light\Command;
+namespace Light\Framework\Command;
 
-use Light\Model\Role;
-use Light\Model\User;
-use Light\Model\UserRole;
+use Light\Framework\Model\Role;
+use Light\Framework\Model\User;
+use Light\Framework\Model\UserRole;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace Light\WebAuthn;
+namespace Light\Framework\WebAuthn;
 
 use InvalidArgumentException;
 use Webauthn\CeremonyStep\CeremonyStepManagerFactory;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Tests;
+namespace Light\Framework\Tests;
 
 use Light\Db\Adapter;
 use PHPUnit\Framework\TestCase as BaseTestCase;
@@ -26,7 +26,7 @@ abstract class TestCase extends BaseTestCase
         Adapter::Create()->rollback();
         // Reset static container so the next test doesn't inherit a stale
         // Auth\Service pointing at rolled-back users
-        \Light\Model::SetContainer(null);
+        \Light\Framework\Model::SetContainer(null);
         parent::tearDown();
     }
 }

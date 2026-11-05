@@ -220,4 +220,14 @@ class AppControllerTest extends TestCase
         $updated = User::Get($this->adminUser->user_id);
         $this->assertEquals([["label" => "Favorites", "to" => "/User", "icon" => "sym_o_person"]], $updated->getMenu());
     }
+    public function testSystemPageQueryWorksForAuthenticatedAdministrator(): void
+    {
+        $out = $this->gql('query { system { server arch os CPUCores hostname memoryTotal memoryFree memoryAvailable } }');
+        $this->assertArrayNotHasKey('errors', $out, json_encode($out));
+        $system = $out['data']['system'];
+        $this->assertIsArray($system['server']);
+        $this->assertNotEmpty($system['arch']);
+        $this->assertNotEmpty($system['os']);
+        $this->assertNotEmpty($system['hostname']);
+    }
 }

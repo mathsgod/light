@@ -292,4 +292,19 @@ class UserControllerTest extends TestCase
         $this->assertSame(3, $page['meta']['total']);
         $this->assertSame('user_id', $page['meta']['key']);
     }
+    public function testListUserLogAcceptsEmptyFrontendFilterList(): void
+    {
+        $log = \Light\Framework\Model\UserLog::Create([
+            'user_id'=>$this->adminUser->user_id, 'login_dt'=>date('Y-m-d H:i:s'),
+            'ip'=>'127.0.0.1', 'user_agent'=>'migration-test', 'result'=>'SUCCESS',
+        ]);
+        $log->save();
+        $out = $this->gql('query { listUserLog(filters: [{}], sort: "login_dt:desc") { data(offset: 0, limit: 20) { ip user_agent result logout_dt last_access_time login_dt username userlog_id } meta { total key name } } }');
+        $this->assertArrayNotHasKey('errors', $out, json_encode($out));
+        $result = $out['data']['listUserLog'];
+        $this->assertSame(1, $result['meta']['total']);
+        $this->assertSame('userlog_id', $result['meta']['key']);
+        $this->assertSame($log->userlog_id, $result['data'][0]['userlog_id']);
+        $this->assertSame($this->adminUser->username, $result['data'][0]['username']);
+    }
 }

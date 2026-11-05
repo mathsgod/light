@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Resolve sibling v2 packages while their stable releases are being prepared.
+# Optional contributor setup: use sibling v2 sources instead of published packages.
 set -euo pipefail
 cd "$(dirname "$0")"
 python3 - <<'PY'

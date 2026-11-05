@@ -32,8 +32,8 @@
         "symfony/property-access": "^7.4",
         "guzzlehttp/guzzle": "^7.15.2",
         "web-auth/webauthn-lib": "^5.3",
-        "mathsgod/light-db": "^2.0@dev",
-        "mathsgod/light-db-graphqlite-mappers": "^2.0@dev",
+        "mathsgod/light-db": "^2.0",
+        "mathsgod/light-db-graphqlite-mappers": "^2.0",
         "mathsgod/json-to-sql": "^1.0",
         "mathsgod/mysql-schema-migrate": "^1.0",
         "symfony/console": "^7.4",
@@ -78,26 +78,6 @@
         "test:docker:teardown": "docker compose -f compose.yml down -v --remove-orphans",
         "serve": "php -S 127.0.0.1:8888 index.php"
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../light-db-new",
-            "options": {
-                "versions": {
-                    "mathsgod/light-db": "2.0.x-dev"
-                }
-            }
-        },
-        {
-            "type": "path",
-            "url": "../light-db-graphqlite-mappers",
-            "options": {
-                "versions": {
-                    "mathsgod/light-db-graphqlite-mappers": "2.0.x-dev"
-                }
-            }
-        }
-    ],
     "minimum-stability": "stable",
     "prefer-stable": true
 }

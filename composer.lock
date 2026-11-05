@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "46a563ad70ed4240208833e5f194aa4b",
+    "content-hash": "6a71f2c13952a96051d264ba38415bef",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1936,11 +1936,17 @@
         },
         {
             "name": "mathsgod/light-db",
-            "version": "2.0.x-dev",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mathsgod/light-db.git",
+                "reference": "88a02e72c51d17337fa8bd6b8f380dab3acd373b"
+            },
             "dist": {
-                "type": "path",
-                "url": "../light-db-new",
-                "reference": "28684240ce22aed26a4c595204ce63ecb2e37130"
+                "type": "zip",
+                "url": "https://api.github.com/repos/mathsgod/light-db/zipball/88a02e72c51d17337fa8bd6b8f380dab3acd373b",
+                "reference": "88a02e72c51d17337fa8bd6b8f380dab3acd373b",
+                "shasum": ""
             },
             "require": {
                 "ext-pdo": "*",
@@ -1958,22 +1964,7 @@
                     "Light\\Db\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Light\\Db\\Tests\\": "tests/"
-                }
-            },
-            "scripts": {
-                "test": [
-                    "phpunit"
-                ],
-                "test:mysql": [
-                    "bash scripts/test-mysql.sh"
-                ],
-                "analyse": [
-                    "phpstan analyse src --level=5 --no-progress"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1984,22 +1975,33 @@
                 }
             ],
             "description": "A convention-based Active Record layer built on light-entity",
-            "transport-options": {
-                "relative": true
-            }
+            "support": {
+                "issues": "https://github.com/mathsgod/light-db/issues",
+                "source": "https://github.com/mathsgod/light-db/tree/v2.0.0"
+            },
+            "time": "2026-11-05T05:20:47+00:00"
         },
         {
             "name": "mathsgod/light-db-graphqlite-mappers",
-            "version": "2.0.x-dev",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mathsgod/light-db-graphqlite-mappers.git",
+                "reference": "d812f3588417a0d9b764278847aebf2a7287f553"
+            },
             "dist": {
-                "type": "path",
-                "url": "../light-db-graphqlite-mappers",
-                "reference": "518b63da9ff210698894cff0b1ea92e6960f4f2d"
+                "type": "zip",
+                "url": "https://api.github.com/repos/mathsgod/light-db-graphqlite-mappers/zipball/d812f3588417a0d9b764278847aebf2a7287f553",
+                "reference": "d812f3588417a0d9b764278847aebf2a7287f553",
+                "shasum": ""
             },
             "require": {
-                "mathsgod/light-db": "^2.0@dev",
+                "mathsgod/light-db": "^2.0",
                 "php": ">=8.3",
                 "thecodingmachine/graphqlite": "^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^12.5"
             },
             "type": "library",
             "autoload": {
@@ -2007,6 +2009,7 @@
                     "Light\\Db\\GraphQLite\\Mappers\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -2017,9 +2020,11 @@
                 }
             ],
             "description": "Light DB GraphQLite Mappers",
-            "transport-options": {
-                "relative": true
-            }
+            "support": {
+                "issues": "https://github.com/mathsgod/light-db-graphqlite-mappers/issues",
+                "source": "https://github.com/mathsgod/light-db-graphqlite-mappers/tree/v2.0.0"
+            },
+            "time": "2026-11-05T07:10:40+00:00"
         },
         {
             "name": "mathsgod/light-entity",
@@ -8986,10 +8991,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "mathsgod/light-db": 20,
-        "mathsgod/light-db-graphqlite-mappers": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

@@ -338,12 +338,11 @@ MIT
 For the full upgrade sequence, examples and deployment checks, see
 [the Light 1.x to 2.x migration guide](docs/migration-v2.md).
 
-This major-version branch uses light-db 2, backed by light-entity 1.x, and the
-v2 GraphQLite mapper. The development Composer repositories resolve sibling
-`../light-db-new` and `../light-db-graphqlite-mappers` checkouts as `2.0.x-dev`.
-Run `./dev-setup.sh` after cloning those packages. Stable release preparation
-must remove the local path repositories and use published `^2.0` dependencies;
-this branch cannot yet be installed in isolation from those source checkouts.
+This major-version branch uses published light-db `^2.0` and GraphQLite mapper
+`^2.0` packages, backed by light-entity 1.x. A normal `composer install` does not
+require sibling source checkouts, path repositories or `@dev` flags. Contributors
+can optionally run `./dev-setup.sh` to switch to sibling source packages; those
+local development overrides must not be included in a stable application deploy.
 The old light-oauth2 development dependency was removed because it requires
 Light 1.x; applications using that optional extension need a compatible release.
 

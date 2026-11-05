@@ -25,14 +25,17 @@ PHP 8.3+ and PDO MySQL are required. MySQL 8.0 is the framework integration-test
 baseline; schema administration is MySQL-specific. Do not infer support for every
 light-entity SQL dialect from the framework's use of that package.
 
-Until the v2 packages are published, this checkout uses sibling `../light-db-new`
-and `../light-db-graphqlite-mappers` path repositories with `2.0.x-dev` version
-overrides. Use `./dev-setup.sh` for local development. Composer repositories in a
-dependency are not inherited by an application: an application testing these
-unreleased sources must configure its own source repositories and constraints.
-For a stable deployment, use published versions and remove local path repositories,
-version overrides and `@dev` flags. Do not copy this development lock file into an
-unrelated application.
+light-db 2.0 and its v2 GraphQLite mapper are published. This checkout now uses
+stable `^2.0` constraints and a normal installation needs no sibling repositories
+or version overrides. Light framework's own major release remains a separate
+release step.
+
+Contributors can optionally use `./dev-setup.sh` to switch to sibling
+`../light-db-new` and `../light-db-graphqlite-mappers` sources. Composer repositories
+in a dependency are not inherited by an application: applications using custom
+source overrides must configure them at the root. Remove local path repositories,
+version overrides and `@dev` flags before stable deployment. Do not copy this
+framework's development lock file into an unrelated application.
 
 ## 2. Rename framework references
 

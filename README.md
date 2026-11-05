@@ -12,7 +12,8 @@ The companion frontend module is [`nuxt-light`](https://github.com/hostlink/nuxt
 
 - PHP >= 8.3
 - Composer
-- MySQL / MariaDB (or any Laminas DB-supported database)
+- MySQL 8.0 (the framework schema administration API is MySQL-specific)
+- light-db 2.x and light-db-graphqlite-mappers 2.x, backed by light-entity 1.x
 
 ---
 
@@ -41,15 +42,11 @@ DATABASE_CHARSET=
 
 ### Local OAuth 2.0 provider
 
-`light-oauth2` is a development dependency. `./dev-setup.sh` links the sibling
-`../light-oauth2` package through Composer. Production applications that enable
-OAuth must require `mathsgod/light-oauth2` as a runtime dependency themselves.
-With OAuth disabled, Light also starts without the package after `composer install --no-dev`.
-`index.php` calls `Light\OAuth2\ProviderFactory::registerFromEnvironment($app)`
-from that package before running Light when
-`OAUTH_ENABLED=true`. The provider uses the existing database through a separate,
-non-persistent PDO connection. Apply `light-oauth2/migrations/001_oauth.sql` once
-if the OAuth tables have not been installed; migrations do not run on requests.
+OAuth requires a release of `mathsgod/light-oauth2` compatible with this major
+version of Light. The existing extension requires Light 1.x and is not installed
+by this branch's development setup. Applications enabling OAuth must require a
+compatible extension as a runtime dependency; the configuration below describes
+the integration settings for that extension.
 
 Configure the following in the application's `.env`:
 
@@ -79,9 +76,7 @@ bound to the request, user and browser session with a one-time CSRF token.
 Only the permissions listed in `OAUTH_SCOPES` can be delegated; users must also
 hold those permissions in Light RBAC.
 
-For a manual Composer update of this development root, use
-`COMPOSER_ROOT_VERSION=1.45.0 composer update mathsgod/light-oauth2 --with-dependencies`
-(adjust the root version to the checkout's latest release).
+
 
 ### JWT signing
 
@@ -290,10 +285,45 @@ index.php → Light\App::run()
 ./vendor/bin/phpstan analyse src/                           # Static analysis
 ```
 
-Tests require a real DB connection (integration tests). Each test wraps in a DB transaction and rolls back in `tearDown()`.
+Tests require the disposable `light_test` MySQL database and clear its tables
+between tests. Use `composer test:docker` to create and remove the fixture
+container. Direct PHPUnit commands require that fixture to be running and its
+`DATABASE_*` environment variables to be configured.
 
 ---
 
 ## License
 
 MIT
+
+## Migrating to light-db 2
+
+This major-version branch uses light-db 2, backed by light-entity 1.x, and the
+v2 GraphQLite mapper. The development Composer repositories resolve sibling
+`../light-db-new` and `../light-db-graphqlite-mappers` checkouts as `2.0.x-dev`.
+Run `./dev-setup.sh` after cloning those packages. Stable release preparation
+must remove the local path repositories and use published `^2.0` dependencies;
+this branch cannot yet be installed in isolation from those source checkouts.
+The old light-oauth2 development dependency was removed because it requires
+Light 1.x; applications using that optional extension need a compatible release.
+
+`App::getDatabase()` now returns `Light\Db\Database`. Obtain PDO with
+`$app->getDatabase()->connection()`. Models use the new `Get`, `Create`, `Query`,
+`save` and `delete` APIs. Query objects are immutable: retain the returned query
+from `where`, `filters`, `sort`, `limit` and `offset`. Replace Laminas predicate
+mutation with condition arrays or parameterized `whereRaw()` calls. Legacy
+`Adapter`, `_table()`, `GetAdapter()` and Laminas schema wrappers are no longer
+used by the framework. Schema administration and generators use PDO metadata.
+
+GraphQL list fields retain `data(limit:, offset:)` and `meta { total key }`;
+`total` counts matching records before pagination. Composite-key metadata uses
+comma-separated names. Object input binding still distinguishes Undefined from
+an explicitly provided null. Audit records are written after successful Model
+persistence, including deferred `Database::transaction()` writes; audit insertion
+is a separate write after the Model transaction commits, not part of its atomic
+unit. An audit failure can therefore be reported after data has committed.
+
+The MySQL integration tests require the disposable `light_test` database.
+They clear its tables between tests instead of wrapping tests in an externally
+opened PDO transaction. Run `composer test:docker`; never point this suite at an
+application database.

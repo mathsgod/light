@@ -70,8 +70,8 @@ class Schema
     public function getEvents(#[Autowire] App $app)
     {
         $db = $app->getDatabase();
-        $result = $db->query("SHOW EVENTS")->execute();
-        return iterator_to_array($result);
+        $result = $db->connection()->query("SHOW EVENTS")->fetchAll(\PDO::FETCH_ASSOC);
+        return $result;
     }
 
     #[Field]
@@ -82,8 +82,8 @@ class Schema
     public function getEvent(#[Autowire] App $app, string $name)
     {
         $db = $app->getDatabase();
-        $result = $db->query("SHOW CREATE EVENT $name")->execute();
-        return iterator_to_array($result)[0];
+        $result = $db->connection()->query("SHOW CREATE EVENT $name")->fetchAll(\PDO::FETCH_ASSOC);
+        return $result[0];
     }
 
     #[Field]
@@ -94,8 +94,8 @@ class Schema
     public function getProcessList(#[Autowire] App $app)
     {
         $db = $app->getDatabase();
-        $result = $db->query("SHOW FULL PROCESSLIST");
-        return  iterator_to_array($result->execute());
+        $result = $db->connection()->query("SHOW FULL PROCESSLIST");
+        return  $result->fetchAll(\PDO::FETCH_ASSOC);
     }
 
 
@@ -105,7 +105,7 @@ class Schema
     public function getTables(#[Autowire] App $app)
     {
         $db = $app->getDatabase();
-        $result = $db->query("SHOW TABLE STATUS")->execute();
+        $result = $db->connection()->query("SHOW TABLE STATUS")->fetchAll(\PDO::FETCH_ASSOC);
 
         $data = [];
         foreach ($result as $row) {
@@ -120,8 +120,8 @@ class Schema
     public function getType(#[Autowire] App $app): string
     {
         $db = $app->getDatabase();
-        $result = $db->query("SELECT @@version_comment as version_comment")->execute();
-        $data = iterator_to_array($result);
+        $result = $db->connection()->query("SELECT @@version_comment as version_comment")->fetchAll(\PDO::FETCH_ASSOC);
+        $data = $result;
         return (string)$data[0]["version_comment"];
     }
 
@@ -130,8 +130,8 @@ class Schema
     public function getSizeBytes(#[Autowire] App $app): int
     {
         $db = $app->getDatabase();
-        $result = $db->query("SELECT SUM(data_length + index_length) AS size FROM information_schema.TABLES WHERE table_schema = DATABASE()")->execute();
-        $data = iterator_to_array($result);
+        $result = $db->connection()->query("SELECT SUM(data_length + index_length) AS size FROM information_schema.TABLES WHERE table_schema = DATABASE()")->fetchAll(\PDO::FETCH_ASSOC);
+        $data = $result;
         return (int)$data[0]["size"];
     }
 
@@ -150,7 +150,7 @@ class Schema
     public function getVersion(#[Autowire] App $app): string
     {
         $db = $app->getDatabase();
-        $result = iterator_to_array($db->query("SELECT VERSION()")->execute());
+        $result = $db->connection()->query("SELECT VERSION()")->fetchAll(\PDO::FETCH_ASSOC);
         return $result[0]["VERSION()"];
     }
 
@@ -159,7 +159,7 @@ class Schema
     public function getTableStatus(#[Autowire] App $app)
     {
         $db = $app->getDatabase();
-        return  iterator_to_array($db->query("SHOW TABLE STATUS")->execute());
+        return  $db->connection()->query("SHOW TABLE STATUS")->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     #[Field(outputType: "mixed")]
@@ -167,25 +167,13 @@ class Schema
     public function getTable(#[Autowire] App $app): array
     {
         $db = $app->getDatabase();
-        $tables = $db->getTables();
         $data = [];
-        foreach ($tables as $table) {
-
-            $name = $table->getTable();
-            $data[] = [
-                "name" => $name,
-                "columns" => $table->columns()->map(function (\Laminas\Db\Metadata\Object\ColumnObject $column) {
-                    return [
-                        "name" => $column->getName(),
-                        "type" => $column->getDataType(),
-                        "default" => $column->getColumnDefault(),
-                        "null" => $column->isNullable(),
-                        "length" => $column->getCharacterMaximumLength(),
-                        //"key" => $column->getC
-                        "extra" => $column->getErratas()
-                    ];
-                }),
-            ];
+        foreach ($db->connection()->query('SHOW TABLES')->fetchAll(\PDO::FETCH_COLUMN) as $name) {
+            $data[] = ['name' => $name, 'columns' => array_map(static fn ($column) => [
+                'name' => $column['name'], 'type' => $column['type'],
+                'default' => $column['default'], 'null' => (bool)$column['nullable'],
+                'length' => $column['length'], 'extra' => $column['extra'],
+            ], Sql::columns($name))];
         }
         return $data;
     }
@@ -255,7 +243,8 @@ class Schema
 
             // Check if table exists in database
             try {
-                $dbTable = $db->getTable($tableName);
+                $schemaColumns = array_column($tableSchema['columns'], null, 'name');
+                $dbTable = Sql::columns($tableName);
 
                 if (!$dbTable) {
                     $result['exists'] = false;
@@ -275,17 +264,9 @@ class Schema
 
                 // Get current table columns from database
                 $currentColumns = [];
-                foreach ($dbTable->columns()->toArray() as $col) {
-                    $currentColumns[$col->getName()] = [
-                        'type' => $col->getDataType(),
-                        'nullable' => $col->isNullable(),
-                        'default' => $col->getColumnDefault(),
-                        'length' => $col->getCharacterMaximumLength(),
-                        'unsigned' => $col->getNumericUnsigned(),
-                        'auto_increment' => $col->isAutoIncrement()
-                    ];
+                foreach ($dbTable as $col) {
+                    $currentColumns[$col['name']] = $col;
                 }
-
 
                 // Compare columns
                 $schemaColumns = [];

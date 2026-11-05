@@ -20,7 +20,7 @@ class TranslateController
     public function updateTranslate(string $name, string $value, string $language): bool
     {
         $q = Translate::Query(["language" => $language]);
-        $q->where->expression("binary name = ?", [$name]);
+        $q = $q->whereRaw("binary name = ?", [$name]);
         $t = $q->first();
 
         if (!$t) {
@@ -65,7 +65,7 @@ class TranslateController
         foreach ($data->values as $value) {
 
             $q = Translate::Query(["language" => $value["language"]]);
-            $q->where->expression("binary name = ?", [$data->name]);
+            $q = $q->whereRaw("binary name = ?", [$data->name]);
             $t = $q->first();
 
             if (!$t) {
@@ -94,7 +94,7 @@ class TranslateController
     {
 
         $q = Translate::Query();
-        $q->where->expression("binary name = ?", [$name]);
+        $q = $q->whereRaw("binary name = ?", [$name]);
         $q->delete();
         return true;
     }

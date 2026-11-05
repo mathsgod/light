@@ -56,7 +56,7 @@ class User extends \Light\Model
             return false;
         }
 
-        UserLog::_table()->update(["logout_dt" => date("Y-m-d H:i:s")], ["jti" => $jti, "user_id" => $this->user_id]);
+        UserLog::Query(["jti" => $jti, "user_id" => $this->user_id])->update(["logout_dt" => date("Y-m-d H:i:s")]);
         return true;
     }
 
@@ -68,18 +68,13 @@ class User extends \Light\Model
         $active_after = date("Y-m-d H:i:s", time() - $session_expire);
 
         $ul = UserLog::Query(["user_id" => $this->user_id, "result" => "SUCCESS"]);
-        $ul->where->isNull("logout_dt");
-
-        // A browser session stays active for the refresh-token window. Use
-        // last activity when available and fall back to login time for a
-        // newly-created session that has not made another request yet.
-        $active = $ul->where->nest();
-        $active->greaterThan("last_access_time", $active_after);
-        $without_last_access = $active->or->nest();
-        $without_last_access->isNull("last_access_time");
-        $without_last_access->greaterThan("login_dt", $active_after);
-        $without_last_access->unnest();
-        $active->unnest();
+        $ul = $ul->where([
+            'logout_dt' => null,
+            '_or' => [
+                ['last_access_time' => ['gt' => $active_after]],
+                ['last_access_time' => null, 'login_dt' => ['gt' => $active_after]],
+            ],
+        ]);
 
         $sessions = [];
         foreach ($ul as $log) {
@@ -246,10 +241,7 @@ class User extends \Light\Model
 
     public function saveLastAccessTime(string $session_id): void
     {
-        UserLog::_table()->update(
-            ["last_access_time" => date("Y-m-d H:i:s")],
-            ["jti" => $session_id, "user_id" => $this->user_id]
-        );
+        UserLog::Query(["jti" => $session_id, "user_id" => $this->user_id])->update(["last_access_time" => date("Y-m-d H:i:s")]);
     }
 
     public function isAuthLocked()
@@ -263,7 +255,7 @@ class User extends \Light\Model
 
         $auth_lockout_attempts = intval(Config::Value("auth_lockout_attempts", 5));  // default 5 attempts
 
-        $q->where->greaterThan("login_dt", date("Y-m-d H:i:s", time() - ($auth_lockout_minutes * 60)));
+        $q = $q->where(["login_dt" => ["gt" => date("Y-m-d H:i:s", time() - ($auth_lockout_minutes * 60))]]);
         foreach ($q->order("userlog_id")->limit($auth_lockout_attempts) as $ul) {
             if ($ul->result == "FAIL") {
                 $total++;

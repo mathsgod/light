@@ -29,18 +29,11 @@ class Table
     #[Field(outputType: "mixed")]
     public function getColumns(#[Autowire()] App $app): array
     {
-        $db = $app->getDatabase();
-        $table = $db->getTable($this->name);
-        return $table->getColumns()->map(function ($col) {
-            $length = $col->getCharacterMaximumLength() ?? $col->getNumericPrecision();
-            return [
-                'name'          => $col->getName(),
-                'type'          => $col->getDataType(),
-                'length'        => $length !== null ? (string)$length : '',
-                'nullable'      => $col->isNullable(),
-                'default'       => $col->getColumnDefault() ?? '',
-                'autoincrement' => $col->isAutoIncrement(),
-            ];
-        })->values()->toArray();
+        return array_map(static fn ($col) => [
+            'name' => $col['name'], 'type' => $col['type'],
+            'length' => (string)($col['length'] ?? $col['precision_length'] ?? ''),
+            'nullable' => (bool)$col['nullable'], 'default' => $col['default'] ?? '',
+            'autoincrement' => (bool)$col['auto_increment'],
+        ], Sql::columns($this->name));
     }
 }

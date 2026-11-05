@@ -42,7 +42,8 @@ if 'mathsgod/light-db' in d.get('require', {}):
         ['composer', 'show', 'mathsgod/light-db', '--no-interaction', '-q', '--format=json'],
         capture_output=True, text=True
     )
-    d['require']['mathsgod/light-db'] = '^1.7.0'
+    d['require']['mathsgod/light-db'] = '^2.0'
+    d['require']['mathsgod/light-db-graphqlite-mappers'] = '^2.0'
 
 with open('composer.json', 'w') as f:
     json.dump(d, f, indent=4, ensure_ascii=False)
@@ -51,8 +52,11 @@ with open('composer.json', 'w') as f:
 print("  composer.json updated to stable versions")
 EOF
 
-# Commit the release composer.json
-git add composer.json
+# Resolve published packages before creating a release; missing v2 tags fail here.
+composer update mathsgod/light-db mathsgod/light-db-graphqlite-mappers --with-dependencies --minimal-changes --no-interaction
+
+# Commit the release manifests
+git add composer.json composer.lock
 git commit -m "chore: release $VERSION"
 git push
 
@@ -65,33 +69,10 @@ fi
 
 # Create GitHub release
 echo "→ Creating GitHub release $VERSION..."
-gh release create "$VERSION" --title "$VERSION" --notes "$NOTES" --target main
+gh release create "$VERSION" --title "$VERSION" --notes "$NOTES" --target "$(git rev-parse HEAD)"
 
 echo "✓ Released $VERSION"
 
-# Restore local dev mode
-echo "→ Restoring local dev setup..."
-composer config repositories.light-db '{"type":"path","url":"../light-db"}'
-python3 - <<'EOF'
-import json
-
-with open('composer.json') as f:
-    d = json.load(f)
-
-repos = d.setdefault('repositories', {})
-local_db = {"type": "path", "url": "../light-db"}
-if isinstance(repos, list):
-    repos.insert(0, local_db)
-else:
-    repos['light-db'] = local_db
-d.setdefault('require', {})['mathsgod/light-db'] = '@dev'
-
-with open('composer.json', 'w') as f:
-    json.dump(d, f, indent=4, ensure_ascii=False)
-    f.write('\n')
-
-print("  composer.json restored to @dev + path repo")
-EOF
-
-git update-index --skip-worktree composer.json
-echo "✓ Local dev mode restored (git ignoring composer.json again)"
+# Restore the sibling v2 source packages for continued development.
+./dev-setup.sh
+echo "✓ Local v2 development setup restored"

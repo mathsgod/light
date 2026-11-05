@@ -110,11 +110,11 @@ class AuthController
         }
 
 
-        User::_table()->update([
+        User::Query([
+            "user_id" => $user->user_id
+        ])->update([
             "password" => password_hash($new_password, PASSWORD_DEFAULT),
             "password_dt" => date("Y-m-d H:i:s")
-        ], [
-            "user_id" => $user->user_id
         ]);
 
         return true;
@@ -381,10 +381,10 @@ class AuthController
 
 
         if ($session_id) {
-            UserLog::_table()->update([
-                "logout_dt" => date("Y-m-d H:i:s")
-            ], [
+            UserLog::Query([
                 "jti" => $session_id
+            ])->update([
+                "logout_dt" => date("Y-m-d H:i:s")
             ]);
         }
 
@@ -430,7 +430,7 @@ class AuthController
 
         if (!self::PasswordVerify($password, $user->password)) {
             //save to UserLog
-            UserLog::_table()->insert([
+            \Light\Database\Sql::insert('UserLog', [
                 "user_id" => $user->user_id,
                 "login_dt" => date("Y-m-d H:i:s"),
                 "result" => "FAIL",
@@ -599,7 +599,7 @@ class AuthController
     #[Logged]
     public function markAllNotificationsRead(#[InjectUser] User $user): bool
     {
-        \Light\Model\Notification::_table()->update(['is_read' => 1], ['user_id' => $user->user_id, 'is_read' => 0]);
+        \Light\Model\Notification::Query(['user_id' => $user->user_id, 'is_read' => 0])->update(['is_read' => 1]);
         return true;
     }
 
@@ -693,10 +693,10 @@ class AuthController
             throw new Error("Password is not valid to the password policy");
         }
 
-        User::_table()->update([
-            "password" => password_hash($password, PASSWORD_DEFAULT)
-        ], [
+        User::Query([
             "user_id" => $user->user_id
+        ])->update([
+            "password" => password_hash($password, PASSWORD_DEFAULT)
         ]);
 
         return true;
@@ -727,7 +727,7 @@ class AuthController
 
         $token = TokenManager::encode($payload);
 
-        APIKey::_table()->insert([
+        \Light\Database\Sql::insert('APIKey', [
             "name"         => $name,
             "key"          => $token,
             "user_id"      => $user->user_id,

@@ -229,9 +229,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         }
     }
 
-    public function getDatabase(): \Light\Db\Adapter
+    public function getDatabase(): \Light\Db\Database
     {
-        return \Light\Db\Adapter::Create();
+        return \Light\Db\Database::getDefault();
     }
 
     public function getCache(): CacheInterface
@@ -737,7 +737,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function getRefreshTokenCookiePath(): string
     {
-        if ($_ENV["API_PREFIX"]) {
+        if (!empty($_ENV["API_PREFIX"])) {
             $currentDir = rtrim($_ENV["API_PREFIX"], '/\\');
         } else {
             $currentDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
@@ -783,7 +783,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->setAccessTokenCookie(TokenManager::encode($payload));
 
         //save UserLog
-        UserLog::_table()->insert([
+        \Light\Database\Sql::insert('UserLog', [
             "user_id" => $user->user_id,
             "login_dt" => date("Y-m-d H:i:s"),
             "result" => "SUCCESS",
@@ -813,7 +813,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     public function hasFavorite(): bool
     {
 
-        $result =  iterator_to_array(MyFavorite::GetAdapter()->query("Show tables like 'MyFavorite'")->execute());
+        $result =  \Light\Database\Sql::rows("SHOW TABLES LIKE 'MyFavorite'");
         if (count($result) == 0) return false;
         return true;
     }
@@ -979,7 +979,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             // session without invalidating the user's existing login.
             if (!$session_id) {
                 $session_id = Uuid::uuid4()->toString();
-                UserLog::_table()->insert([
+                \Light\Database\Sql::insert('UserLog', [
                     "user_id" => $user_id,
                     "login_dt" => date("Y-m-d H:i:s"),
                     "last_access_time" => date("Y-m-d H:i:s"),

@@ -220,14 +220,11 @@ class WebAuthnController
 
 
         //directly save the credential to the user
-        User::_table()->update(
-            [
-                "credential" => json_encode($user->credential)
-            ],
-            [
+        User::Query([
                 "user_id" => $user->user_id
-            ]
-        );
+            ])->update([
+                "credential" => $user->credential
+            ]);
 
 
         //remove the challenge from cache

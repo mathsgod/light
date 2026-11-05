@@ -73,7 +73,7 @@ class ConfigTest extends TestCase
         $this->assertSame("v1", Config::Value($name));
 
         // Update the row directly (bypassing the model API)
-        Config::_table()->update(["value" => "v2"], ["name" => $name]);
+        Config::Query(["name" => $name])->update(["value" => "v2"]);
 
         // Cache is still warm, so we should see the stale "v1"
         $this->assertSame("v1", Config::Value($name));
@@ -93,7 +93,7 @@ class ConfigTest extends TestCase
         $this->assertSame("persistent", Config::Value($name));
 
         // Mutate the DB out from under the cache
-        Config::_table()->update(["value" => "mutated"], ["name" => $name]);
+        Config::Query(["name" => $name])->update(["value" => "mutated"]);
 
         // Second call returns the cached value, not the DB row
         $this->assertSame("persistent", Config::Value($name));

@@ -25,7 +25,7 @@ class EventLogController
     #[Right("event_log.list")]
     public function listEventLog(#[InjectUser] \Light\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
     {
-        $app = new \Light\Type\App($filters, $sort);
+        $app = new \Light\Type\App();
         return $app->listEventLog($filters, $sort);
     }
 
@@ -35,9 +35,9 @@ class EventLogController
     public function getEventLogCleanup(#[Autowire] LightApp $app): LogCleanup
     {
         $db = $app->getDatabase();
-        $result = $db->query(
+        $result = $db->connection()->query(
             "SELECT COUNT(*) as cnt FROM information_schema.EVENTS WHERE EVENT_SCHEMA = DATABASE() AND EVENT_NAME = 'light_eventlog_cleanup'"
-        )->execute()->current();
+        )->fetch(\PDO::FETCH_ASSOC);
 
         $enabled = (int)$result['cnt'] > 0;
 
@@ -61,15 +61,15 @@ class EventLogController
         $config->value = $days;
         $config->save();
 
-        $db->query("DROP EVENT IF EXISTS `light_eventlog_cleanup`")->execute();
+        $db->connection()->query("DROP EVENT IF EXISTS `light_eventlog_cleanup`");
 
         if ($enabled) {
-            $db->query(
+            $db->connection()->query(
                 "CREATE EVENT `light_eventlog_cleanup`
                  ON SCHEDULE EVERY 1 DAY
                  STARTS TIMESTAMP(DATE_ADD(CURRENT_DATE(), INTERVAL 1 DAY))
                  DO DELETE FROM `EventLog` WHERE `created_time` < DATE_SUB(NOW(), INTERVAL $days DAY)"
-            )->execute();
+            );
         }
 
         return true;
@@ -81,9 +81,9 @@ class EventLogController
     public function getUserLogCleanup(#[Autowire] LightApp $app): LogCleanup
     {
         $db = $app->getDatabase();
-        $result = $db->query(
+        $result = $db->connection()->query(
             "SELECT COUNT(*) as cnt FROM information_schema.EVENTS WHERE EVENT_SCHEMA = DATABASE() AND EVENT_NAME = 'light_userlog_cleanup'"
-        )->execute()->current();
+        )->fetch(\PDO::FETCH_ASSOC);
 
         $enabled = (int)$result['cnt'] > 0;
 
@@ -106,15 +106,15 @@ class EventLogController
         $config->value = $days;
         $config->save();
 
-        $db->query("DROP EVENT IF EXISTS `light_userlog_cleanup`")->execute();
+        $db->connection()->query("DROP EVENT IF EXISTS `light_userlog_cleanup`");
 
         if ($enabled) {
-            $db->query(
+            $db->connection()->query(
                 "CREATE EVENT `light_userlog_cleanup`
                  ON SCHEDULE EVERY 1 DAY
                  STARTS TIMESTAMP(DATE_ADD(CURRENT_DATE(), INTERVAL 1 DAY))
                  DO DELETE FROM `UserLog` WHERE `login_dt` < DATE_SUB(NOW(), INTERVAL $days DAY)"
-            )->execute();
+            );
         }
 
         return true;

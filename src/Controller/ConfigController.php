@@ -33,7 +33,7 @@ class ConfigController
     public function listConfigBasic(): array
     {
         $q = Config::Query();
-        $q->where->in("name", ["company", "company_logo"]);
+        $q = $q->where(["name" => ["company", "company_logo"]]);
         return $q->toArray();
     }
 

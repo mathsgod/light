@@ -32,8 +32,8 @@
         "symfony/property-access": "^7.4",
         "guzzlehttp/guzzle": "^7.15.2",
         "web-auth/webauthn-lib": "^5.3",
-        "mathsgod/light-db": "^1.7.0",
-        "mathsgod/light-db-graphqlite-mappers": "^1.0",
+        "mathsgod/light-db": "^2.0@dev",
+        "mathsgod/light-db-graphqlite-mappers": "^2.0@dev",
         "mathsgod/json-to-sql": "^1.0",
         "mathsgod/mysql-schema-migrate": "^1.0",
         "symfony/console": "^7.4",
@@ -46,8 +46,7 @@
         "hostlink/hostlink-storage-adapter": "^1.0",
         "alphasnow/aliyun-oss-flysystem": "^3.4",
         "phpstan/phpstan": "^2.0",
-        "phpunit/phpunit": "^12.0",
-        "mathsgod/light-oauth2": "dev-main"
+        "phpunit/phpunit": "^12.0"
     },
     "autoload-dev": {
         "psr-4": {
@@ -73,7 +72,7 @@
         }
     },
     "scripts": {
-        "test": "phpunit tests --verbose",
+        "test": "phpunit",
         "test:docker": "tests/run-with-mysql.sh",
         "test:docker:setup": "docker compose -f compose.yml up -d --wait",
         "test:docker:teardown": "docker compose -f compose.yml down -v --remove-orphans",
@@ -81,8 +80,24 @@
     },
     "repositories": [
         {
-            "type": "vcs",
-            "url": "https://github.com/mathsgod/light-oauth2"
+            "type": "path",
+            "url": "../light-db-new",
+            "options": {
+                "versions": {
+                    "mathsgod/light-db": "2.0.x-dev"
+                }
+            }
+        },
+        {
+            "type": "path",
+            "url": "../light-db-graphqlite-mappers",
+            "options": {
+                "versions": {
+                    "mathsgod/light-db-graphqlite-mappers": "2.0.x-dev"
+                }
+            }
         }
-    ]
+    ],
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }

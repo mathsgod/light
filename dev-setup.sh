@@ -1,27 +1,22 @@
-#!/bin/bash
-# Switch to local development mode (uses sibling light-db and light-oauth2 paths)
-# Run once after cloning: ./dev-setup.sh
-# Git will ignore your local composer.json changes after this.
-
-set -e
-
-echo "→ Adding local path repository for light-db..."
-composer config repositories.light-db '{"type":"path","url":"../light-db"}'
-composer require mathsgod/light-db:@dev --no-update
-
-echo "→ Adding local path repository for light-oauth2..."
-composer config repositories.light-oauth2 '{"type":"path","url":"../light-oauth2","options":{"symlink":true}}'
-composer require --dev mathsgod/light-oauth2:@dev --no-update
-
-# light-oauth2 depends on a stable Light version; identify this dev checkout
-# by its latest release while resolving the circular root dependency.
-LIGHT_DEV_ROOT_VERSION=${COMPOSER_ROOT_VERSION:-$(git describe --tags --abbrev=0)}
-LIGHT_DEV_ROOT_VERSION=${LIGHT_DEV_ROOT_VERSION#v}
-echo "→ Updating local development dependencies..."
-COMPOSER_ROOT_VERSION="$LIGHT_DEV_ROOT_VERSION" composer update mathsgod/light-db mathsgod/light-oauth2 --with-dependencies --minimal-changes --no-interaction
-
-echo "→ Hiding composer.json changes from git..."
-git update-index --skip-worktree composer.json
-
-echo "✓ Dev mode active. composer.json now uses local light-db and light-oauth2"
-echo "  To release: run ./release.sh <version>"
+#!/usr/bin/env bash
+# Resolve sibling v2 packages while their stable releases are being prepared.
+set -euo pipefail
+cd "$(dirname "$0")"
+python3 - <<'PY'
+import json
+from pathlib import Path
+p = Path('composer.json')
+data = json.loads(p.read_text())
+names = {'mathsgod/light-db': '../light-db-new', 'mathsgod/light-db-graphqlite-mappers': '../light-db-graphqlite-mappers'}
+repositories = data.get('repositories', [])
+if isinstance(repositories, dict):
+    repositories = list(repositories.values())
+repositories = [repo for repo in repositories if repo.get('url') not in names.values()]
+local = []
+for name, path in names.items():
+    local.append({'type': 'path', 'url': path, 'options': {'versions': {name: '2.0.x-dev'}}})
+    data['require'][name] = '^2.0@dev'
+data['repositories'] = local + repositories
+p.write_text(json.dumps(data, indent=4) + '\n')
+PY
+composer update mathsgod/light-db mathsgod/light-db-graphqlite-mappers --with-dependencies --minimal-changes --no-interaction

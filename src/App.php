@@ -172,7 +172,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             if ($this->isDevMode()) {
                 return new JsonResponse($result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE), 200, [], JsonResponse::DEFAULT_JSON_FLAGS | JSON_UNESCAPED_UNICODE);
             } else {
-                DocumentValidator::addRule(new DisableIntrospection(true));
                 return new JsonResponse($result->toArray(), 200, [], JsonResponse::DEFAULT_JSON_FLAGS | JSON_UNESCAPED_UNICODE);
             }
         } catch (\Exception $e) {
@@ -703,7 +702,20 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
 
         $schema = $this->factory->createSchema();
-        return  GraphQL::executeQuery($schema, $query, null, new Context, $variableValues);
+        $validationRules = null;
+        if (!$this->isDevMode()) {
+            // Apply production validation to this execution without changing global rules.
+            $validationRules = DocumentValidator::allRules();
+            $validationRules[DisableIntrospection::class] = new DisableIntrospection(DisableIntrospection::ENABLED);
+        }
+        return GraphQL::executeQuery(
+            $schema,
+            $query,
+            null,
+            new Context,
+            $variableValues,
+            validationRules: $validationRules,
+        );
     }
 
     public function isDevMode(): bool

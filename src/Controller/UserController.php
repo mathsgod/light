@@ -38,7 +38,7 @@ class UserController
         if (!$user->is("Administrators")) {
 
             //filter out administrators
-            $q->where("user_id NOT IN (SELECT user_id FROM UserRole WHERE role = 'Administrators')");
+            $q = $q->whereRaw("user_id NOT IN (SELECT user_id FROM UserRole WHERE role = 'Administrators')");
         }
 
         return $q;

@@ -43,7 +43,7 @@ class MakeModelCommand extends Command
             return Command::FAILURE;
         }
 
-        $adapter = \Light\Db\Adapter::Create();
+        $adapter = \Light\Db\Database::getDefault();
 
         $class = new ClassGenerator($name, "Model");
         $class->addUse("TheCodingMachine\\GraphQLite\\Annotations\\Field");
@@ -60,9 +60,9 @@ class MakeModelCommand extends Command
         }
 
         // Add MagicField attributes for each column
-        foreach ($adapter->getTable($org_name)->columns() as $field) {
-            /** @var \Laminas\Db\Metadata\Object\ColumnObject $field */
-            $type = $field->getDataType();
+        foreach (\Light\Framework\Database\Sql::columns($org_name) as $field) {
+
+            $type = $field['type'];
 
             $gql_type = match ($type) {
                 "timestamp", "int unsigned", "int" => "Int",
@@ -72,11 +72,11 @@ class MakeModelCommand extends Command
                 default => "String"
             };
 
-            if (!$field->isNullable()) {
+            if (!$field['nullable']) {
                 $gql_type = "{$gql_type}!";
             }
 
-            $class->addAttribute("#[MagicField(name: \"{$field->getName()}\", outputType: \"$gql_type\")]");
+            $class->addAttribute("#[MagicField(name: \"{$field['name']}\", outputType: \"$gql_type\")]");
         }
 
         $content = "<?php\n\n" . $class->generate();

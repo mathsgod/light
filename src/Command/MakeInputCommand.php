@@ -45,7 +45,7 @@ class MakeInputCommand extends Command
             return Command::FAILURE;
         }
 
-        $adapter = \Light\Db\Adapter::Create();
+        $adapter = \Light\Db\Database::getDefault();
 
         $class = new ClassGenerator($name, "Input");
         $class->addUse("TheCodingMachine\\GraphQLite\\Annotations\\Field");
@@ -54,15 +54,15 @@ class MakeInputCommand extends Command
         $class->addAttribute("#[Input(name: \"Create{$name}Input\", default: true)]");
         $class->addAttribute("#[Input(name: \"Update{$name}Input\")]");
 
-        $table = $adapter->getTable($org_name);
-        $keys = $table->getPrimaryKey();
+        $table = \Light\Framework\Database\Sql::columns($org_name);
+        $keys = array_column(array_filter($table, static fn ($column) => $column['primary']), 'name');
 
         // Skip fields list
         $skipFields = ['created_time', 'updated_time', 'created_by', 'updated_by'];
 
-        foreach ($table->columns() as $field) {
-            /** @var \Laminas\Db\Metadata\Object\ColumnObject $field */
-            $fieldName = $field->getName();
+        foreach ($table as $field) {
+
+            $fieldName = $field['name'];
 
             // Skip primary keys
             if (in_array($fieldName, $keys)) {
@@ -74,7 +74,7 @@ class MakeInputCommand extends Command
                 continue;
             }
 
-            $type = $field->getDataType();
+            $type = $field['type'];
 
             $base_type = match ($type) {
                 "int", "bigint", "smallint", "mediumint", "year" => "int",

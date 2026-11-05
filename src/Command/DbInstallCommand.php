@@ -32,14 +32,15 @@ class DbInstallCommand extends Command
             return Command::FAILURE;
         }
 
-        $adapter = \Light\Db\Adapter::Create();
+        $adapter = \Light\Db\Database::getDefault();
 
         $io->section('Installing database schema');
 
         try {
             $converter = new \JsonToSql();
             $sql = $converter->convertJsonToSql('db.json');
-            $adapter->getDriver()->getConnection()->execute($sql);
+            $adapter->connection()->exec($sql);
+            $adapter->clearMetadata();
             $io->info('Database schema installed');
         } catch (\Exception $e) {
             $io->error('Failed to install database: ' . $e->getMessage());
@@ -51,7 +52,7 @@ class DbInstallCommand extends Command
         // Create admin user
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        User::_table()->insert([
+        \Light\Framework\Database\Sql::insert('User', [
             'username' => 'admin',
             'password' => $hashed_password,
             'first_name' => 'Admin',
@@ -61,18 +62,18 @@ class DbInstallCommand extends Command
         $io->info('Admin user created');
 
         // Create roles
-        Role::_table()->insert([
+        \Light\Framework\Database\Sql::insert('Role', [
             'name' => 'Users',
             'child' => 'Administrators',
         ]);
-        Role::_table()->insert([
+        \Light\Framework\Database\Sql::insert('Role', [
             'name' => 'Users',
             'child' => 'Power Users',
         ]);
         $io->info('Roles created');
 
         // Assign admin role
-        UserRole::_table()->insert([
+        \Light\Framework\Database\Sql::insert('UserRole', [
             'user_id' => 1,
             'role' => 'Administrators',
         ]);

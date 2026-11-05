@@ -276,4 +276,20 @@ class UserControllerTest extends TestCase
         $this->assertArrayNotHasKey("errors", $out, json_encode($out));
         $this->assertFalse($out["data"]["changeUserPassword"]);
     }
+    public function testListUserPaginationAliasesKeepIndependentQueriesAndTotal(): void
+    {
+        $ids = [$this->adminUser->user_id];
+        foreach (['page_one', 'page_two'] as $name) {
+            $user = User::Create(['username' => $name . uniqid(), 'first_name' => $name, 'join_date' => date('Y-m-d')]);
+            $user->save();
+            $ids[] = $user->user_id;
+        }
+        $out = $this->gql('{ app { listUser(sort: "user_id:asc") { first: data(limit: 1) { user_id } second: data(limit: 1, offset: 1) { user_id } meta { total key } } } }');
+        $this->assertArrayNotHasKey('errors', $out, json_encode($out));
+        $page = $out['data']['app']['listUser'];
+        $this->assertSame($ids[0], $page['first'][0]['user_id']);
+        $this->assertSame($ids[1], $page['second'][0]['user_id']);
+        $this->assertSame(3, $page['meta']['total']);
+        $this->assertSame('user_id', $page['meta']['key']);
+    }
 }

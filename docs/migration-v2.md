@@ -27,7 +27,7 @@ Update fully qualified class names, type declarations, parent classes, interface
 Only classes provided by `mathsgod/light` have moved. Other packages retain their existing namespaces, including:
 
 ```php
-use Light\Db\Adapter;
+use Light\Db\Database;
 use Light\Rbac\Rbac;
 use Light\GraphQL\Server;
 ```
@@ -48,3 +48,12 @@ Extensions that use framework classes must be updated to the new namespace and d
 2. Regenerate autoload files with `composer dump-autoload` if needed.
 3. Run your application's test suite and check its generated GraphQL schema.
 4. Exercise login, authorization, file access and other application-specific flows in a test environment before deployment.
+
+## Update persistence dependencies
+
+Light 2.x uses light-db 2.x and its v2 GraphQLite mapper, backed by light-entity
+1.x. `App::getDatabase()` returns `Light\Db\Database`; obtain PDO through
+`connection()`. Replace legacy Adapter/TableGateway calls with the new Model,
+Query or PDO APIs. Queries are immutable; retain returned queries when adding
+filters, ordering and pagination. See the README migration section for local
+source dependencies, transaction/audit behavior and the disposable test database.

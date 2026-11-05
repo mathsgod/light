@@ -7,7 +7,6 @@ use Firebase\JWT\JWT;
 use Google\Service\MigrationCenterAPI\UploadFileInfo;
 use GraphQL\Error\Error;
 use JsonToSql;
-use Laminas\Db\Sql\Ddl\CreateTable;
 use Light\Framework\App;
 use Light\Framework\Type\System;
 use Ramsey\Uuid\Uuid;
@@ -17,7 +16,6 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
-use Laminas\Db\Sql\Ddl\Column;
 use MysqlSchemaMigrate\Importer;
 use Psr\Http\Message\UploadedFileInterface;
 
@@ -26,7 +24,7 @@ class DatabaseController
 
     #[Mutation]
     #[Right("system.database.schema_import")]
-    public function importDatabaseSchema(UploadedFileInterface $schema): string
+    public function importDatabaseSchema(UploadedFileInterface $schema): bool
     {
         $importer = new Importer(
             host: $_ENV["DATABASE_HOSTNAME"],
@@ -43,6 +41,7 @@ class DatabaseController
             allowDrop: false,
         );
 
+        \Light\Db\Database::getDefault()->clearMetadata();
         return true;
     }
 
@@ -53,10 +52,11 @@ class DatabaseController
     {
         $db = $app->getDatabase();
         try {
-            $db->query("ALTER EVENT $name DO $body", $db::QUERY_MODE_EXECUTE);
+            $db->connection()->exec("ALTER EVENT $name DO $body");
         } catch (Exception $e) {
             throw new Error($e->getMessage());
         }
+        \Light\Db\Database::getDefault()->clearMetadata();
         return true;
     }
  */
@@ -67,10 +67,11 @@ class DatabaseController
     {
         $db = $app->getDatabase();
         try {
-            $db->getTable($table)->truncate();
+            $db->connection()->exec("TRUNCATE TABLE " . \Light\Framework\Database\Sql::identifier($table));
         } catch (Exception $e) {
             throw new Error($e->getMessage());
         }
+        \Light\Db\Database::getDefault()->clearMetadata();
         return true;
     }
 
@@ -80,10 +81,12 @@ class DatabaseController
     {
         $db = $app->getDatabase();
         try {
-            $db->removeTable($table);
+            $db->connection()->exec("DROP TABLE " . \Light\Framework\Database\Sql::identifier($table));
+            $db->clearMetadata();
         } catch (Exception $e) {
             throw new Error($e->getMessage());
         }
+        \Light\Db\Database::getDefault()->clearMetadata();
         return true;
     }
 
@@ -99,10 +102,11 @@ class DatabaseController
             $nullStr = $nullable ? "NULL" : "NOT NULL";
             $autoStr = $autoincrement ? "AUTO_INCREMENT" : "";
 
-            $db->query("ALTER TABLE `$table` ADD `$field` $typeStr $nullStr $defaultStr $autoStr", $db::QUERY_MODE_EXECUTE);
+            $db->connection()->exec("ALTER TABLE `$table` ADD `$field` $typeStr $nullStr $defaultStr $autoStr");
         } catch (Exception $e) {
             throw new Error($e->getMessage());
         }
+        \Light\Db\Database::getDefault()->clearMetadata();
         return true;
     }
 
@@ -121,13 +125,14 @@ class DatabaseController
             // If changing to NOT NULL, fill existing NULLs with a default value first
             if (!$nullable) {
                 $fillValue = in_array(strtolower($type), ['int', 'tinyint', 'smallint', 'mediumint', 'bigint', 'float', 'double', 'decimal']) ? 0 : '';
-                $db->query("UPDATE `$table` SET `$field` = '$fillValue' WHERE `$field` IS NULL", $db::QUERY_MODE_EXECUTE);
+                $db->connection()->exec("UPDATE `$table` SET `$field` = '$fillValue' WHERE `$field` IS NULL");
             }
 
-            $db->query("ALTER TABLE `$table` MODIFY `$field` $typeStr $nullStr $defaultStr $autoStr", $db::QUERY_MODE_EXECUTE);
+            $db->connection()->exec("ALTER TABLE `$table` MODIFY `$field` $typeStr $nullStr $defaultStr $autoStr");
         } catch (Exception $e) {
             throw new Error($e->getMessage());
         }
+        \Light\Db\Database::getDefault()->clearMetadata();
         return true;
     }
 
@@ -142,11 +147,12 @@ class DatabaseController
         $db = $app->getDatabase();
         foreach ($fields as $field) {
             try {
-                $db->query("ALTER TABLE $table DROP COLUMN $field", $db::QUERY_MODE_EXECUTE);
+                $db->connection()->exec("ALTER TABLE $table DROP COLUMN $field");
             } catch (Exception $e) {
                 throw new Error($e->getMessage());
             }
         }
+        \Light\Db\Database::getDefault()->clearMetadata();
         return true;
     }
 
@@ -161,35 +167,23 @@ class DatabaseController
     {
         $db = $app->getDatabase();
 
-        $t = new CreateTable($name);
+        $definitions = [];
         foreach ($fields as $column) {
-            if ($column->type == "int") {
-                $t->addColumn(new Column\Integer($column->name, $column->nullable ?? false));
-            }
-
-
-            if ($column->type == "varchar") {
-                $t->addColumn(new Column\Varchar($column->name, $column->length ?? 255, $column->nullable ?? false));
-            }
-
-            if ($column->type == "text") {
-                $t->addColumn(new Column\Text($column->name, $column->length ?? 4000, $column->nullable ?? false));
-            }
-
-            if ($column->type == "boolean") {
-                $t->addColumn(new Column\Boolean($column->name, $column->nullable ?? false));
-            }
-
-            if ($column->type == "date") {
-                $t->addColumn(new Column\Date($column->name, $column->nullable ?? false));
-            }
+            $type = match ($column->type) {
+                'int' => 'INT',
+                'varchar' => 'VARCHAR(' . max(1, (int)($column->length ?? 255)) . ')',
+                'text' => 'TEXT', 'boolean' => 'BOOLEAN', 'date' => 'DATE',
+                default => throw new \InvalidArgumentException('Unsupported column type: ' . $column->type),
+            };
+            $definitions[] = \Light\Framework\Database\Sql::identifier($column->name) . ' ' . $type . (($column->nullable ?? false) ? ' NULL' : ' NOT NULL');
         }
-
+        if ($definitions === []) throw new \InvalidArgumentException('A table needs columns.');
         try {
-            $db->query($t->getSqlString($db->getPlatform()), $db::QUERY_MODE_EXECUTE);
+            $db->connection()->exec('CREATE TABLE ' . \Light\Framework\Database\Sql::identifier($name) . ' (' . implode(', ', $definitions) . ')');
         } catch (\Exception $e) {
             throw new Error($e->getMessage());
         }
+        \Light\Db\Database::getDefault()->clearMetadata();
         return true;
     }
 
@@ -210,6 +204,7 @@ class DatabaseController
         $output = [];
         exec($command, $output);
 
+        \Light\Db\Database::getDefault()->clearMetadata();
         return true;
     }
 
@@ -256,11 +251,12 @@ class DatabaseController
 
             //execute sql
             try {
-                $db->query($sql, $db::QUERY_MODE_EXECUTE);
+                $db->connection()->exec($sql);
             } catch (Exception $e) {
                 throw new Error("Failed to create table '$name': " . $e->getMessage());
             }
-            return true;
+            \Light\Db\Database::getDefault()->clearMetadata();
+        return true;
         }
 
         // Process differences and apply fixes
@@ -296,7 +292,7 @@ class DatabaseController
                         $sql .= " $autoIncrement";
                     }
 
-                    $db->query($sql, $db::QUERY_MODE_EXECUTE);
+                    $db->connection()->exec($sql);
                 } elseif ($diff['type'] === 'column_mismatch') {
                     // Modify column to match expected definition
                     $colDef = $diff['differences'];
@@ -339,17 +335,18 @@ class DatabaseController
                             $sql .= " DEFAULT '$default'";
                         }
 
-                        $db->query($sql, $db::QUERY_MODE_EXECUTE);
+                        $db->connection()->exec($sql);
                     }
                 } elseif ($diff['type'] === 'extra_column') {
                     // Remove extra column
-                    $db->query("ALTER TABLE `$name` DROP COLUMN `{$diff['column']}`", $db::QUERY_MODE_EXECUTE);
+                    $db->connection()->exec("ALTER TABLE `$name` DROP COLUMN `{$diff['column']}`");
                 }
             } catch (Exception $e) {
                 throw new Error("Failed to fix column '{$diff['column']}': {$e->getMessage()}");
             }
         }
 
+        \Light\Db\Database::getDefault()->clearMetadata();
         return true;
     }
 }

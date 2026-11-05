@@ -130,7 +130,8 @@ class SystemController
     public function addDatabaseField(#[Autowire] App $app, string $table, string $field, string $type, string $length, string $default, bool $nullable, bool $autoincrement): string
     {
         $db = $app->getDatabase();
-        $db->exec("ALTER TABLE $table ADD $field $type($length) DEFAULT '$default' " . ($nullable ? "NULL" : "NOT NULL") . " " . ($autoincrement ? "AUTO_INCREMENT" : ""));
+        $db->connection()->exec("ALTER TABLE $table ADD $field $type($length) DEFAULT '$default' " . ($nullable ? "NULL" : "NOT NULL") . " " . ($autoincrement ? "AUTO_INCREMENT" : ""));
+        $db->clearMetadata();
         return "Field $field added to table $table";
     }
 
@@ -143,8 +144,9 @@ class SystemController
     {
         $db = $app->getDatabase();
         foreach ($fields as $field) {
-            $db->exec("ALTER TABLE $table DROP COLUMN $field");
+            $db->connection()->exec("ALTER TABLE $table DROP COLUMN $field");
         }
+        $db->clearMetadata();
         return "Fields " . implode(", ", $fields) . " removed from table $table";
     }
 }

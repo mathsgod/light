@@ -24,7 +24,7 @@ export JWT_SECRET="${JWT_SECRET}"
 export TZ=UTC
 
 echo "Creating database schema..."
-php -d variables_order=EGPCS tests/ci-setup.php
+"${PHP_BINARY:-php}" -d variables_order=EGPCS tests/ci-setup.php
 
 echo "Running PHPUnit..."
-php -d variables_order=EGPCS ./vendor/bin/phpunit --no-coverage "$@"
+"${PHP_BINARY:-php}" -d variables_order=EGPCS ./vendor/bin/phpunit --no-coverage "$@"

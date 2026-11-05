@@ -28,6 +28,7 @@ class UserLog extends \Light\Framework\Model
     }
 }
 
-UserLog::RegisterFilter("username", function ($f) {
-    return "user_id in (" . User::Query()->columns(["user_id"])->filters(["username" => $f])->getSqlString() . ")";
+UserLog::RegisterFilter("username", static function ($filter, \Light\Db\Query $query) {
+    $ids = array_map(static fn ($user) => $user->user_id, User::Query()->filters(['username' => $filter])->toArray());
+    return $query->where(['user_id' => $ids]);
 });

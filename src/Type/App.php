@@ -457,8 +457,8 @@ class App
 
         $q = EventLog::Query();
 
-        if ($filters["username"]["contains"]) {
-            $q->where->expression("user_id IN (SELECT user_id FROM User WHERE username LIKE ?)", ["%" . $filters["username"]["contains"] . "%"]);
+        if (isset($filters["username"]["contains"])) {
+            $q = $q->whereRaw("user_id IN (SELECT user_id FROM User WHERE username LIKE ?)", ["%" . $filters["username"]["contains"] . "%"]);
             unset($filters["username"]);
         }
 
@@ -493,7 +493,7 @@ class App
         if (!$user->is("Administrators")) {
 
             //filter out administrators
-            $q->where("user_id NOT IN (SELECT user_id FROM UserRole WHERE role = 'Administrators')");
+            $q = $q->whereRaw("user_id NOT IN (SELECT user_id FROM UserRole WHERE role = 'Administrators')");
         }
 
         return $q;

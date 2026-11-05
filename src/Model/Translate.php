@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Framework\Model;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
@@ -11,6 +11,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "language", outputType: "String")]
 #[MagicField(name: "name", outputType: "String")]
 #[MagicField(name: "value", outputType: "String")]
-class Translate extends \Light\Model
+class Translate extends \Light\Framework\Model
 {
 }

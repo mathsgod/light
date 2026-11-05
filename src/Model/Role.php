@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Framework\Model;
 
 use Light\Rbac\Role as RbacRole;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
@@ -30,12 +30,12 @@ class Role extends \Light\Db\Model
     {
         $name = $this->getName();
 
-        $user_ids = UserRole::Query(["role" => $name])->map(function ($ur) {
+        $user_ids = UserRole::Query(["role" => $name])->asEnumerable()->select(function ($ur) {
             return $ur->user_id;
         })->toArray();
 
         $q = User::Query();
-        $q->where->in("user_id", $user_ids);
+        $q = $q->where(["user_id" => $user_ids]);
         return $q->toArray();
     }
 
@@ -69,7 +69,7 @@ class Role extends \Light\Db\Model
 
     public static function LoadByRole(RbacRole $role)
     {
-        $r = Role::Create();
+        $r = new Role();
         $r->setRole($role);
         return $r;
     }

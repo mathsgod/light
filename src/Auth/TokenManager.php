@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Auth;
+namespace Light\Framework\Auth;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;

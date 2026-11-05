@@ -1,10 +1,10 @@
 <?php
 
-namespace Light;
+namespace Light\Framework;
 
 use Exception;
-use Light\Model\Config;
-use Light\Model\MailLog;
+use Light\Framework\Model\Config;
+use Light\Framework\Model\MailLog;
 use PHPMailer\PHPMailer\PHPMailer;
 
 class Mailer extends PHPMailer

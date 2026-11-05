@@ -1,8 +1,8 @@
 <?php
 
-namespace Light\Tests;
+namespace Light\Framework\Tests;
 
-use Light\App;
+use Light\Framework\App;
 
 class AppPermissionsTest extends TestCase
 {

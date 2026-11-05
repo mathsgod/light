@@ -7,3 +7,5 @@ pages/*
 !pages/api/
 
 upload2.phpunit.result.cache
+
+.serena

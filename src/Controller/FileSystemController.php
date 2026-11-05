@@ -1,23 +1,23 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
 use GraphQL\Error\Error;
 use League\Flysystem\MountManager;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
-use Light\App;
+use Light\Framework\App;
 
-use Light\Filesystem\Event\FolderCreating;
-use Light\Filesystem\Event\FolderDeleting;
-use Light\Filesystem\Event\FolderRenaming;
-use Light\Filesystem\Event\FileWriting;
-use Light\Filesystem\Event\FileDeleting;
-use Light\Filesystem\Event\FileRenaming;
-use Light\Filesystem\Event\NodeMoving;
-use Light\Filesystem\Event\FileUploading;
-use Light\Filesystem\FilesystemFactory;
-use Light\Model\EventLog;
-use Light\Filesystem\Node\File;
+use Light\Framework\Filesystem\Event\FolderCreating;
+use Light\Framework\Filesystem\Event\FolderDeleting;
+use Light\Framework\Filesystem\Event\FolderRenaming;
+use Light\Framework\Filesystem\Event\FileWriting;
+use Light\Framework\Filesystem\Event\FileDeleting;
+use Light\Framework\Filesystem\Event\FileRenaming;
+use Light\Framework\Filesystem\Event\NodeMoving;
+use Light\Framework\Filesystem\Event\FileUploading;
+use Light\Framework\Filesystem\FilesystemFactory;
+use Light\Framework\Model\EventLog;
+use Light\Framework\Filesystem\Node\File;
 use Psr\Http\Message\UploadedFileInterface;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -26,7 +26,7 @@ use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
-use Light\Model\Config;
+use Light\Framework\Model\Config;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 
 class FileSystemController

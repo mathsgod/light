@@ -1,22 +1,22 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use GraphQL\Error\Error;
 use Ramsey\Uuid\Uuid;
 
-use Light\App;
-use Light\Auth\Service;
-use Light\Auth\TokenManager;
-use Light\Input\User as InputUser;
-use Light\Model\APIKey;
-use Light\Model\Config;
-use Light\Type\System;
-use Light\Model\User;
-use Light\Model\UserLog;
-use Light\Security\TwoFactorAuthentication;
+use Light\Framework\App;
+use Light\Framework\Auth\Service;
+use Light\Framework\Auth\TokenManager;
+use Light\Framework\Input\User as InputUser;
+use Light\Framework\Model\APIKey;
+use Light\Framework\Model\Config;
+use Light\Framework\Type\System;
+use Light\Framework\Model\User;
+use Light\Framework\Model\UserLog;
+use Light\Framework\Security\TwoFactorAuthentication;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
@@ -110,11 +110,11 @@ class AuthController
         }
 
 
-        User::_table()->update([
+        User::Query([
+            "user_id" => $user->user_id
+        ])->update([
             "password" => password_hash($new_password, PASSWORD_DEFAULT),
             "password_dt" => date("Y-m-d H:i:s")
-        ], [
-            "user_id" => $user->user_id
         ]);
 
         return true;
@@ -381,10 +381,10 @@ class AuthController
 
 
         if ($session_id) {
-            UserLog::_table()->update([
-                "logout_dt" => date("Y-m-d H:i:s")
-            ], [
+            UserLog::Query([
                 "jti" => $session_id
+            ])->update([
+                "logout_dt" => date("Y-m-d H:i:s")
             ]);
         }
 
@@ -430,7 +430,7 @@ class AuthController
 
         if (!self::PasswordVerify($password, $user->password)) {
             //save to UserLog
-            UserLog::_table()->insert([
+            \Light\Framework\Database\Sql::insert('UserLog', [
                 "user_id" => $user->user_id,
                 "login_dt" => date("Y-m-d H:i:s"),
                 "result" => "FAIL",
@@ -587,7 +587,7 @@ class AuthController
     #[Logged]
     public function markNotificationRead(#[InjectUser] User $user, int $id): bool
     {
-        if ($n = \Light\Model\Notification::Get(['notification_id' => $id, 'user_id' => $user->user_id])) {
+        if ($n = \Light\Framework\Model\Notification::Get(['notification_id' => $id, 'user_id' => $user->user_id])) {
             $n->is_read = 1;
             $n->save();
             return true;
@@ -599,7 +599,7 @@ class AuthController
     #[Logged]
     public function markAllNotificationsRead(#[InjectUser] User $user): bool
     {
-        \Light\Model\Notification::_table()->update(['is_read' => 1], ['user_id' => $user->user_id, 'is_read' => 0]);
+        \Light\Framework\Model\Notification::Query(['user_id' => $user->user_id, 'is_read' => 0])->update(['is_read' => 1]);
         return true;
     }
 
@@ -607,7 +607,7 @@ class AuthController
     #[Logged]
     public function deleteNotification(#[InjectUser] User $user, int $id): bool
     {
-        if ($n = \Light\Model\Notification::Get(['notification_id' => $id, 'user_id' => $user->user_id])) {
+        if ($n = \Light\Framework\Model\Notification::Get(['notification_id' => $id, 'user_id' => $user->user_id])) {
             $n->delete();
             return true;
         }
@@ -622,7 +622,7 @@ class AuthController
     public function deleteNotifications(#[InjectUser] User $user, array $ids): bool
     {
         foreach ($ids as $id) {
-            if ($n = \Light\Model\Notification::Get(['notification_id' => $id, 'user_id' => $user->user_id])) {
+            if ($n = \Light\Framework\Model\Notification::Get(['notification_id' => $id, 'user_id' => $user->user_id])) {
                 $n->delete();
             }
         }
@@ -634,7 +634,7 @@ class AuthController
     #[Right("notification.send")]
     public function sendNotification(int $user_id, string $type, string $title, string $message, ?string $link = null): bool
     {
-        \Light\Model::Notify($user_id, $type, $title, $message, $link);
+        \Light\Framework\Model::Notify($user_id, $type, $title, $message, $link);
         return true;
     }
 
@@ -693,10 +693,10 @@ class AuthController
             throw new Error("Password is not valid to the password policy");
         }
 
-        User::_table()->update([
-            "password" => password_hash($password, PASSWORD_DEFAULT)
-        ], [
+        User::Query([
             "user_id" => $user->user_id
+        ])->update([
+            "password" => password_hash($password, PASSWORD_DEFAULT)
         ]);
 
         return true;
@@ -727,7 +727,7 @@ class AuthController
 
         $token = TokenManager::encode($payload);
 
-        APIKey::_table()->insert([
+        \Light\Framework\Database\Sql::insert('APIKey', [
             "name"         => $name,
             "key"          => $token,
             "user_id"      => $user->user_id,

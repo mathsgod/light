@@ -1,12 +1,12 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
 use Exception;
-use Light\Auth\TokenManager;
+use Light\Framework\Auth\TokenManager;
 use GraphQL\Error\Error;
-use Light\App;
-use Light\Type\System;
+use Light\Framework\App;
+use Light\Framework\Type\System;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -51,7 +51,7 @@ class SystemController
 
     #[Mutation]
     #[Logged]
-    public function cancelViewAs(#[Autowire] \Light\Auth\Service $service, #[Autowire] App $app): bool
+    public function cancelViewAs(#[Autowire] \Light\Framework\Auth\Service $service, #[Autowire] App $app): bool
     {
 
         $access_token_expire = $app->getAccessTokenExpire();
@@ -82,7 +82,7 @@ class SystemController
         #[InjectUser] $user,
         int $user_id,
         #[Autowire] App $app,
-        #[Autowire] \Light\Auth\Service $service
+        #[Autowire] \Light\Framework\Auth\Service $service
     ): bool
     {
         $access_token_expire = $app->getAccessTokenExpire();
@@ -130,7 +130,8 @@ class SystemController
     public function addDatabaseField(#[Autowire] App $app, string $table, string $field, string $type, string $length, string $default, bool $nullable, bool $autoincrement): string
     {
         $db = $app->getDatabase();
-        $db->exec("ALTER TABLE $table ADD $field $type($length) DEFAULT '$default' " . ($nullable ? "NULL" : "NOT NULL") . " " . ($autoincrement ? "AUTO_INCREMENT" : ""));
+        $db->connection()->exec("ALTER TABLE $table ADD $field $type($length) DEFAULT '$default' " . ($nullable ? "NULL" : "NOT NULL") . " " . ($autoincrement ? "AUTO_INCREMENT" : ""));
+        $db->clearMetadata();
         return "Field $field added to table $table";
     }
 
@@ -143,8 +144,9 @@ class SystemController
     {
         $db = $app->getDatabase();
         foreach ($fields as $field) {
-            $db->exec("ALTER TABLE $table DROP COLUMN $field");
+            $db->connection()->exec("ALTER TABLE $table DROP COLUMN $field");
         }
+        $db->clearMetadata();
         return "Fields " . implode(", ", $fields) . " removed from table $table";
     }
 }

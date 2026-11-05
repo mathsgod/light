@@ -1,16 +1,16 @@
 <?php
 
-namespace Light\Tests\Auth;
+namespace Light\Framework\Tests\Auth;
 
 use GraphQL\Error\Error;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\ServerRequest;
-use Light\App;
-use Light\Controller\AuthController;
-use Light\Model\Config;
-use Light\Model\User;
-use Light\Security\TwoFactorAuthentication;
-use Light\Tests\TestCase;
+use Light\Framework\App;
+use Light\Framework\Controller\AuthController;
+use Light\Framework\Model\Config;
+use Light\Framework\Model\User;
+use Light\Framework\Security\TwoFactorAuthentication;
+use Light\Framework\Tests\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;

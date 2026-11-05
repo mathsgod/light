@@ -1,14 +1,14 @@
 <?php
 
-namespace Light\Type;
+namespace Light\Framework\Type;
 
 use Exception;
 use GraphQL\Error\Error;
-use Light\App;
-use Light\Model\Config;
-use Light\Model\User;
-use Light\WebAuthn\PublicKeyCredentialSourceRepository;
-use Light\WebAuthn\Serializer;
+use Light\Framework\App;
+use Light\Framework\Model\Config;
+use Light\Framework\Model\User;
+use Light\Framework\WebAuthn\PublicKeyCredentialSourceRepository;
+use Light\Framework\WebAuthn\Serializer;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;

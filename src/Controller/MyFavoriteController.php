@@ -1,20 +1,20 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
 use Google\Service\Transcoder\Input;
-use Light\App as LightApp;
-use Light\Model\Config;
-use Light\Model\MyFavorite;
-use Light\Model\User;
-use Light\Type\App;
+use Light\Framework\App as LightApp;
+use Light\Framework\Model\Config;
+use Light\Framework\Model\MyFavorite;
+use Light\Framework\Model\User;
+use Light\Framework\Type\App;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
 use TheCodingMachine\GraphQLite\Annotations\Right;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
-use Light\Input\MyFavorite as InputMyFavorite;
+use Light\Framework\Input\MyFavorite as InputMyFavorite;
 use TheCodingMachine\GraphQLite\Annotations\UseInputType;
 
 class MyFavoriteController

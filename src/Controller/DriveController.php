@@ -1,14 +1,14 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
 
 use GraphQL\Error\Error;
 use League\Flysystem\Filesystem;
-use Light\App;
-use Light\Drive\Event\FileUploading;
-use Light\Drive\Event\FolderCreating;
-use Light\Drive\File;
+use Light\Framework\App;
+use Light\Framework\Drive\Event\FileUploading;
+use Light\Framework\Drive\Event\FolderCreating;
+use Light\Framework\Drive\File;
 use Psr\Http\Message\UploadedFileInterface;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;

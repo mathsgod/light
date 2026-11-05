@@ -1,13 +1,13 @@
 <?php
 
-namespace Light\Auth;
+namespace Light\Framework\Auth;
 
 use Exception;
 use Firebase\JWT\ExpiredException;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
-use Light\Model\APIKey;
-use Light\Model\User;
-use Light\TokenExpiredException;
+use Light\Framework\Model\APIKey;
+use Light\Framework\Model\User;
+use Light\Framework\TokenExpiredException;
 use Psr\Http\Message\ServerRequestInterface;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
@@ -19,7 +19,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
     protected bool $is_logged = false;
     protected ?User $user = null;
     protected ?User $org_user = null;
-    protected \Light\App $app;
+    protected \Light\Framework\App $app;
     protected bool $view_as = false;
     protected bool $is_api_key = false;
     protected ?string $token = null;
@@ -31,8 +31,8 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
     public function __construct(ServerRequestInterface $request)
     {
 
-        /** @var \Light\App $app */
-        $this->app = $request->getAttribute(\Light\App::class);
+        /** @var \Light\Framework\App $app */
+        $this->app = $request->getAttribute(\Light\Framework\App::class);
         $cache = $this->app->getCache();
 
         $cookies = $request->getCookieParams();

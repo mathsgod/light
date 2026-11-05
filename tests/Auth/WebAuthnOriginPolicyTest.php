@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
-namespace Light\Tests\Auth;
+namespace Light\Framework\Tests\Auth;
 use InvalidArgumentException;
-use Light\WebAuthn\OriginPolicy;
-use Light\WebAuthn\Serializer;
+use Light\Framework\WebAuthn\OriginPolicy;
+use Light\Framework\WebAuthn\Serializer;
 use PHPUnit\Framework\TestCase;
 use Webauthn\{AuthenticatorAssertionResponse, AuthenticatorData, AuthenticatorSelectionCriteria, CollectedClientData, CredentialRecord, PublicKeyCredentialRequestOptions};
 use Webauthn\CeremonyStep\{CeremonyStepManagerFactory, CheckAllowedOrigins, CheckOrigin};

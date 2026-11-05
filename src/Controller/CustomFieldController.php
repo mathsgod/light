@@ -1,8 +1,8 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
-use Light\Model\CustomField;
+use Light\Framework\Model\CustomField;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -18,11 +18,11 @@ class CustomFieldController
     #[Query]
     #[Logged]
     /**
-     * @return \Light\Model\CustomField[]
+     * @return \Light\Framework\Model\CustomField[]
      * @param ?mixed $filters
      */
     #[Right("customfield.list")]
-    public function listCustomField(#[InjectUser] \Light\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
+    public function listCustomField(#[InjectUser] \Light\Framework\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
     {
         return CustomField::Query()->filters($filters)->sort($sort);
     }
@@ -30,7 +30,7 @@ class CustomFieldController
     #[Mutation]
     #[Logged]
     #[Right("customfield.add")]
-    public function addCustomField(\Light\Input\CustomField $data, #[InjectUser] \Light\Model\User $user): int
+    public function addCustomField(\Light\Framework\Input\CustomField $data, #[InjectUser] \Light\Framework\Model\User $user): int
     {
         $obj = CustomField::Create();
         $obj->bind($data);
@@ -41,7 +41,7 @@ class CustomFieldController
     #[Mutation]
     #[Logged]
     #[Right("customfield.update")]
-    public function updateCustomField(int $id, #[UseInputType(inputType: "UpdateCustomFieldInput")] \Light\Input\CustomField $data, #[InjectUser] \Light\Model\User $user): bool
+    public function updateCustomField(int $id, #[UseInputType(inputType: "UpdateCustomFieldInput")] \Light\Framework\Input\CustomField $data, #[InjectUser] \Light\Framework\Model\User $user): bool
     {
         if (!$obj = CustomField::Get($id)) return false;
         if (!$obj->canUpdate($user)) return false;
@@ -53,7 +53,7 @@ class CustomFieldController
     #[Mutation]
     #[Logged]
     #[Right("customfield.delete")]
-    public function deleteCustomField(int $id, #[InjectUser] \Light\Model\User $user): bool
+    public function deleteCustomField(int $id, #[InjectUser] \Light\Framework\Model\User $user): bool
     {
         if (!$obj = CustomField::Get($id)) return false;
         if (!$obj->canDelete($user)) return false;

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Light\WebAuthn;
+namespace Light\Framework\WebAuthn;
 
 use Symfony\Component\Serializer\SerializerInterface;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;

@@ -1,24 +1,24 @@
 <?php
 
-namespace Light\Type;
+namespace Light\Framework\Type;
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
-use Light\Type\Auth;
+use Light\Framework\Type\Auth;
 use Light\Rbac\Rbac;
-use Light\App as LightApp;
-use Light\Model\Config;
-use Light\Model\CustomField;
-use Light\Model\EventLog;
-use Light\Model\MailLog;
-use Light\Model\Notification;
-use Light\Model\Permission;
-use Light\Model\Role;
-use Light\Model\SystemValue;
-use Light\Model\Translate;
-use Light\Model\User;
-use Light\Model\UserLog;
-use Light\Security\TwoFactorAuthentication;
+use Light\Framework\App as LightApp;
+use Light\Framework\Model\Config;
+use Light\Framework\Model\CustomField;
+use Light\Framework\Model\EventLog;
+use Light\Framework\Model\MailLog;
+use Light\Framework\Model\Notification;
+use Light\Framework\Model\Permission;
+use Light\Framework\Model\Role;
+use Light\Framework\Model\SystemValue;
+use Light\Framework\Model\Translate;
+use Light\Framework\Model\User;
+use Light\Framework\Model\UserLog;
+use Light\Framework\Security\TwoFactorAuthentication;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -32,9 +32,9 @@ class App
 
     #[Field]
     #[Logged]
-    public function fs(): \Light\Type\Filesystem
+    public function fs(): \Light\Framework\Type\Filesystem
     {
-        return new \Light\Type\Filesystem();
+        return new \Light\Framework\Type\Filesystem();
     }
 
     #[Field(outputType: "mixed")]
@@ -92,7 +92,7 @@ class App
     #[Field]
     #[Logged]
     /**
-     * @return \Light\Model\Notification[]
+     * @return \Light\Framework\Model\Notification[]
      * @param ?mixed $filters
      */
     public function listNotification(#[InjectUser] User $user, $filters = null, ?string $sort = ''): \Light\Db\Query
@@ -140,7 +140,7 @@ class App
     #[Field]
     #[Logged]
     /**
-     * @return \Light\Model\Translate[]
+     * @return \Light\Framework\Model\Translate[]
      */
     public function getTranslates(): array
     {
@@ -151,7 +151,7 @@ class App
     #[Field]
     #[Logged]
     /**
-     * @return \Light\Model\Translate[]
+     * @return \Light\Framework\Model\Translate[]
      */
     public function getI18nMessages(#[InjectUser] User $user): array
     {
@@ -171,7 +171,7 @@ class App
     }
 
     #[Field]
-    public function isViewAsMode(#[Autowire] \Light\Auth\Service $service): bool
+    public function isViewAsMode(#[Autowire] \Light\Framework\Auth\Service $service): bool
     {
         return $service->isViewAsMode();
     }
@@ -369,7 +369,7 @@ class App
     #[Logged]
     #[Right("config.list")]
     /**
-     * @return \Light\Model\Config[]
+     * @return \Light\Framework\Model\Config[]
      */
     public function getConfig(): array
     {
@@ -412,17 +412,17 @@ class App
 
     #[Field]
     #[Logged]
-    function getDrive(#[Autowire] LightApp $app, ?int $index = 0): \Light\Drive\Drive
+    function getDrive(#[Autowire] LightApp $app, ?int $index = 0): \Light\Framework\Drive\Drive
     {
         $config = $app->getFSConfig();
         $fs = $config[$index] ?? $config[0];
-        return new \Light\Drive\Drive($fs["name"], $app->getFS($index), $index, $fs["data"]);
+        return new \Light\Framework\Drive\Drive($fs["name"], $app->getFS($index), $index, $fs["data"]);
     }
 
     #[Field]
     #[Logged]
     /**
-     * @return \Light\Drive\Drive[]
+     * @return \Light\Framework\Drive\Drive[]
      */
     function getDrives(#[Autowire] LightApp $app)
     {
@@ -430,7 +430,7 @@ class App
 
         $result = [];
         foreach ($config as $key => $fs) {
-            $result[] = new \Light\Drive\Drive($fs["name"], $app->getFS($key), $key, $fs["data"]);
+            $result[] = new \Light\Framework\Drive\Drive($fs["name"], $app->getFS($key), $key, $fs["data"]);
         }
         return $result;
     }
@@ -438,7 +438,7 @@ class App
     #[Field]
     /**
      * @param ?mixed $filters
-     * @return \Light\Model\MailLog[]
+     * @return \Light\Framework\Model\MailLog[]
      */
     #[Right("mail_log.list")]
     public function listMailLog($filters = null,  ?string $sort = ''): \Light\Db\Query
@@ -449,7 +449,7 @@ class App
     #[Field]
     /**
      * @param ?mixed $filters
-     * @return \Light\Model\EventLog[]
+     * @return \Light\Framework\Model\EventLog[]
      */
     #[Right("event_log.list")]
     public function listEventLog($filters = null,  ?string $sort = ''): \Light\Db\Query
@@ -457,8 +457,8 @@ class App
 
         $q = EventLog::Query();
 
-        if ($filters["username"]["contains"]) {
-            $q->where->expression("user_id IN (SELECT user_id FROM User WHERE username LIKE ?)", ["%" . $filters["username"]["contains"] . "%"]);
+        if (isset($filters["username"]["contains"])) {
+            $q = $q->whereRaw("user_id IN (SELECT user_id FROM User WHERE username LIKE ?)", ["%" . $filters["username"]["contains"] . "%"]);
             unset($filters["username"]);
         }
 
@@ -469,7 +469,7 @@ class App
     #[Right('config.list')]
     #[Logged]
     /**
-     * @return \Light\Model\Config[]
+     * @return \Light\Framework\Model\Config[]
      * @param ?mixed $filters
      */
     public function listConfig($filters = null,  ?string $sort = '',): \Light\Db\Query
@@ -481,11 +481,11 @@ class App
     #[Field]
     #[Logged]
     /**
-     * @return \Light\Model\User[]
+     * @return \Light\Framework\Model\User[]
      * @param ?mixed $filters
      */
     #[Right("user.list")]
-    public function listUser(#[InjectUser] \Light\Model\User $user, $filters = null, ?string $sort = ""): \Light\Db\Query
+    public function listUser(#[InjectUser] \Light\Framework\Model\User $user, $filters = null, ?string $sort = ""): \Light\Db\Query
     {
 
         //only administrators can list administrators
@@ -493,7 +493,7 @@ class App
         if (!$user->is("Administrators")) {
 
             //filter out administrators
-            $q->where("user_id NOT IN (SELECT user_id FROM UserRole WHERE role = 'Administrators')");
+            $q = $q->whereRaw("user_id NOT IN (SELECT user_id FROM UserRole WHERE role = 'Administrators')");
         }
 
         return $q;
@@ -525,10 +525,10 @@ class App
     #[Field]
     #[Logged]
     /**
-     * @return \Light\Model\Role[]
+     * @return \Light\Framework\Model\Role[]
      */
     #[Right("role.list")]
-    public function getRoles(#[Autowire] Rbac $rbac, #[InjectUser] \Light\Model\User $user): array
+    public function getRoles(#[Autowire] Rbac $rbac, #[InjectUser] \Light\Framework\Model\User $user): array
     {
         $rs = [];
         foreach ($rbac->getRoles() as $role) {
@@ -558,7 +558,7 @@ class App
     #[Field]
     #[Logged]
     /**
-     * @return \Light\Model\SystemValue[]
+     * @return \Light\Framework\Model\SystemValue[]
      * @param ?mixed $filters
      */
     #[Right('system_value.list')]
@@ -570,7 +570,7 @@ class App
     #[Field]
     #[Logged]
     /**
-     * @return \Light\Model\UserLog[]
+     * @return \Light\Framework\Model\UserLog[]
      * @param ?mixed $filters
      */
     #[Right("user_log.list")]
@@ -583,7 +583,7 @@ class App
     #[Right("permission.list")]
     /**
      * @param ?mixed $filters
-     * @return \Light\Model\Permission[]
+     * @return \Light\Framework\Model\Permission[]
      */
     public function listPermission($filters = null,  ?string $sort = ''): \Light\Db\Query
     {

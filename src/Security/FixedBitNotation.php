@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Security;
+namespace Light\Framework\Security;
 
 /**
  * FixedBitNotation

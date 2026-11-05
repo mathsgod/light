@@ -1,13 +1,13 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
-use Light\App as LightApp;
-use Light\Auth\Service;
-use Light\Input\Test;
-use Light\Model\Config;
-use Light\Model\User;
-use Light\Type\App;
+use Light\Framework\App as LightApp;
+use Light\Framework\Auth\Service;
+use Light\Framework\Input\Test;
+use Light\Framework\Model\Config;
+use Light\Framework\Model\User;
+use Light\Framework\Type\App;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;

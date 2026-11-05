@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Framework\Model;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
@@ -16,7 +16,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "user_agent", outputType: "String")]
 #[MagicField(name: "last_access_time", outputType: "String")]
 
-class UserLog extends \Light\Model
+class UserLog extends \Light\Framework\Model
 {
     #[Field]
     public function getUsername(): ?string
@@ -28,6 +28,7 @@ class UserLog extends \Light\Model
     }
 }
 
-UserLog::RegisterFilter("username", function ($f) {
-    return "user_id in (" . User::Query()->columns(["user_id"])->filters(["username" => $f])->getSqlString() . ")";
+UserLog::RegisterFilter("username", static function ($filter, \Light\Db\Query $query) {
+    $ids = array_map(static fn ($user) => $user->user_id, User::Query()->filters(['username' => $filter])->toArray());
+    return $query->where(['user_id' => $ids]);
 });

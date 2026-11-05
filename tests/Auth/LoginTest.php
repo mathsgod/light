@@ -1,11 +1,11 @@
 <?php
 
-namespace Light\Tests\Auth;
+namespace Light\Framework\Tests\Auth;
 
-use Light\Model\Config;
-use Light\Model\User;
-use Light\Model\UserLog;
-use Light\Tests\TestCase;
+use Light\Framework\Model\Config;
+use Light\Framework\Model\User;
+use Light\Framework\Model\UserLog;
+use Light\Framework\Tests\TestCase;
 
 class LoginTest extends TestCase
 {
@@ -43,7 +43,7 @@ class LoginTest extends TestCase
     {
         $user = $this->createUser("login_fail_" . uniqid(), "pw12345");
 
-        UserLog::_table()->insert([
+        \Light\Framework\Database\Sql::insert('UserLog', [
             "user_id" => $user->user_id,
             "login_dt" => date("Y-m-d H:i:s"),
             "result" => "FAIL",
@@ -60,7 +60,7 @@ class LoginTest extends TestCase
     {
         $user = $this->createUser("login_ok_" . uniqid(), "pw12345");
 
-        UserLog::_table()->insert([
+        \Light\Framework\Database\Sql::insert('UserLog', [
             "user_id" => $user->user_id,
             "login_dt" => date("Y-m-d H:i:s"),
             "result" => "SUCCESS",
@@ -88,7 +88,7 @@ class LoginTest extends TestCase
         $attempts = intval(Config::Value("auth_lockout_attempts", 5));
 
         for ($i = 0; $i < $attempts; $i++) {
-            UserLog::_table()->insert([
+            \Light\Framework\Database\Sql::insert('UserLog', [
                 "user_id" => $user->user_id,
                 "login_dt" => date("Y-m-d H:i:s"),
                 "result" => "FAIL",

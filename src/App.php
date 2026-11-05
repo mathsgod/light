@@ -1,10 +1,11 @@
 <?php
 
-namespace Light;
+namespace Light\Framework;
 
 use Exception;
-use Light\Auth\TokenManager;
-use Light\Auth\AudienceRegistry;
+use Light\Framework\Auth\TokenManager;
+use Light\Framework\Auth\AudienceRegistry;
+use Light\Framework\Extension\ExtensionInterface;
 use GraphQL\Error\DebugFlag;
 use GraphQL\GraphQL;
 use GraphQL\Upload\UploadMiddleware;
@@ -15,17 +16,17 @@ use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\Response\TextResponse;
 use League\Flysystem\MountManager;
-use Light\Filesystem\FilesystemFactory;
+use Light\Framework\Filesystem\FilesystemFactory;
 use Light\Rbac\Rbac;
-use Light\Model\Config;
-use Light\Model\MyFavorite;
-use Light\Model\Permission;
-use Light\Model\Role;
-use Light\Model\User;
-use Light\Model\UserLog;
-use Light\Model\UserRole;
-use Light\Drive\Drive;
-use Light\Mailer;
+use Light\Framework\Model\Config;
+use Light\Framework\Model\MyFavorite;
+use Light\Framework\Model\Permission;
+use Light\Framework\Model\Role;
+use Light\Framework\Model\User;
+use Light\Framework\Model\UserLog;
+use Light\Framework\Model\UserRole;
+use Light\Framework\Drive\Drive;
+use Light\Framework\Mailer;
 use PHPMailer\PHPMailer\PHPMailer;
 use League\Container\DefinitionContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -58,6 +59,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     protected CacheInterface $cache;
     private ?AudienceRegistry $audienceRegistry = null;
+
+    /** @var array<class-string<ExtensionInterface>, true> */
+    private array $extensions = [];
 
     protected array $menus = [];
     /** @var string[] Permissions exposed by registered extensions. */
@@ -138,7 +142,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->cache = $gql->getCache();
         $this->factory = $gql->getSchemaFactory();
         $this->factory->addNamespace("Light");
-        $this->factory->setFinder(\Light\GraphQL\ControllerDiscovery::finder($this->container));
+        $this->factory->setFinder(\Light\Framework\GraphQL\ControllerDiscovery::finder($this->container));
         $this->factory->addTypeMapperFactory(new \Light\Db\GraphQLite\Mappers\TypeMapperFactory);
 
         $this->rbac = new Rbac();
@@ -229,9 +233,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         }
     }
 
-    public function getDatabase(): \Light\Db\Adapter
+    public function getDatabase(): \Light\Db\Database
     {
-        return \Light\Db\Adapter::Create();
+        return \Light\Db\Database::getDefault();
     }
 
     public function getCache(): CacheInterface
@@ -408,7 +412,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     {
         $permissions = [];
         foreach (glob(__DIR__ . "/Controller/*.php") as $file) {
-            $class = "Light\\Controller\\" . basename($file, ".php");
+            $class = "Light\\Framework\\Controller\\" . basename($file, ".php");
             $rc = new \ReflectionClass($class);
             foreach ($rc->getMethods() as $method) {
                 foreach ($method->getAttributes("TheCodingMachine\GraphQLite\Annotations\Right") as $attr) {
@@ -418,7 +422,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         }
 
         foreach (glob(__DIR__ . "/Model/*.php") as $file) {
-            $class = "Light\\Model\\" . basename($file, ".php");
+            $class = "Light\\Framework\\Model\\" . basename($file, ".php");
             $rc = new \ReflectionClass($class);
             foreach ($rc->getMethods() as $method) {
                 foreach ($method->getAttributes("TheCodingMachine\GraphQLite\Annotations\Right") as $attr) {
@@ -428,7 +432,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         }
 
         foreach (glob(__DIR__ . "/Database/*.php") as $file) {
-            $class = "Light\\Database\\" . basename($file, ".php");
+            $class = "Light\\Framework\\Database\\" . basename($file, ".php");
             $rc = new \ReflectionClass($class);
             foreach ($rc->getMethods() as $method) {
                 foreach ($method->getAttributes("TheCodingMachine\GraphQLite\Annotations\Right") as $attr) {
@@ -438,7 +442,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         }
 
         foreach (glob(__DIR__ . "/Type/*.php") as $file) {
-            $class = "Light\\Type\\" . basename($file, ".php");
+            $class = "Light\\Framework\\Type\\" . basename($file, ".php");
             $rc = new \ReflectionClass($class);
             foreach ($rc->getMethods() as $method) {
                 foreach ($method->getAttributes("TheCodingMachine\GraphQLite\Annotations\Right") as $attr) {
@@ -564,6 +568,23 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return $this->container;
     }
 
+    /** Register an extension once, before handling requests or creating the schema. */
+    public function addExtension(ExtensionInterface $extension): void
+    {
+        $class = $extension::class;
+        if (isset($this->extensions[$class])) {
+            throw new \LogicException("Extension {$class} is already registered");
+        }
+
+        $this->extensions[$class] = true;
+        try {
+            $extension->register($this);
+        } catch (\Throwable $error) {
+            unset($this->extensions[$class]);
+            throw $error;
+        }
+    }
+
     public function getSchemaFactory(): SchemaFactory
     {
         return $this->factory;
@@ -587,7 +608,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             ? ($this->authServiceFactory)($request)
             : new Auth\Service($request);
         if (!$service instanceof Auth\Service) {
-            throw new \UnexpectedValueException('Authentication factory must return Light\\Auth\\Service');
+            throw new \UnexpectedValueException('Authentication factory must return Light\\Framework\\Auth\\Service');
         }
         return $service;
     }
@@ -737,7 +758,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function getRefreshTokenCookiePath(): string
     {
-        if ($_ENV["API_PREFIX"]) {
+        if (!empty($_ENV["API_PREFIX"])) {
             $currentDir = rtrim($_ENV["API_PREFIX"], '/\\');
         } else {
             $currentDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
@@ -783,7 +804,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->setAccessTokenCookie(TokenManager::encode($payload));
 
         //save UserLog
-        UserLog::_table()->insert([
+        \Light\Framework\Database\Sql::insert('UserLog', [
             "user_id" => $user->user_id,
             "login_dt" => date("Y-m-d H:i:s"),
             "result" => "SUCCESS",
@@ -813,7 +834,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     public function hasFavorite(): bool
     {
 
-        $result =  iterator_to_array(MyFavorite::GetAdapter()->query("Show tables like 'MyFavorite'")->execute());
+        $result =  \Light\Framework\Database\Sql::rows("SHOW TABLES LIKE 'MyFavorite'");
         if (count($result) == 0) return false;
         return true;
     }
@@ -979,7 +1000,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             // session without invalidating the user's existing login.
             if (!$session_id) {
                 $session_id = Uuid::uuid4()->toString();
-                UserLog::_table()->insert([
+                \Light\Framework\Database\Sql::insert('UserLog', [
                     "user_id" => $user_id,
                     "login_dt" => date("Y-m-d H:i:s"),
                     "last_access_time" => date("Y-m-d H:i:s"),

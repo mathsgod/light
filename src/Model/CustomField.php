@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Framework\Model;
 
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\MagicField;
@@ -18,7 +18,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "default_value", outputType: "String")]
 #[MagicField(name: "order", outputType: "Int")]
 #[MagicField(name: "help", outputType: "String")]
-class CustomField extends \Light\Model
+class CustomField extends \Light\Framework\Model
 {
 
     public function getFormKitSchema()

@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Input\Table;
+namespace Light\Framework\Input\Table;
 
 use Psr\Http\Message\UploadedFileInterface;
 use TheCodingMachine\GraphQLite\Annotations\Field;

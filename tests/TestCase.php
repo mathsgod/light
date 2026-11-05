@@ -1,8 +1,8 @@
 <?php
 
-namespace Light\Tests;
+namespace Light\Framework\Tests;
 
-use Light\Db\Adapter;
+use Light\Db\Database;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -18,15 +18,24 @@ abstract class TestCase extends BaseTestCase
             mkdir($pagesDir, 0777, true);
         }
 
-        Adapter::Create()->beginTransaction();
+        $pdo = Database::getDefault()->connection();
+        if ($pdo->query('SELECT DATABASE()')->fetchColumn() !== 'light_test') {
+            throw new \LogicException('Framework integration tests require the disposable light_test database.');
+        }
+        $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+        try {
+            foreach ($pdo->query('SHOW TABLES')->fetchAll(\PDO::FETCH_COLUMN) as $table) {
+                $pdo->exec('TRUNCATE TABLE ' . \Light\Framework\Database\Sql::identifier($table));
+            }
+        } finally { $pdo->exec('SET FOREIGN_KEY_CHECKS = 1'); }
     }
 
     protected function tearDown(): void
     {
-        Adapter::Create()->rollback();
+
         // Reset static container so the next test doesn't inherit a stale
         // Auth\Service pointing at rolled-back users
-        \Light\Model::SetContainer(null);
+        \Light\Framework\Model::SetContainer(null);
         parent::tearDown();
     }
 }

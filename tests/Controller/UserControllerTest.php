@@ -1,14 +1,14 @@
 <?php
 
-namespace Light\Tests\Controller;
+namespace Light\Framework\Tests\Controller;
 
 use Firebase\JWT\JWT;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\Response\EmptyResponse;
-use Light\App;
-use Light\Model\User;
-use Light\Model\UserRole;
-use Light\Tests\TestCase;
+use Light\Framework\App;
+use Light\Framework\Model\User;
+use Light\Framework\Model\UserRole;
+use Light\Framework\Tests\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -275,5 +275,36 @@ class UserControllerTest extends TestCase
 
         $this->assertArrayNotHasKey("errors", $out, json_encode($out));
         $this->assertFalse($out["data"]["changeUserPassword"]);
+    }
+    public function testListUserPaginationAliasesKeepIndependentQueriesAndTotal(): void
+    {
+        $ids = [$this->adminUser->user_id];
+        foreach (['page_one', 'page_two'] as $name) {
+            $user = User::Create(['username' => $name . uniqid(), 'first_name' => $name, 'join_date' => date('Y-m-d')]);
+            $user->save();
+            $ids[] = $user->user_id;
+        }
+        $out = $this->gql('{ app { listUser(sort: "user_id:asc") { first: data(limit: 1) { user_id } second: data(limit: 1, offset: 1) { user_id } meta { total key } } } }');
+        $this->assertArrayNotHasKey('errors', $out, json_encode($out));
+        $page = $out['data']['app']['listUser'];
+        $this->assertSame($ids[0], $page['first'][0]['user_id']);
+        $this->assertSame($ids[1], $page['second'][0]['user_id']);
+        $this->assertSame(3, $page['meta']['total']);
+        $this->assertSame('user_id', $page['meta']['key']);
+    }
+    public function testListUserLogAcceptsEmptyFrontendFilterList(): void
+    {
+        $log = \Light\Framework\Model\UserLog::Create([
+            'user_id'=>$this->adminUser->user_id, 'login_dt'=>date('Y-m-d H:i:s'),
+            'ip'=>'127.0.0.1', 'user_agent'=>'migration-test', 'result'=>'SUCCESS',
+        ]);
+        $log->save();
+        $out = $this->gql('query { listUserLog(filters: [{}], sort: "login_dt:desc") { data(offset: 0, limit: 20) { ip user_agent result logout_dt last_access_time login_dt username userlog_id } meta { total key name } } }');
+        $this->assertArrayNotHasKey('errors', $out, json_encode($out));
+        $result = $out['data']['listUserLog'];
+        $this->assertSame(1, $result['meta']['total']);
+        $this->assertSame('userlog_id', $result['meta']['key']);
+        $this->assertSame($log->userlog_id, $result['data'][0]['userlog_id']);
+        $this->assertSame($this->adminUser->username, $result['data'][0]['username']);
     }
 }

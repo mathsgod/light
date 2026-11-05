@@ -1,11 +1,11 @@
 <?php
 
-namespace Light\Tests;
+namespace Light\Framework\Tests;
 
 use Laminas\Diactoros\ServerRequest;
-use Light\App;
-use Light\Auth\Service;
-use Light\Model\User;
+use Light\Framework\App;
+use Light\Framework\Auth\Service;
+use Light\Framework\Model\User;
 
 class UserIdentitiesTest extends TestCase
 {

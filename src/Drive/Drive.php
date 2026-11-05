@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Drive;
+namespace Light\Framework\Drive;
 
 use GraphQL\Error\Error;
 use League\Flysystem\Filesystem;

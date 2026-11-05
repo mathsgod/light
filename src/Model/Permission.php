@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Model;
+namespace Light\Framework\Model;
 
 use Laminas\Permissions\Rbac\Role as RbacRole;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -11,6 +11,6 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 #[MagicField(name: "permission_id", outputType: "Int")]
 #[MagicField(name: "value", outputType: "String")]
 #[MagicField(name: "role", outputType: "String")]
-class Permission extends \Light\Model
+class Permission extends \Light\Framework\Model
 {
 }

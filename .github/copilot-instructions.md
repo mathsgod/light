@@ -33,7 +33,7 @@ php bin/light db:install             # Initialize database schema
 ## Architecture
 
 ```
-index.php → Light\App::run()
+index.php → Light\Framework\App::run()
   → Middleware pipeline (CORS, JWT auth, upload)
   → Router:
       GET  /fs/{protocol}/{path}   — Flysystem file serving
@@ -44,7 +44,7 @@ index.php → Light\App::run()
 
 **Schema generation** is annotation-driven via TheCodingMachine/GraphQLite (pulled in through `mathsgod/light-graphql`). Controllers in `src/Controller/` declare queries and mutations using PHP 8 attributes.
 
-**Database** schema is defined in `db.json`; the ORM is `mathsgod/light-db`. Models live in `src/Model/` and extend `Light\Model`.
+**Database** schema is defined in `db.json`; the ORM is `mathsgod/light-db`. Models live in `src/Model/` and extend `Light\Framework\Model`.
 
 **RBAC** is handled by `mathsgod/light-rbac`. Role→permission mappings bootstrap from `permissions.yml`; menus bootstrap from `menus.yml`. The `Administrators` role always has `*` (wildcard) in `permissions.yml`, granting all permissions natively — never add a hard-coded `if ($user->is("Administrators")) return true` shortcut.
 
@@ -75,7 +75,7 @@ public function createUser(CreateUserInput $input): User { ... }
 | Path | Purpose |
 |------|---------|
 | `src/Controller/` | GraphQL controllers (queries & mutations) |
-| `src/Model/` | ORM models, extend `Light\Model` |
+| `src/Model/` | ORM models, extend `Light\Framework\Model` |
 | `src/Input/` | GraphQL input types for mutations |
 | `src/Type/` | GraphQL output types |
 | `src/Command/` | Symfony Console CLI commands |
@@ -111,7 +111,7 @@ $user->delete();
 Models are annotated with `#[Type]` to double as GraphQL output types. `save()` and `delete()` auto-populate `created_time`, `updated_time`, `created_by`, `updated_by` and write to `EventLog`.
 
 ### `bind()` for Partial Updates
-`Light\Model::bind($data)` supports partial updates from GraphQL input objects:
+`Light\Framework\Model::bind($data)` supports partial updates from GraphQL input objects:
 - Uses `get_object_vars($data)` so **uninitialized** properties (fields not sent by the frontend) are skipped entirely
 - **`null` values are written** — allows clearing a nullable field explicitly
 - Only writes fields that exist in the DB schema (protects against injection of unknown keys)
@@ -128,7 +128,7 @@ Do **not** pre-filter null values before calling `bind()` — the method handles
 
 ### Authorization Pattern (`canDelete` / `canUpdate` / `canView`)
 
-The base `Light\Model` returns `$by !== null` for all three (any logged-in user can act). System models override with specific rules.
+The base `Light\Framework\Model` returns `$by !== null` for all three (any logged-in user can act). System models override with specific rules.
 
 **Permission split by operation type:**
 
@@ -168,7 +168,7 @@ public function canDelete(#[InjectUser] ?User $by): bool
 Use `$user->can('permission.name')` for PHP-level checks (e.g. inside `canDelete` body). It falls back to `self::$container` when GraphQLite injection is unavailable. Do not use the old `isGranted()` for direct calls — that requires `#[Autowire]` injection.
 
 ### Testing
-- All tests extend `Light\Tests\TestCase` which wraps each test in a DB transaction and rolls back in `tearDown()`, also calling `Model::SetContainer(null)` to reset static state.
+- All tests extend `Light\Framework\Tests\TestCase` which wraps each test in a DB transaction and rolls back in `tearDown()`, also calling `Model::SetContainer(null)` to reset static state.
 - Tests require a real DB connection (integration tests, not unit tests).
 - `Model::$container` is static — must be reset between tests to avoid stale `Auth\Service` references.
 
@@ -181,7 +181,7 @@ All new code must use PHP 8.3 type hints on properties and method signatures. Wh
 - Both files are loaded at boot; runtime overrides are stored in the `Config` table.
 
 ### File Storage
-File operations go through `Light\Drive` (Flysystem MountManager). Available adapters: Local, S3, Aliyun OSS, Hostlink. Never access the filesystem directly — use the drive abstraction.
+File operations go through `Light\Framework\Drive` (Flysystem MountManager). Available adapters: Local, S3, Aliyun OSS, Hostlink. Never access the filesystem directly — use the drive abstraction.
 
 ### Authentication Flow
 1. Login → `POST /` mutation returns `access_token` (short-lived JWT) + `refresh_token`

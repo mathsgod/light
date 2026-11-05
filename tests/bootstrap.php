@@ -6,5 +6,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->safeLoad();
 
-// Initialise DB adapter (singleton) so all models can use it
-\Light\Db\Adapter::Create();
+// Initialise the default PDO-backed database for all models
+\Light\Db\Database::getDefault();
+
+// Composer changes can remove optional GraphQL types cached by earlier test runs.
+(new \Symfony\Component\Cache\Adapter\FilesystemAdapter('light'))->clear();

@@ -1,6 +1,6 @@
 <?php
 
-namespace Light;
+namespace Light\Framework;
 
 use GraphQL\Error\ClientAware;
 use GraphQL\Error\ProvidesExtensions;

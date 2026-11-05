@@ -1,9 +1,9 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
-use Light\Input\Translate as InputTranslate;
-use Light\Model\Translate;
+use Light\Framework\Input\Translate as InputTranslate;
+use Light\Framework\Model\Translate;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -20,7 +20,7 @@ class TranslateController
     public function updateTranslate(string $name, string $value, string $language): bool
     {
         $q = Translate::Query(["language" => $language]);
-        $q->where->expression("binary name = ?", [$name]);
+        $q = $q->whereRaw("binary name = ?", [$name]);
         $t = $q->first();
 
         if (!$t) {
@@ -60,12 +60,12 @@ class TranslateController
     #[Mutation]
     #[Logged]
     #[Right('translate.add')]
-    public function addTranslate(InputTranslate $data, #[InjectUser] \Light\Model\User $user): int
+    public function addTranslate(InputTranslate $data, #[InjectUser] \Light\Framework\Model\User $user): int
     {
         foreach ($data->values as $value) {
 
             $q = Translate::Query(["language" => $value["language"]]);
-            $q->where->expression("binary name = ?", [$data->name]);
+            $q = $q->whereRaw("binary name = ?", [$data->name]);
             $t = $q->first();
 
             if (!$t) {
@@ -94,7 +94,7 @@ class TranslateController
     {
 
         $q = Translate::Query();
-        $q->where->expression("binary name = ?", [$name]);
+        $q = $q->whereRaw("binary name = ?", [$name]);
         $q->delete();
         return true;
     }

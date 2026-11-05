@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Command;
+namespace Light\Framework\Command;
 
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -26,15 +26,15 @@ class MakeTsCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $org_name = $input->getArgument('name');
 
-        $adapter = \Light\Db\Adapter::Create();
+        $adapter = \Light\Db\Database::getDefault();
 
         $str = "export default defineLightModel({\n";
         $str .= "\tname: \"{$org_name}\",\n";
         $str .= "\tfields: {\n";
 
-        foreach ($adapter->getTable($org_name)->columns() as $field) {
-            $name = $field->getName();
-            $type = $field->getDataType();
+        foreach (\Light\Framework\Database\Sql::columns($org_name) as $field) {
+            $name = $field['name'];
+            $type = $field['type'];
 
             // Convert snake_case to Title Case for label
             $label = str_replace('_', ' ', $name);

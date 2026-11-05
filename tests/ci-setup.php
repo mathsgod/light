@@ -8,10 +8,11 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$adapter = \Light\Db\Adapter::Create();
+$adapter = \Light\Db\Database::getDefault();
 
 $converter = new \JsonToSql();
 $sql = $converter->convertJsonToSql('db.json');
-$adapter->getDriver()->getConnection()->execute($sql);
+$adapter->connection()->exec($sql);
+$adapter->clearMetadata();
 
 echo "Database schema created successfully.\n";

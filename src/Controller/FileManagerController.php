@@ -1,11 +1,11 @@
 <?php
 
-namespace Light\Controller;
+namespace Light\Framework\Controller;
 
 use GraphQL\Error\Error;
-use Light\App;
-use Light\Drive\Drive;
-use Light\Drive\File;
+use Light\Framework\App;
+use Light\Framework\Drive\Drive;
+use Light\Framework\Drive\File;
 use Psr\Http\Message\UploadedFileInterface;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -81,7 +81,7 @@ class FileManagerController
         $list = $drive->getFilesystem()->listContents(dirname($path), false);
         foreach ($list as $file) {
             if ($file->path() === $path) {
-                return new \Light\Drive\File($drive, $file);
+                return new \Light\Framework\Drive\File($drive, $file);
             }
         }
         return null;
@@ -89,7 +89,7 @@ class FileManagerController
 
     #[Query]
     /**
-     * @return \Light\Drive\File[]
+     * @return \Light\Framework\Drive\File[]
      * @deprecated use app { drive { files } }
      */
     #[Right('fs.file.list')]
@@ -128,14 +128,14 @@ class FileManagerController
                 if (strpos($filename, $search) === false) continue;
             }
 
-            $files[] = new \Light\Drive\File($drive, $file);
+            $files[] = new \Light\Framework\Drive\File($drive, $file);
         }
         return $files;
     }
 
     #[Query]
     /**
-     * @return \Light\Drive\Folder[]
+     * @return \Light\Framework\Drive\Folder[]
      * @deprecated use app { drive { folders } }
      */
     #[Right('fs.folder.list')]
@@ -145,7 +145,7 @@ class FileManagerController
         $files = [];
         foreach ($drive->getFilesystem()->listContents($path, false) as $dir) {
             if (!$dir->isDir()) continue;
-            $files[] = new \Light\Drive\Folder($drive, $dir);
+            $files[] = new \Light\Framework\Drive\Folder($drive, $dir);
         }
         return $files;
     }

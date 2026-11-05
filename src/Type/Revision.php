@@ -1,9 +1,9 @@
 <?php
 
-namespace Light\Type;
+namespace Light\Framework\Type;
 
-use Light\Model\User;
-use Light\Util;
+use Light\Framework\Model\User;
+use Light\Framework\Util;
 use SebastianBergmann\Diff\Differ;
 use SebastianBergmann\Diff\Output\StrictUnifiedDiffOutputBuilder;
 use TheCodingMachine\GraphQLite\Annotations\Field;
@@ -13,7 +13,7 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 class Revision
 {
     public $eventlog;
-    public function __construct(\Light\Model\EventLog $eventlog)
+    public function __construct(\Light\Framework\Model\EventLog $eventlog)
     {
         $this->eventlog = $eventlog;
     }
@@ -30,7 +30,7 @@ class Revision
         $model_object = $class::Get($this->eventlog->id);
         if ($model_object) {
             foreach ($fields as $field) {
-                assert($model_object instanceof \Light\Model);
+                assert($model_object instanceof \Light\Framework\Model);
 
                 if (in_array($field, $model_object->__fields())) {
                     $model_object->$field = $this->getContent()[$field];

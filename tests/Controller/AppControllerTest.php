@@ -1,17 +1,17 @@
 <?php
 
-namespace Light\Tests\Controller;
+namespace Light\Framework\Tests\Controller;
 
 use Firebase\JWT\JWT;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\ServerRequest;
-use Light\App;
-use Light\Auth\Service;
-use Light\Model\Config;
-use Light\Model\User;
-use Light\Model\UserLog;
-use Light\Model\UserRole;
-use Light\Tests\TestCase;
+use Light\Framework\App;
+use Light\Framework\Auth\Service;
+use Light\Framework\Model\Config;
+use Light\Framework\Model\User;
+use Light\Framework\Model\UserLog;
+use Light\Framework\Model\UserRole;
+use Light\Framework\Tests\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -219,5 +219,15 @@ class AppControllerTest extends TestCase
 
         $updated = User::Get($this->adminUser->user_id);
         $this->assertEquals([["label" => "Favorites", "to" => "/User", "icon" => "sym_o_person"]], $updated->getMenu());
+    }
+    public function testSystemPageQueryWorksForAuthenticatedAdministrator(): void
+    {
+        $out = $this->gql('query { system { server arch os CPUCores hostname memoryTotal memoryFree memoryAvailable } }');
+        $this->assertArrayNotHasKey('errors', $out, json_encode($out));
+        $system = $out['data']['system'];
+        $this->assertIsArray($system['server']);
+        $this->assertNotEmpty($system['arch']);
+        $this->assertNotEmpty($system['os']);
+        $this->assertNotEmpty($system['hostname']);
     }
 }

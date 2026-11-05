@@ -1,6 +1,6 @@
 <?php
 
-namespace Light\Filesystem\Node;
+namespace Light\Framework\Filesystem\Node;
 
 use League\Flysystem\MountManager;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;

@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Light\Type;
+namespace Light\Framework\Type;
 
 use League\Flysystem\Filesystem;
-use Light\Drive\File;
+use Light\Framework\Drive\File;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Right;
@@ -36,7 +36,7 @@ class FS
         $list = $this->filesystem->listContents(dirname($path), false);
         foreach ($list as $file) {
             if ($file->path() === $path) {
-                return new \Light\Drive\File($this, $file);
+                return new \Light\Framework\Drive\File($this, $file);
             }
         }
         return null;
@@ -44,7 +44,7 @@ class FS
 
     #[Field]
     /**
-     * @return \Light\Drive\File[]
+     * @return \Light\Framework\Drive\File[]
      */
     #[Right('fs.file.list')]
     public function getFiles(?string $path = "", ?string $type = null, ?string $search = null): array
@@ -81,14 +81,14 @@ class FS
                 if (strpos($filename, $search) === false) continue;
             }
 
-            $files[] = new \Light\Drive\File($this, $file);
+            $files[] = new \Light\Framework\Drive\File($this, $file);
         }
         return $files;
     }
 
     #[Field]
     /**
-     * @return \Light\Drive\Folder[]
+     * @return \Light\Framework\Drive\Folder[]
      */
     #[Right('fs.folder.list')]
     public function folders(?string $path = ""): array
@@ -96,7 +96,7 @@ class FS
         $files = [];
         foreach ($this->filesystem->listContents($path, false) as $dir) {
             if (!$dir->isDir()) continue;
-            $files[] = new \Light\Drive\Folder($this, $dir);
+            $files[] = new \Light\Framework\Drive\Folder($this, $dir);
         }
         return $files;
     }

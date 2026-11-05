@@ -1,18 +1,18 @@
 <?php
 
-namespace Light;
+namespace Light\Framework;
 
-use Light\Db\Proxy;
-use Light\Model\EventLog;
-use Light\Model\Notification;
-use Light\Model\Revision;
-use Light\Model\User;
+use Light\Framework\Model\EventLog;
+use Light\Framework\Model\Notification;
+use Light\Framework\Model\User;
 use Psr\Container\ContainerInterface;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 
 abstract class Model extends \Light\Db\Model
 {
+    private ?array $pendingAudit = null;
+
     public static bool $_log_insert = true;
     public static bool $_log_delete = true;
     public static bool $_log_update = true;
@@ -35,40 +35,27 @@ abstract class Model extends \Light\Db\Model
 
     public function __fields(): array
     {
-        return self::_table()->columns()->map(function ($column) {
-            return $column->getName();
-        })->toArray();
+        return $this->database()->metadata(static::class)->properties;
     }
 
-    public function bind($data)
+    public function bind($data): static
     {
         $fields = $this->__fields();
-
         if (is_array($data)) {
-            foreach ($data as $k => $v) {
-                if (!in_array($k, $fields)) continue;
-                $this->$k = $v;
-            }
-            return;
+            return parent::bind(array_intersect_key($data, array_flip($fields)));
         }
-
+        $values = [];
         $ref = new \ReflectionObject($data);
         foreach ($ref->getProperties(\ReflectionProperty::IS_PUBLIC) as $prop) {
-            $k = $prop->getName();
-            if (!in_array($k, $fields)) continue;
-            if (!$prop->isInitialized($data)) continue;
-
-            $v = $prop->getValue($data);
-            if ($v === \TheCodingMachine\GraphQLite\Undefined::VALUE) continue;
-
-            // Old style (?int, ?string): null means "not provided" (GraphQLite schema default)
-            // New style (int|null|Undefined): null means explicitly provided — allow it
-            if ($v === null && $prop->getType() instanceof \ReflectionNamedType) continue;
-
-            $this->$k = $v;
+            $name = $prop->getName();
+            if (!in_array($name, $fields, true) || !$prop->isInitialized($data)) continue;
+            $value = $prop->getValue($data);
+            if ($value === \TheCodingMachine\GraphQLite\Undefined::VALUE) continue;
+            if ($value === null && $prop->getType() instanceof \ReflectionNamedType) continue;
+            $values[$name] = $value;
         }
+        return parent::bind($values);
     }
-
 
     #[Field] public function createdTime(): ?string
     {
@@ -125,123 +112,65 @@ abstract class Model extends \Light\Db\Model
     }
 
 
-    public function delete()
+    private function auditUserId(): ?int
     {
-        $key = $this->_key();
+        return self::$container?->get(Auth\Service::class)->getUser()?->user_id;
+    }
 
-        $user_id = null;
-        if ($container = self::$container) {
-            if ($service = $container->get(Auth\Service::class)) {
-                $user_id = $service->getUser()?->user_id;
-            }
+    private function auditData(): array
+    {
+        $data = $this->jsonSerialize();
+        foreach ($this->database()->metadata(static::class)->columns as $column) {
+            if (str_contains(strtolower($column->type), 'blob')) unset($data[$column->name]);
         }
+        return Util::Sanitize($data);
+    }
 
-        EventLog::_table()->insert([
-            "class" => static::class,
-            "id" => $this->$key,
-            "action" => "Delete",
-            "source" => null,
-            "target" => json_encode(Util::Sanitize($this->jsonSerialize()), JSON_UNESCAPED_UNICODE),
-            "user_id" => $user_id,
-            "created_time" => date("Y-m-d H:i:s"),
-        ]);
+    private function writeAudit(string $action, ?array $source, array $target): void
+    {
+        if (!(match ($action) {
+            'Insert' => static::$_log_insert,
+            'Update' => static::$_log_update,
+            'Delete' => static::$_log_delete,
+        })) return;
+        \Light\Framework\Database\Sql::insert('EventLog', [
+            'class' => static::class,
+            'id' => is_array($id = $this->_id()) ? json_encode($id, JSON_THROW_ON_ERROR) : $id,
+            'action' => $action,
+            'source' => $source === null ? null : json_encode($source, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
+            'target' => json_encode($target, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
+            'user_id' => $this->auditUserId(),
+            'created_time' => date('Y-m-d H:i:s'),
+        ], $this->database()->connection());
+    }
 
+    public function delete(): int
+    {
+        $this->pendingAudit = ['Delete', null, $this->auditData()];
         return parent::delete();
     }
 
-    public function save()
+    public function save(): int
     {
-        $user_id = null;
-        if ($container = self::$container) {
-            if ($service = $container->get(Auth\Service::class)) {
-                $user_id = $service->getUser()?->user_id;
-            }
-        }
-
-        $key = $this->_key();
-        if (!$this->$key) {
-            $action = "Insert";
-            if (in_array("created_time", $this->__fields())) {
-                $this->created_time = date("Y-m-d H:i:s");
-            }
-            if (in_array("created_by", $this->__fields()) && $user_id) {
-                $this->created_by = $user_id;
-            }
-        } else {
-            $action = "Update";
-            if (in_array("updated_time", $this->__fields())) {
-                $this->updated_time = date("Y-m-d H:i:s");
-            }
-            if (in_array("updated_by", $this->__fields()) && $user_id) {
-                $this->updated_by = $user_id;
-            }
-        }
-
-        if ($action == "Update") {
-            $source = static::get($this->$key);
-            if ($source) {
-
-                //filter out blob fields
-                $attributes = $this->__attributes();
-
-                foreach ($attributes as $attribute) {
-
-                    if ($attribute->getDataType() == "longblob" || $attribute->getDataType() == "mediumblob" || $attribute->getDataType() == "tinyblob") {
-                        $field = $attribute->getName();
-                        $source->$field = null;
-                    }
-                }
-                /* 
-                $container = self::GetSchema()->getContainer();
-               
-                if ($container && $app = $container->get(App::class)) {
-                    assert($app instanceof App);
-                    if ($app->isRevisionEnabled(static::class)) {
-                        Revision::Insert($user_id, static::class, $this->$key, $source, $this);
-                    }
-                }
- */
-                $source = json_encode(Util::Sanitize($source->jsonSerialize()), JSON_UNESCAPED_UNICODE);
-            }
-
-
-            //filter out blob fields for target
-            $attributes = $this->__attributes();
-            $target = $this->jsonSerialize();
-
-            foreach ($attributes as $attribute) {
-                if ($attribute->getDataType() == "longblob" || $attribute->getDataType() == "mediumblob" || $attribute->getDataType() == "tinyblob") {
-                    $field = $attribute->getName();
-                    unset($target[$field]);
-                }
-            }
-
-            $target = json_encode(Util::Sanitize($target), JSON_UNESCAPED_UNICODE);
-        }
-
-        if ($action == "Insert") {
-            $source = null;
-            $target = json_encode(Util::Sanitize($this->jsonSerialize()), JSON_UNESCAPED_UNICODE);
-        }
-
-        $result = parent::save();
-
-        if (
-            static::$_log_insert && $action == "Insert"
-            || static::$_log_update && $action == "Update"
-            || static::$_log_delete && $action == "Delete"
-        ) {
-
-            EventLog::_table()->insert([
-                "class" => static::class,
-                "id" => $this->$key,
-                "action" => $action,
-                "source" => $source,
-                "target" => $target,
-                "user_id" => $user_id,
-                "created_time" => date("Y-m-d H:i:s"),
-            ]);
-        }
-        return $result;
+        $action = $this->exists() ? 'Update' : 'Insert';
+        $keys = $this->database()->metadata(static::class)->keys;
+        $id = $this->_id();
+        $condition = is_array($id) ? $id : [$keys[0] => $id];
+        $source = $this->exists() ? (new \Light\Db\Query($this->database(), static::class))->where($condition)->first()?->auditData() : null;
+        $userId = $this->auditUserId();
+        $fields = $this->__fields();
+        $prefix = $action === 'Insert' ? 'created' : 'updated';
+        if (in_array($prefix . '_time', $fields, true)) $this->{$prefix . '_time'} = date('Y-m-d H:i:s');
+        if ($userId !== null && in_array($prefix . '_by', $fields, true)) $this->{$prefix . '_by'} = $userId;
+        $this->pendingAudit = [$action, $source, null];
+        return parent::save();
     }
+    protected function afterPersistence(bool $deleted): void
+    {
+        if ($this->pendingAudit === null) return;
+        [$action, $source, $target] = $this->pendingAudit;
+        $this->pendingAudit = null;
+        $this->writeAudit($action, $source, $target ?? $this->auditData());
+    }
+
 }

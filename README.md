@@ -4,6 +4,8 @@
 
 A lightweight PHP 8.3+ GraphQL backend framework for building admin/CMS applications. Exposes a GraphQL API (plus a few REST endpoints for file serving) backed by a custom ORM ([mathsgod/light-db](https://github.com/mathsgod/light-db)), RBAC, and a PSR-15 middleware pipeline.
 
+For upgrades from Light 1.x, follow the [Light 2.x migration guide](docs/migration-v2.md).
+
 The companion frontend module is [`nuxt-light`](https://github.com/hostlink/nuxt-light) — a Nuxt 4 module using Quasar UI.
 
 ---
@@ -12,7 +14,8 @@ The companion frontend module is [`nuxt-light`](https://github.com/hostlink/nuxt
 
 - PHP >= 8.3
 - Composer
-- MySQL / MariaDB (or any Laminas DB-supported database)
+- MySQL 8.0 (the framework schema administration API is MySQL-specific)
+- light-db 2.x and light-db-graphqlite-mappers 2.x, backed by light-entity 1.x
 
 ---
 
@@ -21,6 +24,8 @@ The companion frontend module is [`nuxt-light`](https://github.com/hostlink/nuxt
 ```bash
 composer install
 ```
+
+Upgrading from Light 1.x? See the [Light 2.x migration guide](docs/migration-v2.md).
 
 ---
 
@@ -41,15 +46,11 @@ DATABASE_CHARSET=
 
 ### Local OAuth 2.0 provider
 
-`light-oauth2` is a development dependency. `./dev-setup.sh` links the sibling
-`../light-oauth2` package through Composer. Production applications that enable
-OAuth must require `mathsgod/light-oauth2` as a runtime dependency themselves.
-With OAuth disabled, Light also starts without the package after `composer install --no-dev`.
-`index.php` calls `Light\OAuth2\ProviderFactory::registerFromEnvironment($app)`
-from that package before running Light when
-`OAUTH_ENABLED=true`. The provider uses the existing database through a separate,
-non-persistent PDO connection. Apply `light-oauth2/migrations/001_oauth.sql` once
-if the OAuth tables have not been installed; migrations do not run on requests.
+OAuth requires a release of `mathsgod/light-oauth2` compatible with this major
+version of Light. The existing extension requires Light 1.x and is not installed
+by this branch's development setup. Applications enabling OAuth must require a
+compatible extension as a runtime dependency; the configuration below describes
+the integration settings for that extension.
 
 Configure the following in the application's `.env`:
 
@@ -79,9 +80,7 @@ bound to the request, user and browser session with a one-time CSRF token.
 Only the permissions listed in `OAUTH_SCOPES` can be delegated; users must also
 hold those permissions in Light RBAC.
 
-For a manual Composer update of this development root, use
-`COMPOSER_ROOT_VERSION=1.45.0 composer update mathsgod/light-oauth2 --with-dependencies`
-(adjust the root version to the checkout's latest release).
+
 
 ### JWT signing
 
@@ -229,12 +228,45 @@ php bin/light make:input Name        # Generate a GraphQL input type
 php bin/light make:ts                # Generate TypeScript definitions from the schema
 ```
 
+## Extensions
+
+An extension groups application registrations in one place. Implement
+`Light\Framework\Extension\ExtensionInterface` and register it after creating
+the application and before creating a GraphQL schema or handling requests:
+
+```php
+use Light\Framework\App;
+use Light\Framework\Extension\ExtensionInterface;
+
+final class ExampleExtension implements ExtensionInterface
+{
+    public function register(App $app): void
+    {
+        $app->addPermissions(['example.view']);
+        $app->addMenus([
+            ['label' => 'Example', 'to' => '/example', 'permission' => 'example.view'],
+        ]);
+        // Register services or routes with $app->getContainer() or $app->getRouter().
+    }
+}
+
+$app = new App();
+$app->addExtension(new ExampleExtension());
+$app->run();
+```
+
+`addExtension()` calls `register()` immediately. Registering the same extension
+class twice on one application throws a `LogicException`. Declaring permissions
+does not grant them to a role; use the existing RBAC configuration to grant
+access. If registration throws, its exception propagates and any changes already
+made by the extension are not rolled back; discard the application before retrying.
+
 ---
 
 ## Architecture
 
 ```
-index.php → Light\App::run()
+index.php → Light\Framework\App::run()
   → Middleware pipeline (CORS, JWT auth, file upload)
   → Router:
       GET  /fs/{protocol}/{path}   — Flysystem file serving
@@ -245,11 +277,11 @@ index.php → Light\App::run()
 
 **Schema generation** is annotation-driven via [TheCodingMachine/GraphQLite](https://graphqlite.thecodingmachine.io/). Controllers in `src/Controller/` declare queries and mutations using PHP 8 attributes (`#[Query]`, `#[Mutation]`, `#[Type]`, etc.).
 
-**ORM** — models live in `src/Model/` and extend `Light\Model`. The schema is defined in `db.json`. `save()` and `delete()` auto-populate audit fields (`created_time`, `updated_time`, `created_by`, `updated_by`) and write to `EventLog`.
+**ORM** — models live in `src/Model/` and extend `Light\Framework\Model`. The schema is defined in `db.json`. `save()` and `delete()` auto-populate audit fields (`created_time`, `updated_time`, `created_by`, `updated_by`) and write to `EventLog`.
 
 **RBAC** — role → permission mappings bootstrap from `permissions.yml`; menus bootstrap from `menus.yml`. The `Administrators` role always has `*` (wildcard) permission.
 
-**File storage** — file operations go through `Light\Drive` (Flysystem MountManager). Supported adapters: Local, AWS S3, Aliyun OSS, Hostlink.
+**File storage** — file operations go through `Light\Framework\Drive` (Flysystem MountManager). Supported adapters: Local, AWS S3, Aliyun OSS, Hostlink.
 
 ---
 
@@ -258,7 +290,7 @@ index.php → Light\App::run()
 | Path | Purpose |
 |------|---------|
 | `src/Controller/` | GraphQL controllers (queries & mutations) |
-| `src/Model/` | ORM models, extend `Light\Model` |
+| `src/Model/` | ORM models, extend `Light\Framework\Model` |
 | `src/Input/` | GraphQL input types for mutations |
 | `src/Type/` | GraphQL output types |
 | `src/Command/` | Symfony Console CLI commands |
@@ -290,10 +322,47 @@ index.php → Light\App::run()
 ./vendor/bin/phpstan analyse src/                           # Static analysis
 ```
 
-Tests require a real DB connection (integration tests). Each test wraps in a DB transaction and rolls back in `tearDown()`.
+Tests require the disposable `light_test` MySQL database and clear its tables
+between tests. Use `composer test:docker` to create and remove the fixture
+container. Direct PHPUnit commands require that fixture to be running and its
+`DATABASE_*` environment variables to be configured.
 
 ---
 
 ## License
 
 MIT
+
+## Migrating to light-db 2
+
+For the full upgrade sequence, examples and deployment checks, see
+[the Light 1.x to 2.x migration guide](docs/migration-v2.md).
+
+This major-version branch uses published light-db `^2.0` and GraphQLite mapper
+`^2.0` packages, backed by light-entity 1.x. A normal `composer install` does not
+require sibling source checkouts, path repositories or `@dev` flags. Contributors
+can optionally run `./dev-setup.sh` to switch to sibling source packages; those
+local development overrides must not be included in a stable application deploy.
+The old light-oauth2 development dependency was removed because it requires
+Light 1.x; applications using that optional extension need a compatible release.
+
+`App::getDatabase()` now returns `Light\Db\Database`. Obtain PDO with
+`$app->getDatabase()->connection()`. Models use the new `Get`, `Create`, `Query`,
+`save` and `delete` APIs. Query objects are immutable: retain the returned query
+from `where`, `filters`, `sort`, `limit` and `offset`. Replace Laminas predicate
+mutation with condition arrays or parameterized `whereRaw()` calls. Legacy
+`Adapter`, `_table()`, `GetAdapter()` and Laminas schema wrappers are no longer
+used by the framework. Schema administration and generators use PDO metadata.
+
+GraphQL list fields retain `data(limit:, offset:)` and `meta { total key }`;
+`total` counts matching records before pagination. Composite-key metadata uses
+comma-separated names. Object input binding still distinguishes Undefined from
+an explicitly provided null. Audit records are written after successful Model
+persistence, including deferred `Database::transaction()` writes; audit insertion
+is a separate write after the Model transaction commits, not part of its atomic
+unit. An audit failure can therefore be reported after data has committed.
+
+The MySQL integration tests require the disposable `light_test` database.
+They clear its tables between tests instead of wrapping tests in an externally
+opened PDO transaction. Run `composer test:docker`; never point this suite at an
+application database.

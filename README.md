@@ -4,6 +4,8 @@
 
 A lightweight PHP 8.3+ GraphQL backend framework for building admin/CMS applications. Exposes a GraphQL API (plus a few REST endpoints for file serving) backed by a custom ORM ([mathsgod/light-db](https://github.com/mathsgod/light-db)), RBAC, and a PSR-15 middleware pipeline.
 
+For upgrades from Light 1.x, follow the [Light 2.x migration guide](docs/migration-v2.md).
+
 The companion frontend module is [`nuxt-light`](https://github.com/hostlink/nuxt-light) — a Nuxt 4 module using Quasar UI.
 
 ---
@@ -332,6 +334,9 @@ container. Direct PHPUnit commands require that fixture to be running and its
 MIT
 
 ## Migrating to light-db 2
+
+For the full upgrade sequence, examples and deployment checks, see
+[the Light 1.x to 2.x migration guide](docs/migration-v2.md).
 
 This major-version branch uses light-db 2, backed by light-entity 1.x, and the
 v2 GraphQLite mapper. The development Composer repositories resolve sibling

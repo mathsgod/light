@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "885659e7b6f3c9fef21a0c1c3e58a933",
+    "content-hash": "799ce61b5173ff7067e9114bc5741a4f",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -6119,25 +6119,20 @@
         },
         {
             "name": "utopia-php/system",
-            "version": "0.9.0",
+            "version": "0.11.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/utopia-php/system.git",
-                "reference": "8e4a7edaf2dfeb4c9524e9f766d27754f2c4b64d"
+                "reference": "f7077643de7e012945f6e3fc4c3c36e7f1d40047"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/utopia-php/system/zipball/8e4a7edaf2dfeb4c9524e9f766d27754f2c4b64d",
-                "reference": "8e4a7edaf2dfeb4c9524e9f766d27754f2c4b64d",
+                "url": "https://api.github.com/repos/utopia-php/system/zipball/f7077643de7e012945f6e3fc4c3c36e7f1d40047",
+                "reference": "f7077643de7e012945f6e3fc4c3c36e7f1d40047",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.0.0"
-            },
-            "require-dev": {
-                "laravel/pint": "1.13.*",
-                "phpstan/phpstan": "1.10.*",
-                "phpunit/phpunit": "9.6.*"
             },
             "type": "library",
             "autoload": {
@@ -6169,9 +6164,9 @@
             ],
             "support": {
                 "issues": "https://github.com/utopia-php/system/issues",
-                "source": "https://github.com/utopia-php/system/tree/0.9.0"
+                "source": "https://github.com/utopia-php/system/tree/0.11.0"
             },
-            "time": "2024-10-09T14:44:01+00:00"
+            "time": "2026-09-07T09:56:23+00:00"
         },
         {
             "name": "vlucas/phpdotenv",

@@ -24,7 +24,7 @@
         "sebastian/diff": "^7.0",
         "mathsgod/light-rbac": "^1.0",
         "league/event": "^3.0",
-        "utopia-php/system": "^0.9.0",
+        "utopia-php/system": "^0.11.0",
         "mathsgod/light-server": "^1.1",
         "mathsgod/light-graphql": "^1.3",
         "symfony/serializer": "^7.4",

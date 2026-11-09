@@ -1,6 +1,6 @@
 #!/bin/bash
 # Release a new version of light
-# Usage: ./release.sh <version>   e.g. ./release.sh 1.37.0
+# Usage: ./release.sh <version>   e.g. ./release.sh v2.0.0
 
 set -e
 
@@ -20,7 +20,7 @@ git update-index --no-skip-worktree composer.json
 
 # Update composer.json: remove path repo, set stable light-db version
 python3 - <<'EOF'
-import json, sys
+import json
 
 with open('composer.json') as f:
     d = json.load(f)
@@ -36,13 +36,7 @@ if 'repositories' in d:
 
 # Set stable light-db
 if 'mathsgod/light-db' in d.get('require', {}):
-    import subprocess
-    # Get latest released version from Packagist
-    result = subprocess.run(
-        ['composer', 'show', 'mathsgod/light-db', '--no-interaction', '-q', '--format=json'],
-        capture_output=True, text=True
-    )
-    d['require']['mathsgod/light-db'] = '^2.0'
+    d['require']['mathsgod/light-db'] = '^2.2.1'
     d['require']['mathsgod/light-db-graphqlite-mappers'] = '^2.0'
 
 with open('composer.json', 'w') as f:

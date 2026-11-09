@@ -338,7 +338,7 @@ MIT
 For the full upgrade sequence, examples and deployment checks, see
 [the Light 1.x to 2.x migration guide](docs/migration-v2.md).
 
-This major-version branch uses published light-db `^2.0` and GraphQLite mapper
+This major-version branch uses published light-db `^2.2.1` and GraphQLite mapper
 `^2.0` packages, backed by light-entity 1.x. A normal `composer install` does not
 require sibling source checkouts, path repositories or `@dev` flags. Contributors
 can optionally run `./dev-setup.sh` to switch to sibling source packages; those
@@ -358,7 +358,7 @@ GraphQL list fields retain `data(limit:, offset:)` and `meta { total key }`;
 `total` counts matching records before pagination. Composite-key metadata uses
 comma-separated names. Object input binding still distinguishes Undefined from
 an explicitly provided null. Audit records are written after successful Model
-persistence, including deferred `Database::transaction()` writes; audit insertion
+persistence, including immediate writes inside `Database::transaction()`; audit insertion
 is a separate write after the Model transaction commits, not part of its atomic
 unit. An audit failure can therefore be reported after data has committed.
 

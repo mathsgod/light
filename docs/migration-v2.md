@@ -25,8 +25,8 @@ PHP 8.3+ and PDO MySQL are required. MySQL 8.0 is the framework integration-test
 baseline; schema administration is MySQL-specific. Do not infer support for every
 light-entity SQL dialect from the framework's use of that package.
 
-light-db 2.0 and its v2 GraphQLite mapper are published. This checkout now uses
-stable `^2.0` constraints and a normal installation needs no sibling repositories
+light-db 2.2.1 and its v2 GraphQLite mapper are published. This checkout now uses
+stable light-db `^2.2.1` and mapper `^2.0` constraints and a normal installation needs no sibling repositories
 or version overrides. Light framework's own major release remains a separate
 release step.
 
@@ -191,20 +191,20 @@ $database->transaction(function () use ($user, $notification) {
 ```
 
 Models loaded before the callback can participate if bound to this Database.
-Inside the callback, `save()/delete()` queue writes and return `0`. One final
-light-entity `saveChanges()` commits the queued Models atomically. IDs/defaults
-are unavailable until commit, and queries during the callback see database data,
-not queued changes. Do not depend on a new Model's ID inside the callback to
-construct another insert.
+Inside the callback, `save()` and `delete()` execute immediately. Generated IDs
+and defaults are available after saving, and same-connection queries see those
+writes. Model writes, Query bulk writes and raw PDO writes on this connection
+commit or roll back together. Writes through another Database are outside this
+transaction boundary.
 
-Callback errors discard queued writes; persistence failures roll back the unit
-and retain edits for retry. Nested transactions, transactions opened directly on
-PDO, and Query bulk writes inside the callback are rejected. Direct PDO writes
-and writes through another Database are outside this deferred boundary. Outside
-`transaction()`, individual Model writes remain immediate.
+Callback errors roll back database writes and discard pending persistence hooks.
+PHP Model state already accepted by a successful save is not rewound on rollback;
+discard or reload participating Models before retrying. Nested transactions and
+transactions opened directly on PDO are rejected. Outside `transaction()`,
+individual Model writes remain immediate.
 
-Framework audit records run after successful persistence, including deferred
-writes. Audit insertion is a separate write after the Model transaction commits;
+Framework audit records run after successful persistence, including writes inside
+`Database::transaction()`. Audit insertion is a separate write after the Model transaction commits;
 it is not atomic with the business data. An audit failure can be reported after
 data has committed. Do not retry an entire operation blindly after a post-commit
 hook failure.

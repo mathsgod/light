@@ -12,7 +12,9 @@ final class PersistenceMigrationTest extends TestCase
     {
         $config = Config::Create(['name'=>'transaction_config','value'=>'first']);
         Database::getDefault()->transaction(function () use ($config) {
-            $config->save();
+            self::assertSame(1, $config->save());
+            self::assertNotNull($config->config_id);
+            self::assertSame('first', Config::Get($config->config_id)->value);
             self::assertSame(0, EventLog::Query()->count());
         });
         $insert = EventLog::Query(['class'=>Config::class,'action'=>'Insert'])->first();
@@ -27,6 +29,7 @@ final class PersistenceMigrationTest extends TestCase
         } catch (\RuntimeException $e) { self::assertSame('abort',$e->getMessage()); }
         self::assertSame('first',Config::Get($config->config_id)->value);
         self::assertSame(1,EventLog::Query()->count());
+        $config = Config::Get($config->config_id);
         $config->value='second';
         $config->save();
         $update = EventLog::Query(['action'=>'Update'])->first();

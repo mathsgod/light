@@ -51,7 +51,6 @@ abstract class Model extends \Light\Db\Model
             if (!in_array($name, $fields, true) || !$prop->isInitialized($data)) continue;
             $value = $prop->getValue($data);
             if ($value === \TheCodingMachine\GraphQLite\Undefined::VALUE) continue;
-            if ($value === null && $prop->getType() instanceof \ReflectionNamedType) continue;
             $values[$name] = $value;
         }
         return parent::bind($values);

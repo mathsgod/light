@@ -5,6 +5,7 @@ use Light\Db\Database;
 use Light\Framework\Model\Config;
 use Light\Framework\Model\EventLog;
 use Light\Framework\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 final class PersistenceMigrationTest extends TestCase
 {
@@ -48,6 +49,44 @@ final class PersistenceMigrationTest extends TestCase
         });
         self::assertSame('binding',$config->name);
         self::assertNull($config->value);
+    }
+
+    #[DataProvider('nullableInputProvider')]
+    public function testObjectBindingPersistsExplicitNullFromNamedTypes(object $input): void
+    {
+        $config = Config::Create(['name' => 'binding', 'value' => 'original']);
+        $config->save();
+
+        $config->bind($input);
+        $config->save();
+
+        $saved = Config::Get($config->config_id);
+        self::assertSame('binding', $saved->name);
+        self::assertNull($saved->value);
+    }
+
+    public static function nullableInputProvider(): iterable
+    {
+        yield 'string' => [new class { public ?string $value = null; }];
+        yield 'integer' => [new class { public ?int $value = null; }];
+        yield 'float' => [new class { public ?float $value = null; }];
+        yield 'boolean' => [new class { public ?bool $value = null; }];
+    }
+
+    public function testObjectBindingPreservesUninitializedProperties(): void
+    {
+        $config = Config::Create(['name' => 'binding', 'value' => 'original']);
+        $config->save();
+
+        $config->bind(new class {
+            public string $name = 'renamed';
+            public ?string $value;
+        });
+        $config->save();
+
+        $saved = Config::Get($config->config_id);
+        self::assertSame('renamed', $saved->name);
+        self::assertSame('original', $saved->value);
     }
     public function testSchemaMetadataAndGeneratorsUsePdo(): void
     {

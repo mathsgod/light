@@ -38,11 +38,20 @@ abstract class Model extends \Light\Db\Model
         return $this->database()->metadata(static::class)->properties;
     }
 
+    public static function Create(array|object $attributes = []): static
+    {
+        return parent::Create()->bind($attributes);
+    }
+
     public function bind($data): static
     {
         $fields = $this->__fields();
         if (is_array($data)) {
-            return parent::bind(array_intersect_key($data, array_flip($fields)));
+            $values = array_intersect_key($data, array_flip($fields));
+            return parent::bind(array_filter(
+                $values,
+                static fn ($value) => $value !== \TheCodingMachine\GraphQLite\Undefined::VALUE,
+            ));
         }
         $values = [];
         $ref = new \ReflectionObject($data);

@@ -88,6 +88,70 @@ final class PersistenceMigrationTest extends TestCase
         self::assertSame('renamed', $saved->name);
         self::assertSame('original', $saved->value);
     }
+    public function testCreateAcceptsInputObjectsAndIgnoresUnknownAndUninitializedProperties(): void
+    {
+        $input = new class {
+            public string $name = 'object_create';
+            public string $value = 'provided';
+            public string $unknown = 'ignored';
+            public ?string $uninitialized;
+        };
+        $config = Config::Create($input);
+        self::assertInstanceOf(Config::class, $config);
+        $config->save();
+        $saved = Config::Get($config->config_id);
+        self::assertSame('object_create', $saved->name);
+        self::assertSame('provided', $saved->value);
+    }
+
+    public function testCreateRetainsTheInheritedNamedArgument(): void
+    {
+        $config = Config::Create(attributes: ['name' => 'named_create', 'value' => 'provided']);
+        $config->save();
+        self::assertSame('provided', Config::Get($config->config_id)->value);
+    }
+
+    public function testCreateFiltersUndefinedFromObjectsAndLegacyArrayCasts(): void
+    {
+        foreach ([false, true] as $cast) {
+            $input = new class {
+                public string $name = 'undefined_create';
+                public string|null|\TheCodingMachine\GraphQLite\Undefined $value = \TheCodingMachine\GraphQLite\Undefined::VALUE;
+                public string $unknown = 'ignored';
+            };
+            $input->name .= $cast ? '_array' : '_object';
+            $config = Config::Create($cast ? (array) $input : $input);
+            $config->save();
+            $saved = Config::Get($config->config_id);
+            self::assertSame($input->name, $saved->name);
+            self::assertNull($saved->value);
+        }
+    }
+
+    #[DataProvider('arrayInputValueProvider')]
+    public function testArrayBindingPreservesExplicitValuesAndSkipsUndefined(mixed $value, ?string $expected): void
+    {
+        $config = Config::Create(['name' => 'array_binding', 'value' => 'original']);
+        $config->save();
+        $config->bind([
+            'name' => \TheCodingMachine\GraphQLite\Undefined::VALUE,
+            'value' => $value,
+            'unknown' => 'ignored',
+        ]);
+        $config->save();
+        $saved = Config::Get($config->config_id);
+        self::assertSame('array_binding', $saved->name);
+        self::assertSame($expected, $saved->value);
+    }
+
+    public static function arrayInputValueProvider(): iterable
+    {
+        yield 'null' => [null, null];
+        yield 'false' => [false, '0'];
+        yield 'zero' => [0, '0'];
+        yield 'empty string' => ['', ''];
+    }
+
     public function testSchemaMetadataAndGeneratorsUsePdo(): void
     {
         $columns = \Light\Framework\Database\Sql::columns('Config');

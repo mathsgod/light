@@ -41,7 +41,7 @@ class SystemValueController
     #[Mutation]
     #[Logged]
     #[Right('systemvalue.update')]
-    #[Security('obj.canDelete(user)', failWith: false)]
+    #[Security('obj.canUpdate(user)', failWith: false)]
     public function updateSystemValue(
         #[LoadModel] SystemValue $obj,
         \Light\Framework\Input\SystemValue $data,

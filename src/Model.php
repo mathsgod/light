@@ -114,6 +114,15 @@ abstract class Model extends \Light\Db\Model
     }
 
     #[Field]
+    public function canRead(#[InjectUser] ?User $by): bool
+    {
+        return $this->canView($by);
+    }
+
+    /**
+     * @deprecated Use canRead() instead.
+     */
+    #[Field]
     public function canView(#[InjectUser] ?User $by): bool
     {
         return $by !== null;

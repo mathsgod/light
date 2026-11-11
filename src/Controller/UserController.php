@@ -154,10 +154,9 @@ class UserController
     #[Mutation]
     #[Logged]
     #[Right("user.delete")]
-    public function deleteUser(int $id, #[InjectUser] \Light\Framework\Model\User $user): bool
+    #[Security('obj.canDelete(user)', failWith: false)]
+    public function deleteUser(#[LoadModel] User $obj): bool
     {
-        if (!$obj = User::Get($id)) return false;
-        if (!$obj->canDelete($user)) return false;
         $obj->delete();
         return true;
     }

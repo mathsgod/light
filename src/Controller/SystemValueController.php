@@ -2,6 +2,8 @@
 
 namespace Light\Framework\Controller;
 
+use Light\Framework\GraphQL\Annotations\LoadModel;
+use TheCodingMachine\GraphQLite\Annotations\Security;
 use Light\Framework\Model\SystemValue;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -39,10 +41,11 @@ class SystemValueController
     #[Mutation]
     #[Logged]
     #[Right('systemvalue.update')]
-    public function updateSystemValue(int $id,  \Light\Framework\Input\SystemValue $data, #[InjectUser] \Light\Framework\Model\User $user): bool
-    {
-        if (!$obj = SystemValue::Get($id)) return false;
-        if (!$obj->canDelete($user)) return false;
+    #[Security('obj.canDelete(user)', failWith: false)]
+    public function updateSystemValue(
+        #[LoadModel] SystemValue $obj,
+        \Light\Framework\Input\SystemValue $data,
+    ): bool {
         $obj->bind($data);
         $obj->save();
         return true;
@@ -51,10 +54,9 @@ class SystemValueController
     #[Mutation]
     #[Logged]
     #[Right('systemvalue.delete')]
-    public function deleteSystemValue(int $id, #[InjectUser] \Light\Framework\Model\User $user): bool
+    #[Security('obj.canDelete(user)', failWith: false)]
+    public function deleteSystemValue(#[LoadModel] SystemValue $obj): bool
     {
-        if (!$obj = SystemValue::Get($id)) return false;
-        if (!$obj->canDelete($user)) return false;
         $obj->delete();
         return true;
     }

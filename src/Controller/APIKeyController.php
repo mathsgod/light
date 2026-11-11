@@ -2,6 +2,8 @@
 
 namespace Light\Framework\Controller;
 
+use Light\Framework\GraphQL\Annotations\LoadModel;
+use TheCodingMachine\GraphQLite\Annotations\Security;
 use Light\Framework\Model\APIKey;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
@@ -23,9 +25,9 @@ class APIKeyController
 
     #[Mutation]
     #[Logged]
-    public function deleteAPIKey(int $id, #[InjectUser] \Light\Framework\Model\User $user): bool
+    #[Security('obj.canDelete(user)', failWith: false)]
+    public function deleteAPIKey(#[LoadModel] APIKey $obj): bool
     {
-        if (!$obj = APIKey::Get(["apikey_id" => $id, "user_id" => $user->user_id])) return false;
         $obj->delete();
         return true;
     }

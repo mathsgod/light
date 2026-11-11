@@ -2,6 +2,8 @@
 
 namespace Light\Framework\Controller;
 
+use Light\Framework\GraphQL\Annotations\LoadModel;
+use TheCodingMachine\GraphQLite\Annotations\Security;
 use Google\Service\Transcoder\Input;
 use Light\Framework\App as LightApp;
 use Light\Framework\Model\Config;
@@ -40,21 +42,11 @@ class MyFavoriteController
 
     #[Mutation]
     #[Logged]
+    #[Security('fav.canUpdate(user)', failWith: false)]
     public function updateMyFavorite(
-        #[InjectUser] User $user,
-        int $id,
-        #[UseInputType(inputType: "UpdateMyFavoriteInput")] InputMyFavorite $data
-
+        #[LoadModel] MyFavorite $fav,
+        #[UseInputType(inputType: "UpdateMyFavoriteInput")] InputMyFavorite $data,
     ): bool {
-        $fav = MyFavorite::Get([
-            "user_id" => $user->user_id,
-            "my_favorite_id" => $id,
-        ]);
-
-        if (!$fav) {
-            return false;
-        }
-
         $fav->bind($data);
         $fav->save();
 

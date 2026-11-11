@@ -251,6 +251,69 @@ class UserControllerTest extends TestCase
         $this->assertTrue(password_verify($password, User::Get($id)->password));
     }
 
+    public function testDeleteAPIKeyRequiresOwnership(): void
+    {
+        $other = $this->addUserGql("key_owner_" . uniqid());
+        $key = \Light\Framework\Model\APIKey::Create([
+            "user_id" => $other["data"]["addUser"],
+            "name" => "Ownership test",
+            "key" => bin2hex(random_bytes(16)),
+        ]);
+        $key->save();
+        $id = $key->apikey_id;
+
+        $result = $this->gql(
+            'mutation($id:Int!){ deleteAPIKey(id:$id) }',
+            ["id" => $id]
+        );
+        $this->assertArrayNotHasKey("errors", $result, json_encode($result));
+        $this->assertFalse($result["data"]["deleteAPIKey"]);
+        $this->assertNotNull(\Light\Framework\Model\APIKey::Get($id));
+
+        $this->currentToken = $this->makeToken($other["data"]["addUser"]);
+        $result = $this->gql(
+            'mutation($id:Int!){ deleteAPIKey(id:$id) }',
+            ["id" => $id]
+        );
+        $this->assertArrayNotHasKey("errors", $result, json_encode($result));
+        $this->assertTrue($result["data"]["deleteAPIKey"]);
+        $this->assertNull(\Light\Framework\Model\APIKey::Get($id));
+    }
+
+    public function testUpdateMyFavoriteRequiresOwnership(): void
+    {
+        \Light\Db\Database::getDefault()->connection()->exec(
+            'CREATE TABLE IF NOT EXISTS MyFavorite (
+                my_favorite_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                path VARCHAR(255),
+                label VARCHAR(255),
+                icon VARCHAR(255),
+                sequence INT
+            )'
+        );
+        $other = $this->addUserGql("favorite_owner_" . uniqid());
+        $favorite = \Light\Framework\Model\MyFavorite::Create([
+            "user_id" => $other["data"]["addUser"],
+            "path" => "/test",
+            "label" => "Original",
+        ]);
+        $favorite->save();
+        $id = $favorite->my_favorite_id;
+        $query = 'mutation($id:Int!){ updateMyFavorite(id:$id,data:{label:"Updated"}) }';
+
+        $result = $this->gql($query, ["id" => $id]);
+        $this->assertArrayNotHasKey("errors", $result, json_encode($result));
+        $this->assertFalse($result["data"]["updateMyFavorite"]);
+        $this->assertSame("Original", \Light\Framework\Model\MyFavorite::Get($id)->label);
+
+        $this->currentToken = $this->makeToken($other["data"]["addUser"]);
+        $result = $this->gql($query, ["id" => $id]);
+        $this->assertArrayNotHasKey("errors", $result, json_encode($result));
+        $this->assertTrue($result["data"]["updateMyFavorite"]);
+        $this->assertSame("Updated", \Light\Framework\Model\MyFavorite::Get($id)->label);
+    }
+
     public function testDeleteUser(): void
     {
         $username = "del_" . uniqid();

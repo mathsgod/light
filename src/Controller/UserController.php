@@ -3,6 +3,7 @@
 namespace Light\Framework\Controller;
 
 use Light\Framework\Input\User as InputUser;
+use Light\Framework\GraphQL\Annotations\LoadModel;
 use Light\Framework\Type\System;
 use Light\Framework\Model\User;
 use Light\Framework\Model\UserRole;
@@ -47,27 +48,22 @@ class UserController
     #[Mutation]
     #[Logged]
     #[Right("user.update")]
+    #[Security('obj.canUpdate(user)', failWith: false)]
     public function updateUser(
-        int $id,
+        #[LoadModel] User $obj,
         #[UseInputType(inputType: "UpdateUserInput")] InputUser $data,
-        #[InjectUser] \Light\Framework\Model\User $user
     ): bool {
-        $obj = User::Get($id);
-
-        if (!$obj) return false;
-
-        if (!$obj->canUpdate($user)) return false;
-
         $obj->bind($data);
         $obj->save();
         return true;
     }
 
     #[Mutation]
+    #[Logged]
     #[Right("user.change-password")]
-    public function updateUserPassword(int $id, string $password, #[InjectUser] \Light\Framework\Model\User $user): bool
+    #[Security('user.is("Administrators") or not obj.is("Administrators")', failWith: false)]
+    public function updateUserPassword(#[LoadModel] User $obj, string $password): bool
     {
-        if (!$obj = $this->listUser($user, ["user_id" => $id], "")->first()) return false;
 
         //check is valid password
         $system = new System();

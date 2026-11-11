@@ -235,6 +235,22 @@ class UserControllerTest extends TestCase
     // deleteUser
     // -----------------------------------------------------------------------
 
+    public function testUpdateUserPassword(): void
+    {
+        $out = $this->addUserGql("password_" . uniqid());
+        $id = $out["data"]["addUser"];
+        $password = "UpdatedSecurePassword123!";
+
+        $result = $this->gql(
+            'mutation($id:Int!,$password:String!){ updateUserPassword(id:$id,password:$password) }',
+            ["id" => $id, "password" => $password]
+        );
+
+        $this->assertArrayNotHasKey("errors", $result, json_encode($result));
+        $this->assertTrue($result["data"]["updateUserPassword"]);
+        $this->assertTrue(password_verify($password, User::Get($id)->password));
+    }
+
     public function testDeleteUser(): void
     {
         $username = "del_" . uniqid();

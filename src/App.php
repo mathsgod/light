@@ -144,6 +144,10 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->factory->addNamespace("Light");
         $this->factory->setFinder(\Light\Framework\GraphQL\ControllerDiscovery::finder($this->container));
         $this->factory->addTypeMapperFactory(new \Light\Db\GraphQLite\Mappers\TypeMapperFactory);
+        $this->factory->addParameterMiddleware(new \Light\Framework\GraphQL\LoadModelParameterMiddleware());
+        $this->factory->addFieldMiddleware(new \Light\Framework\GraphQL\LoadModelAuthorizationMiddleware(
+            fn () => $this->auth_service,
+        ));
 
         $this->rbac = new Rbac();
         $this->rbac->setPermissionSeparator(".");

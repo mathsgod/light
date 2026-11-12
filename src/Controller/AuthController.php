@@ -353,11 +353,11 @@ class AuthController
 
         $user = User::Get(["username" => $username]);
         if (!$user) {
-            throw new Error("user not found or password error");
+            throw new Error("Invalid credentials or account temporarily unavailable");
         }
 
         if ($user->isAuthLocked()) {
-            throw new Error("user is locked for " . Config::Value("auth_lockout_duration", 15) . " minutes");
+            throw new Error("Invalid credentials or account temporarily unavailable");
         }
 
         if (!self::PasswordVerify($password, $user->password)) {
@@ -370,7 +370,7 @@ class AuthController
                 "user_agent" => $_SERVER["HTTP_USER_AGENT"],
             ]);
 
-            throw new Error("user not found or password error");
+            throw new Error("Invalid credentials or account temporarily unavailable");
         }
 
         if ($user->secret) {

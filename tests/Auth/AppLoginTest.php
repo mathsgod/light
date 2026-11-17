@@ -114,4 +114,55 @@ class AppLoginTest extends TestCase
         $this->assertArrayHasKey("errors", $out);
         $this->assertStringContainsString("not found", $out["errors"][0]["message"]);
     }
+
+    private function loginError(string $username): string
+    {
+        try {
+            (new \Light\Framework\Controller\AuthController())->login($this->getApp(), $username, "wrong_pw");
+            $this->fail("Expected login to fail");
+        } catch (\GraphQL\Error\Error $error) {
+            return $error->getMessage();
+        }
+    }
+
+    public function testUnknownUserLockoutMatchesExistingUser(): void
+    {
+        $user = $this->createUser("lock_existing_" . uniqid(), "correct_pw");
+        $unknown = "lock_unknown_" . uniqid();
+        $limit = intval(\Light\Framework\Model\Config::Value("auth_lockout_attempts", 5));
+
+        for ($i = 0; $i < $limit; $i++) {
+            $this->assertSame("user not found or password error", $this->loginError($user->username));
+            $this->assertSame("user not found or password error", $this->loginError($unknown));
+        }
+
+        $locked = $this->loginError($user->username);
+        $this->assertStringContainsString("user is locked for", $locked);
+        $this->assertSame($locked, $this->loginError($unknown));
+        $this->assertSame("user not found or password error", $this->loginError("other_" . uniqid()));
+
+        $_SERVER["REMOTE_ADDR"] = "127.0.0.2";
+        $this->assertSame("user not found or password error", $this->loginError($unknown));
+    }
+
+    public function testUnknownUserLockoutExpiresWithoutExtendingOnBlockedAttempts(): void
+    {
+        $this->createUser("existing_" . uniqid(), "pw");
+        $unknown = "expiry_unknown_" . uniqid();
+        $cache = $this->getApp()->getCache();
+        $key = "login_unknown_" . hash('sha256', serialize([$unknown, $_SERVER["REMOTE_ADDR"]]));
+        $duration = intval(\Light\Framework\Model\Config::Value("auth_lockout_duration", 15)) * 60;
+        $limit = intval(\Light\Framework\Model\Config::Value("auth_lockout_attempts", 5));
+        $attempts = array_fill(0, $limit, time() - 10);
+        $cache->set($key, $attempts, $duration);
+
+        $this->assertStringContainsString("user is locked for", $this->loginError($unknown));
+        $this->assertSame($attempts, $cache->get($key));
+
+        // Keep one recent failure and expire the rest of the rolling window.
+        $cache->set($key, array_merge(array_fill(0, $limit, time() - $duration), [time()]), $duration);
+        $this->assertSame("user not found or password error", $this->loginError($unknown));
+        $this->assertCount(2, $cache->get($key));
+    }
+
 }

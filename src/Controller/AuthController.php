@@ -418,6 +418,24 @@ class AuthController
 
         $user = User::Get(["username" => $username]);
         if (!$user) {
+            $cache = $app->getCache();
+            $ip = $_SERVER["REMOTE_ADDR"] ?? "unknown";
+            $key = "login_unknown_" . hash('sha256', serialize([$username, $ip]));
+            $duration = intval(Config::Value("auth_lockout_duration", 15)) * 60;
+            $limit = intval(Config::Value("auth_lockout_attempts", 5));
+            $now = time();
+            $attempts = array_values(array_filter(
+                $cache->get($key, []),
+                static fn (int $timestamp): bool => $timestamp > $now - $duration
+            ));
+
+            if (count($attempts) >= $limit) {
+                throw new Error("user is locked for " . Config::Value("auth_lockout_duration", 15) . " minutes");
+            }
+
+            $attempts[] = $now;
+            $cache->set($key, $attempts, $duration);
+
             // Dummy password_verify to keep response time constant
             // and prevent user enumeration via timing oracle.
             password_verify($password, "$2y$10$" . str_repeat("0", 53));

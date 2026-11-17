@@ -58,6 +58,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     protected string $mode = "dev";
 
     protected CacheInterface $cache;
+    private ?\Light\Auth\Contract\StateStore $authenticationStateStore = null;
+    private ?Auth\Authentication $authentication = null;
+    private ?ServerRequestInterface $currentRequest = null;
     private ?AudienceRegistry $audienceRegistry = null;
 
     /** @var array<class-string<ExtensionInterface>, true> */
@@ -244,6 +247,26 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     public function getCache(): CacheInterface
     {
         return $this->cache;
+    }
+
+    public function getCurrentRequest(): ?ServerRequestInterface { return $this->currentRequest; }
+
+    /** Configure shared atomic authentication storage before handling requests (e.g. Redis cache + Redis locks). */
+    public function setAuthenticationStateStore(\Light\Auth\Contract\StateStore $store): void
+    {
+        $this->authenticationStateStore = $store;
+        $this->authentication = null;
+    }
+
+    public function getAuthenticationStateStore(): \Light\Auth\Contract\StateStore
+    {
+        return $this->authenticationStateStore ??= Auth\Authentication::defaultStateStore($this->getCache());
+    }
+
+    public function getAuthentication(?ServerRequestInterface $request = null): Auth\Authentication
+    {
+        if ($request !== null) $this->currentRequest = $request;
+        return $this->authentication ??= new Auth\Authentication($this, $this->getAuthenticationStateStore());
     }
 
     public function getMailer(): Mailer
@@ -623,6 +646,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $this->currentRequest = $request;
         if ($request->getMethod() == "OPTIONS") {
             return new EmptyResponse(200);
         }
@@ -692,6 +716,8 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function execute(ServerRequestInterface $request): \GraphQL\Executor\ExecutionResult
     {
+        $this->currentRequest = $request;
+        $this->container->add(ServerRequestInterface::class, $request, true);
         $uploadCapture = new class($request) implements RequestHandlerInterface {
             public ServerRequestInterface $captured;
             public function __construct(ServerRequestInterface $r) { $this->captured = $r; }
@@ -759,7 +785,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     {
         $samesite = $_ENV["COOKIE_SAMESITE"] ?? "Lax";
         // if is https then add Partitioned
-        if ($_SERVER["HTTPS"] == "on" && $_ENV["COOKIE_PARTITIONED"] == "true") {
+        if (($_SERVER["HTTPS"] ?? "") == "on" && ($_ENV["COOKIE_PARTITIONED"] ?? "false") == "true") {
             $samesite .= ";Partitioned";
         }
         //set cookie
@@ -920,7 +946,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function getRpId(): string
     {
-        $name = $_SERVER["SERVER_NAME"];
+        $name = $_SERVER["SERVER_NAME"] ?? ($this->currentRequest?->getUri()->getHost() ?: "localhost");
         if ($name == "0.0.0.0") {
             $name = "localhost";
         }
@@ -932,21 +958,9 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function getRpEntity(): PublicKeyCredentialRpEntity
     {
-        $name = $_SERVER["SERVER_NAME"];
-        if ($name == "0.0.0.0") {
-            $name = "localhost";
-        } else {
-            $name = $_SERVER["SERVER_NAME"];
-        }
-
-        $rpEntity = PublicKeyCredentialRpEntity::create(
-            $name, //Name
-            $this->getRpId(),              //ID
-            null                            //Icon
-        );
-
-        return $rpEntity;
+        return PublicKeyCredentialRpEntity::create($this->getRpId(), $this->getRpId());
     }
+
 
     public function getDrive(int $index): Drive
     {

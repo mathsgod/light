@@ -98,7 +98,7 @@ class Service implements AuthenticationServiceInterface, AuthorizationServiceInt
 
 
 
-                if ($payload->view_as) {
+                if ($payload->view_as ?? null) {
                     $this->view_as = true;
                     $this->user = User::Get($payload->view_as);
                     $this->org_user = User::Get($payload->id);

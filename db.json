@@ -79,7 +79,7 @@
             {
                 "name": "secret",
                 "type": "varchar",
-                "length": 16
+                "length": 128
             },
             {
                 "name": "setting",

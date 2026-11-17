@@ -364,3 +364,7 @@ The MySQL integration tests require the disposable `light_test` database.
 They clear its tables between tests instead of wrapping tests in an externally
 opened PDO transaction. Run `composer test:docker`; never point this suite at an
 application database.
+
+## Authentication
+
+Credential login, TOTP and WebAuthn are integrated with `mathsgod/light-auth`. See [integration and upgrade notes](docs/LIGHT_AUTH.md), including the existing-database `User.secret` column migration.

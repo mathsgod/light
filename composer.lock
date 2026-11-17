@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "799ce61b5173ff7067e9114bc5741a4f",
+    "content-hash": "8be26044c299fef024b1e008f4f9e893",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1898,6 +1898,67 @@
             "time": "2025-11-13T04:07:08+00:00"
         },
         {
+            "name": "mathsgod/light-auth",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mathsgod/light-auth.git",
+                "reference": "48dbdcaa40e7570b538070619ab967707abff2ad"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mathsgod/light-auth/zipball/48dbdcaa40e7570b538070619ab967707abff2ad",
+                "reference": "48dbdcaa40e7570b538070619ab967707abff2ad",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.3",
+                "psr/clock": "^1.0",
+                "psr/simple-cache": "^3.0",
+                "spomky-labs/otphp": "^11.3",
+                "symfony/lock": "^7.4",
+                "web-auth/webauthn-lib": "^5.3"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^2.0",
+                "phpunit/phpunit": "^12.0",
+                "symfony/cache": "^7.4"
+            },
+            "suggest": {
+                "ext-pdo": "Required for the bundled PDO repositories",
+                "ext-pdo_sqlite": "Required for the SQLite example and integration tests"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Light\\Auth\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Light\\Auth\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ],
+                "analyse": [
+                    "phpstan analyse --memory-limit=512M"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Framework-independent password, TOTP and WebAuthn authentication for PHP 8.3+",
+            "support": {
+                "source": "https://github.com/mathsgod/light-auth/tree/main",
+                "issues": "https://github.com/mathsgod/light-auth/issues"
+            },
+            "time": "2026-11-17T08:33:48+00:00"
+        },
+        {
             "name": "mathsgod/light-collections",
             "version": "v1.0.0",
             "source": {
@@ -3780,6 +3841,76 @@
             "time": "2026-09-15T06:55:29+00:00"
         },
         {
+            "name": "spomky-labs/otphp",
+            "version": "11.5.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Spomky-Labs/otphp.git",
+                "reference": "16866d2206d6f0c0421294357da23a28b78852f7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Spomky-Labs/otphp/zipball/16866d2206d6f0c0421294357da23a28b78852f7",
+                "reference": "16866d2206d6f0c0421294357da23a28b78852f7",
+                "shasum": ""
+            },
+            "require": {
+                "paragonie/constant_time_encoding": "^2.0 || ^3.0",
+                "php": ">=8.1",
+                "psr/clock": "^1.0",
+                "symfony/deprecation-contracts": "^3.2"
+            },
+            "require-dev": {
+                "symfony/error-handler": "^6.4|^7.0|^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "OTPHP\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Florent Morselli",
+                    "homepage": "https://github.com/Spomky"
+                },
+                {
+                    "name": "All contributors",
+                    "homepage": "https://github.com/Spomky-Labs/otphp/contributors"
+                }
+            ],
+            "description": "A PHP library for generating one time passwords according to RFC 4226 (HOTP Algorithm) and the RFC 6238 (TOTP Algorithm) and compatible with Google Authenticator",
+            "homepage": "https://github.com/Spomky-Labs/otphp",
+            "keywords": [
+                "FreeOTP",
+                "RFC 4226",
+                "RFC 6238",
+                "google authenticator",
+                "hotp",
+                "otp",
+                "totp"
+            ],
+            "support": {
+                "issues": "https://github.com/Spomky-Labs/otphp/issues",
+                "source": "https://github.com/Spomky-Labs/otphp/tree/11.5.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/Spomky",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.patreon.com/FlorentMorselli",
+                    "type": "patreon"
+                }
+            ],
+            "time": "2026-11-07T17:39:42+00:00"
+        },
+        {
             "name": "spomky-labs/pki-framework",
             "version": "1.6.3",
             "source": {
@@ -4386,6 +4517,89 @@
                 }
             ],
             "time": "2026-10-09T13:57:53+00:00"
+        },
+        {
+            "name": "symfony/lock",
+            "version": "v7.4.23",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/lock.git",
+                "reference": "1c89b44cf414dfb98e2f83a02b6a7487ccedeb17"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/lock/zipball/1c89b44cf414dfb98e2f83a02b6a7487ccedeb17",
+                "reference": "1c89b44cf414dfb98e2f83a02b6a7487ccedeb17",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2",
+                "psr/log": "^1|^2|^3"
+            },
+            "conflict": {
+                "doctrine/dbal": "<3.6",
+                "symfony/cache": "<6.4"
+            },
+            "require-dev": {
+                "doctrine/dbal": "^3.6|^4",
+                "predis/predis": "^1.1|^2.0",
+                "symfony/serializer": "^6.4|^7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Lock\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jérémy Derussé",
+                    "email": "jeremy@derusse.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Creates and manages locks, a mechanism to provide exclusive access to a shared resource",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "cas",
+                "flock",
+                "locking",
+                "mutex",
+                "redlock",
+                "semaphore"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/lock/tree/v7.4.23"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-11-01T22:26:51+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -8986,7 +9200,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "mathsgod/light-auth": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

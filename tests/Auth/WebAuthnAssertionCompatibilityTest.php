@@ -44,29 +44,24 @@ final class WebAuthnAssertionCompatibilityTest extends TestCase
         self::assertFalse(property_exists($credential, 'id'));
     }
 
-    public function testAssertionLooksUpEncodedRawIdAndRejectsExpiredChallenge(): void
+    public function testMissingChallengeReturnsControlledError(): void
     {
-        $rawId = random_bytes(32);
-        $source = new CredentialRecord($rawId, 'public-key', ['internal'], 'none', EmptyTrustPath::create(), Uuid::v4(), 'test-key', '123', 7);
-        $controller = $this->getMockBuilder(WebAuthnController::class)->onlyMethods(['getStoredCredentials'])->getMock();
-        $controller->expects(self::once())->method('getStoredCredentials')->willReturn([Serializer::toArray($source)]);
-        $cache = $this->createMock(CacheInterface::class);
-        $cache->expects(self::once())->method('get')->with('webauthn_request_' . str_repeat('a', 32))->willReturn(null);
-        $app = $this->getMockBuilder(App::class)->disableOriginalConstructor()->onlyMethods(['getCache'])->getMock();
-        $app->expects(self::once())->method('getCache')->willReturn($cache);
-        $request = (new ServerRequest([], [], 'https://example.test/'))->withCookieParams(['webauthn_sid' => str_repeat('a', 32)]);
+        $store = new \Light\Auth\Cache\CacheStateStore(
+            new \Symfony\Component\Cache\Psr16Cache(new \Symfony\Component\Cache\Adapter\ArrayAdapter()),
+            new \Symfony\Component\Lock\LockFactory(new \Symfony\Component\Lock\Store\FlockStore()),
+        );
+        $app = $this->getMockBuilder(App::class)->disableOriginalConstructor()->onlyMethods(['getAuthenticationStateStore'])->getMock();
+        $app->expects(self::once())->method('getAuthenticationStateStore')->willReturn($store);
+        $request = (new ServerRequest([], [], 'https://example.test/'))->withCookieParams(['light_auth_binding' => str_repeat('a', 64)]);
         $this->expectException(Error::class);
         $this->expectExceptionMessage('Invalid challenge');
-        $controller->webAuthnAssertion(null, $this->assertion($rawId), $app, $request);
+        (new WebAuthnController())->webAuthnAssertion(null, $this->assertion(random_bytes(32)), $app, $request);
     }
 
-    public function testUnknownCredentialReturnsControlledError(): void
+    public function testMalformedAssertionReturnsControlledError(): void
     {
-        $controller = $this->getMockBuilder(WebAuthnController::class)->onlyMethods(['getStoredCredentials'])->getMock();
-        $controller->expects(self::once())->method('getStoredCredentials')->willReturn([]);
-        $app = $this->createStub(App::class);
         $this->expectException(Error::class);
         $this->expectExceptionMessage('Invalid credential');
-        $controller->webAuthnAssertion(null, $this->assertion(random_bytes(32)), $app, new ServerRequest());
+        (new WebAuthnController())->webAuthnAssertion(null, null, $this->createStub(App::class), new ServerRequest());
     }
 }

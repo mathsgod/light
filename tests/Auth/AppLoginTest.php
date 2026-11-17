@@ -149,20 +149,21 @@ class AppLoginTest extends TestCase
     {
         $this->createUser("existing_" . uniqid(), "pw");
         $unknown = "expiry_unknown_" . uniqid();
-        $cache = $this->getApp()->getCache();
-        $key = "login_unknown_" . hash('sha256', serialize([$unknown, $_SERVER["REMOTE_ADDR"]]));
+        $state = $this->getApp()->getAuthenticationStateStore();
+        $key = 'attempts:' . \Light\Auth\AttemptLimiter::key($unknown, $_SERVER['REMOTE_ADDR']);
         $duration = intval(\Light\Framework\Model\Config::Value("auth_lockout_duration", 15)) * 60;
         $limit = intval(\Light\Framework\Model\Config::Value("auth_lockout_attempts", 5));
         $attempts = array_fill(0, $limit, time() - 10);
-        $cache->set($key, $attempts, $duration);
-
+        $state->update($key, $duration, static function (array &$value) use ($attempts): void { $value = ['times' => $attempts]; });
         $this->assertStringContainsString("user is locked for", $this->loginError($unknown));
-        $this->assertSame($attempts, $cache->get($key));
+        $after = $state->update($key, $duration, static fn (array &$value): array => $value['times']);
+        $this->assertSame($attempts, $after);
 
-        // Keep one recent failure and expire the rest of the rolling window.
-        $cache->set($key, array_merge(array_fill(0, $limit, time() - $duration), [time()]), $duration);
+        $times = array_merge(array_fill(0, $limit, time() - $duration), [time()]);
+        $state->update($key, $duration, static function (array &$value) use ($times): void { $value = ['times' => $times]; });
         $this->assertSame("user not found or password error", $this->loginError($unknown));
-        $this->assertCount(2, $cache->get($key));
+        $after = $state->update($key, $duration, static fn (array &$value): array => $value['times']);
+        $this->assertCount(2, $after);
     }
 
 }

@@ -2,13 +2,10 @@
 
 namespace Light\Framework\Model;
 
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
 use GraphQL\Error\Error;
 use Light\Framework\App;
 use Light\Framework\Model\Notification;
 use Light\Rbac\Rbac;
-use Light\Framework\Security\TwoFactorAuthentication;
 use Light\Framework\Type\WebAuthn;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\FailWith;
@@ -20,6 +17,12 @@ use TheCodingMachine\GraphQLite\Annotations\Type;
 
 /**
  * @property int $user_id
+ * @property int $status
+ * @property string|null $password
+ * @property string|null $password_dt
+ * @property string|null $facebook
+ * @property string|null $microsoft
+ * @property string|null $google
  * @property string $username
  * @property string $first_name
  * @property string $last_name
@@ -158,24 +161,12 @@ class User extends \Light\Framework\Model
      * @return ?mixed
      */
     #[Field]
-    public function getMy2FA()
+    public function getMy2FA(#[Autowire] ?App $app = null)
     {
-        if ($this->isTwoFactorEnabled()) {
-            throw new Error("Two-factor authentication is already enabled");
-        }
-
-        $secret = (new TwoFactorAuthentication())->generateSecret();
-
-        $host = $_SERVER["HTTP_HOST"];
-        $url = sprintf("otpauth://totp/%s@%s?secret=%s", $this->username, $host, $secret);
-
-        $writer = new PngWriter();
-        $png = $writer->write(QrCode::create($url));
-        return [
-            "secret" => $secret,
-            "host" => $host,
-            "image" => $png->getDataUri()
-        ];
+        if ($this->isTwoFactorEnabled()) throw new Error("Two-factor authentication is already enabled");
+        $app ??= self::$container?->get(App::class);
+        if (!$app instanceof App) throw new \LogicException('Application context is required for TOTP enrollment');
+        return $app->getAuthentication()->beginTotp($this);
     }
 
 
@@ -244,6 +235,7 @@ class User extends \Light\Framework\Model
         UserLog::Query(["jti" => $session_id, "user_id" => $this->user_id])->update(["last_access_time" => date("Y-m-d H:i:s")]);
     }
 
+    /** @deprecated Legacy log-based helper; credential login uses light-auth's cache limiter. */
     public function isAuthLocked()
     {
         $ip = $_SERVER["REMOTE_ADDR"] ?? "unknown";

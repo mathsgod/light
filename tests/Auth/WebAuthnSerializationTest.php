@@ -57,18 +57,4 @@ final class WebAuthnSerializationTest extends TestCase
         self::assertSame(7, $restored->counter);
     }
 
-    public function testLoginOptionsResolverReturnsSerializableArrayAndCachesChallenge(): void
-    {
-        $sid = str_repeat('a', 32);
-        $cache = $this->createMock(CacheInterface::class);
-        $cache->expects(self::once())->method('set')->with('webauthn_request_' . $sid, self::callback(static fn ($value) => unserialize($value) instanceof PublicKeyCredentialRequestOptions), 300)->willReturn(true);
-        $app = $this->getMockBuilder(App::class)->disableOriginalConstructor()->onlyMethods(['getCache', 'getRpId'])->getMock();
-        $app->expects(self::once())->method('getCache')->willReturn($cache);
-        $app->expects(self::once())->method('getRpId')->willReturn('example.test');
-        $request = (new ServerRequest())->withCookieParams(['webauthn_sid' => $sid]);
-        $data = (new Auth())->getWebAuthnRequestOptions($app, $request);
-        self::assertIsArray($data);
-        self::assertSame('example.test', $data['rpId']);
-        self::assertSame(32, strlen(Base64UrlSafe::decodeNoPadding($data['challenge'])));
-    }
 }

@@ -2,28 +2,15 @@
 
 namespace Light\Framework\Type;
 
-use Exception;
-use GraphQL\Error\Error;
 use Light\Framework\App;
 use Light\Framework\Model\Config;
 use Light\Framework\Model\User;
-use Light\Framework\WebAuthn\PublicKeyCredentialSourceRepository;
-use Light\Framework\WebAuthn\Serializer;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\Field;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
 use TheCodingMachine\GraphQLite\Annotations\Type;
 use Psr\Http\Message\ServerRequestInterface;
-use Webauthn\AttestationStatement\AttestationStatementSupportManager;
-use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
-use Webauthn\AuthenticatorSelectionCriteria;
-use Webauthn\PublicKeyCredentialCreationOptions;
-use Webauthn\PublicKeyCredentialParameters;
-use Webauthn\PublicKeyCredentialRequestOptions;
-use Webauthn\PublicKeyCredentialRpEntity;
-use Webauthn\PublicKeyCredentialSource;
-use Webauthn\PublicKeyCredentialUserEntity;
 
 #[Type]
 class Auth
@@ -59,76 +46,17 @@ class Auth
     }
 
     #[Field]
-    /**
-     * @return mixed
-     */
+    /** @return mixed */
     public function getWebAuthnRequestOptions(#[Autowire] App $app, #[Autowire] ServerRequestInterface $request)
     {
-
-        $cookies = $request->getCookieParams();
-        $sid = $cookies["webauthn_sid"] ?? null;
-        if (!is_string($sid) || !preg_match('/^[a-f0-9]{32}$/', $sid)) {
-            $sid = bin2hex(random_bytes(16));
-            setcookie("webauthn_sid", $sid, [
-                "expires" => time() + 300,
-                "path" => "/",
-                "secure" => true,
-                "httponly" => true,
-                "samesite" => "Lax",
-            ]);
-        }
-
-        $challenge = random_bytes(32);
-        $publicKeyCredentialRequestOptions = PublicKeyCredentialRequestOptions::create(
-            $challenge, // Challenge
-            $app->getRpId(), // Relying party ID
-            [],
-            PublicKeyCredentialRequestOptions::USER_VERIFICATION_REQUIREMENT_REQUIRED,
-        );
-
-        $cache = $app->getCache();
-        $cache->set("webauthn_request_" . $sid, serialize($publicKeyCredentialRequestOptions), 60 * 5);
-
-        $json = Serializer::toArray($publicKeyCredentialRequestOptions);
-
-        return $json;
+        return $app->getAuthentication($request)->beginAssertion();
     }
 
     #[Field]
     #[Logged]
-    /**
-     * @return mixed
-     */
+    /** @return mixed */
     public function getWebAuthnCreationOptions(#[InjectUser] User $user, #[Autowire] App $app)
     {
-
-        $authenticatorSelectionCriteria = AuthenticatorSelectionCriteria::create(
-            userVerification: AuthenticatorSelectionCriteria::USER_VERIFICATION_REQUIREMENT_REQUIRED,
-            residentKey: AuthenticatorSelectionCriteria::RESIDENT_KEY_REQUIREMENT_REQUIRED,
-        );
-
-
-        try {
-            $rpEntity = $app->getRpEntity();
-            $challenge = random_bytes(16);
-            $userEntity = PublicKeyCredentialUserEntity::create($user->username, $user->user_id, $user->getName());
-            $option = PublicKeyCredentialCreationOptions::create(
-                $rpEntity,
-                $userEntity,
-                $challenge,
-                [
-                    PublicKeyCredentialParameters::createPk(-7), // ES256
-                    PublicKeyCredentialParameters::createPk(-257), // RS256
-                ],
-                $authenticatorSelectionCriteria,
-            );
-        } catch (Exception $e) {
-            throw new Error($e->getMessage());
-        }
-
-        $cache = $app->getCache();
-        $cache->set("webauthn_creation_" . $user->user_id, base64_encode($challenge), 60 * 5);
-
-        return Serializer::toArray($option);
+        return $app->getAuthentication()->beginRegistration($user);
     }
 }

@@ -10,6 +10,8 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // DB fixtures reuse user IDs. Clear persistent auth/replay/config state as well.
+        (new \Symfony\Component\Cache\Adapter\FilesystemAdapter('light'))->clear();
 
         // light-server scans <root>/pages via RecursiveDirectoryIterator
         // and throws if the directory is missing — ensure it exists.

@@ -1,106 +1,34 @@
 <?php
+declare(strict_types=1);
 
 namespace Light\Framework\Security;
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 
+use Light\Auth\TotpVerifier;
+use Light\Auth\User;
+use Light\Framework\Auth\Authentication;
+use OTPHP\TOTP;
 use Psr\SimpleCache\CacheInterface;
 
-
+/** @deprecated Compatibility facade; authentication and enrollment use light-auth directly. */
 class TwoFactorAuthentication
 {
-    static $PASS_CODE_LENGTH = 6;
-    static $PIN_MODULO;
-    static $SECRET_LENGTH = 10;
+    public static int $PASS_CODE_LENGTH = 6;
+    public static int $SECRET_LENGTH = 10;
+    public static int $PIN_MODULO = 1000000;
 
-    // TTL (seconds) for replay-protection cache entries. Covers the full
-    // +/- 1 step window (60s) plus 30s of grace.
-    private const REPLAY_TTL = 90;
-
-    public function __construct()
+    public function checkCode($secret, $code, ?int $user_id = null, ?CacheInterface $cache = null): bool
     {
-        self::$PIN_MODULO = pow(10, self::$PASS_CODE_LENGTH);
-    }
-
-    /**
-     * Verify a TOTP code. Optionally enforces replay protection when
-     * $user_id and $cache are supplied: a code whose counter has been
-     * used within the past REPLAY_TTL seconds is rejected.
-     */
-    public function checkCode($secret, $code, ?int $user_id = null, ?CacheInterface $cache = null)
-    {
-        $time = floor(time() / 30);
-        for ($i = -1; $i <= 1; $i++) {
-
-            if ($this->getCode($secret, $time + $i) == $code) {
-
-                // Replay protection: skip counter that has already been used
-                if ($user_id !== null && $cache !== null) {
-                    $key = "totp_used_" . $user_id . "_" . ($time + $i);
-                    if ($cache->has($key)) {
-                        // Code at this counter is already used; keep looking
-                        // for a fresh counter in the window
-                        continue;
-                    }
-                }
-
-                // Mark this counter as used (best-effort, non-atomic)
-                if ($user_id !== null && $cache !== null) {
-                    $cache->set("totp_used_" . $user_id . "_" . ($time + $i), true, self::REPLAY_TTL);
-                }
-
-                return true;
-            }
+        if ($user_id !== null && $cache !== null) {
+            return (new TotpVerifier(Authentication::defaultStateStore($cache)))->verify(new User((string) $user_id, '', null, totpSecret: $secret), (string) $code);
         }
-
-        return false;
+        return TOTP::createFromSecret($secret)->verify((string) $code);
     }
 
-    public function getCode($secret, $time = null)
+    public function getCode($secret, $time = null): string
     {
-
-        if (!$time) {
-            $time = floor(time() / 30);
-        }
-        $base32 = new FixedBitNotation(5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567', TRUE, TRUE);
-        $secret = $base32->decode($secret);
-
-        $time = pack("N", $time);
-        $time = str_pad($time, 8, chr(0), STR_PAD_LEFT);
-
-        $hash = hash_hmac('sha1', $time, $secret, true);
-        $offset = ord(substr($hash, -1));
-        $offset = $offset & 0xF;
-
-        $truncatedHash = self::hashToInt($hash, $offset) & 0x7FFFFFFF;
-        $pinValue = str_pad($truncatedHash % self::$PIN_MODULO, 6, "0", STR_PAD_LEFT);;
-        return $pinValue;
+        $otp = TOTP::createFromSecret($secret);
+        return $time === null ? $otp->now() : $otp->at((int) $time * 30);
     }
 
-    protected  function hashToInt($bytes, $start)
-    {
-        $input = substr($bytes, $start, strlen($bytes) - $start);
-        $val2 = unpack("N", substr($input, 0, 4));
-        return $val2[1];
-    }
-
-    public function generateSecret()
-    {
-        $secret = "";
-        for ($i = 1; $i <= self::$SECRET_LENGTH; $i++) {
-            $c = random_int(0, 255);
-            $secret .= pack("c", $c);
-        }
-        $base32 = new FixedBitNotation(5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567', TRUE, TRUE);
-        return  $base32->encode($secret);
-    }
+    public function generateSecret(): string { return TOTP::generate()->getSecret(); }
 }

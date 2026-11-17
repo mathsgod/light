@@ -2,8 +2,6 @@
 
 namespace Light\Framework\Controller;
 
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
 use GraphQL\Error\Error;
 use Ramsey\Uuid\Uuid;
 
@@ -16,7 +14,6 @@ use Light\Framework\Model\Config;
 use Light\Framework\Type\System;
 use Light\Framework\Model\User;
 use Light\Framework\Model\UserLog;
-use Light\Framework\Security\TwoFactorAuthentication;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Logged;
@@ -30,41 +27,10 @@ class AuthController
     #[Mutation]
     public function updateTwoFactorAuthentication(string $username, string $password, string $secret, string $code, #[Autowire] App $app): bool
     {
-        $cache = $app->getCache();
-        $count = $cache->get("two_factor_authentication_setup_" . $username, 0);
-        if ($count >= 5) {
-            throw new Error("You have reached the maximum number of attempts to set up two-factor authentication. Please try again later.");
-        }
-
-        $cache->set("two_factor_authentication_setup_" . $username, $count + 1, 600);
-
-        $user = User::Get(["username" => $username]);
-        if (!$user) {
-            // Dummy password_verify to keep response time constant
-            password_verify($password, "$2y$10$" . str_repeat("0", 53));
-            throw new Error("update two factor authentication failed");
-        }
-
-        if ($user->status != 0) {
-            throw new Error("update two factor authentication failed");
-        }
-
-        // Verify password before revealing whether 2FA is already set up,
-        // to avoid user enumeration (which users have 2FA enabled).
-        if (!self::PasswordVerify($password, $user->password)) {
-            throw new Error("update two factor authentication failed");
-        }
-
-        if ($user->secret) {
-            throw new Error("update two factor authentication failed");
-        }
-
-        if (!(new TwoFactorAuthentication)->checkCode($secret, $code, $user->user_id, $app->getCache())) {
-            throw new Error("setup two factor authentication failed");
-        }
-
-        $user->secret = $secret;
-        $user->save();
+        $auth = $app->getAuthentication();
+        $user = $auth->authorizeSetupWithPassword($username, $password);
+        if (!$user) throw new Error("update two factor authentication failed");
+        if (!$auth->confirmTotp($user, $secret, $code)) throw new Error("setup two factor authentication failed");
         return true;
     }
 
@@ -388,6 +354,8 @@ class AuthController
             ]);
         }
 
+        $app->getAuthentication($request)->rotateBrowserBinding();
+
         //set cookie
         setcookie("access_token", "", [
             "expires" => time() - 3600,
@@ -415,84 +383,7 @@ class AuthController
     #[Mutation]
     public function login(#[Autowire] App $app, string $username, string $password, ?string $code = null): bool
     {
-
-        $user = User::Get(["username" => $username]);
-        if (!$user) {
-            $cache = $app->getCache();
-            $ip = $_SERVER["REMOTE_ADDR"] ?? "unknown";
-            $key = "login_unknown_" . hash('sha256', serialize([$username, $ip]));
-            $duration = intval(Config::Value("auth_lockout_duration", 15)) * 60;
-            $limit = intval(Config::Value("auth_lockout_attempts", 5));
-            $now = time();
-            $attempts = array_values(array_filter(
-                $cache->get($key, []),
-                static fn (int $timestamp): bool => $timestamp > $now - $duration
-            ));
-
-            if (count($attempts) >= $limit) {
-                throw new Error("user is locked for " . Config::Value("auth_lockout_duration", 15) . " minutes");
-            }
-
-            $attempts[] = $now;
-            $cache->set($key, $attempts, $duration);
-
-            // Dummy password_verify to keep response time constant
-            // and prevent user enumeration via timing oracle.
-            password_verify($password, "$2y$10$" . str_repeat("0", 53));
-            throw new Error("user not found or password error");
-        }
-
-        if ($user->isAuthLocked()) {
-            throw new Error("user is locked for " . Config::Value("auth_lockout_duration", 15) . " minutes");
-        }
-
-        if (!self::PasswordVerify($password, $user->password)) {
-            //save to UserLog
-            \Light\Framework\Database\Sql::insert('UserLog', [
-                "user_id" => $user->user_id,
-                "login_dt" => date("Y-m-d H:i:s"),
-                "result" => "FAIL",
-                "ip" => $_SERVER["REMOTE_ADDR"],
-                "user_agent" => $_SERVER["HTTP_USER_AGENT"],
-            ]);
-
-            throw new Error("user not found or password error");
-        }
-
-        if ($user->status != 0) {
-            throw new Error("user is disabled");
-        }
-
-        $user_has_2fa = !empty($user->secret);
-        $system_2fa = $app->isTwoFactorAuthentication();
-        $need_2fa = $user_has_2fa || $system_2fa;
-
-        if ($need_2fa) {
-            if (!$user->secret) {
-                // System 2FA is required but the user has not set one up yet
-                throw new Error("setup_2fa_required");
-            }
-
-            if (!$code) {
-                throw new Error("two factor authentication code is required");
-            }
-
-            if (!(new TwoFactorAuthentication)->checkCode($user->secret, $code, $user->user_id, $app->getCache())) {
-                throw new Error("two factor authentication error");
-            }
-        }
-
-
-        if (Config::Value("password_expiration")) {
-            $duration = Config::Value("password_expiration_duration", 90); //90 days
-            $diff = strtotime(date("Y-m-d")) - strtotime($user->password_dt);
-            if ($diff > $duration * 24 * 60 * 60) {
-                throw new Error("password is expired");
-            }
-        }
-
-        $app->userLogin($user);
-        return true;
+        return $app->getAuthentication()->login($username, $password, $code);
     }
 
     private static function PasswordVerify(string $password, string $hash)
@@ -529,16 +420,8 @@ class AuthController
     #[Logged]
     public function updateMy2FA(#[InjectUser] User $user, string $secret, string $code, #[Autowire] App $app): bool
     {
-        if ($user->isTwoFactorEnabled()) {
-            throw new Error("Two-factor authentication is already enabled");
-        }
-
-        if (!(new TwoFactorAuthentication)->checkCode($secret, $code, $user->user_id, $app->getCache())) {
-            throw new Error("two factor authentication error");
-        }
-
-        $user->secret = $secret;
-        $user->save();
+        if ($user->isTwoFactorEnabled()) throw new Error("Two-factor authentication is already enabled");
+        if (!$app->getAuthentication()->confirmTotp($user, $secret, $code)) throw new Error("two factor authentication error");
         return true;
     }
 
@@ -554,22 +437,11 @@ class AuthController
         string $code,
         #[Autowire] App $app
     ): bool {
-        if ($app->isTwoFactorAuthentication()) {
-            throw new Error("Two-factor authentication is required by the system");
-        }
-
-        if (!$user->isTwoFactorEnabled()) {
-            throw new Error("Two-factor authentication is not enabled");
-        }
-
-        if (!self::PasswordVerify($password, $user->password)) {
+        if ($app->isTwoFactorAuthentication()) throw new Error("Two-factor authentication is required by the system");
+        if (!$user->isTwoFactorEnabled()) throw new Error("Two-factor authentication is not enabled");
+        if (!$app->getAuthentication()->verifyCredentials($user, $password, $code)) {
             throw new Error("Password or two-factor authentication code is incorrect");
         }
-
-        if (!(new TwoFactorAuthentication)->checkCode($user->secret, $code, $user->user_id, $app->getCache())) {
-            throw new Error("Password or two-factor authentication code is incorrect");
-        }
-
         $user->secret = "";
         $user->save();
         return true;
@@ -581,24 +453,9 @@ class AuthController
      * @return mixed
      */
     #[Logged]
-    public function getMy2FA(#[InjectUser] User $user)
+    public function getMy2FA(#[InjectUser] User $user, #[Autowire] App $app)
     {
-        if ($user->isTwoFactorEnabled()) {
-            throw new Error("Two-factor authentication is already enabled");
-        }
-
-        $secret = (new TwoFactorAuthentication())->generateSecret();
-
-        $host = $_SERVER["HTTP_HOST"];
-        $url = sprintf("otpauth://totp/%s@%s?secret=%s", $user->username, $host, $secret);
-
-        $writer = new PngWriter();
-        $png = $writer->write(QrCode::create($url));
-        return [
-            "secret" => $secret,
-            "host" => $host,
-            "image" => $png->getDataUri()
-        ];
+        return $app->getAuthentication()->beginTotp($user);
     }
 
     #[Mutation]

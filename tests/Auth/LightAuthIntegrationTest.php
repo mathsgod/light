@@ -121,6 +121,28 @@ final class LightAuthIntegrationTest extends TestCase
         $controller->login($this->app, 'alice', 'correct-password', $code);
     }
 
+    public function testConfiguredIpRateLimitAggregatesUsernames(): void
+    {
+        $this->config('auth_lockout_scope', 'ip');
+        if (!enum_exists(\Light\Auth\RateLimitScope::class)) {
+            $this->expectException(\LogicException::class);
+            $this->expectExceptionMessage('Update mathsgod/light-auth');
+            $this->app->getAuthentication()->policy();
+            return;
+        }
+        $this->config('auth_lockout_attempts', '2');
+        $this->user();
+        $controller = new AuthController();
+        foreach (['alice', 'missing'] as $name) {
+            try { $controller->login($this->app, $name, 'wrong'); self::fail('Invalid login succeeded'); }
+            catch (Error $error) { self::assertSame('user not found or password error', $error->getMessage()); }
+        }
+        try { $controller->login($this->app, 'alice', 'correct-password'); self::fail('IP quota was bypassed'); }
+        catch (Error $error) { self::assertStringContainsString('user is locked for', $error->getMessage()); }
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.2';
+        self::assertTrue($controller->login($this->app, 'alice', 'correct-password'));
+    }
+
     public function testLoggedInUserCanSetUpTotpThroughExistingApiAndSecretCannotBeInvented(): void
     {
         $user = $this->user();

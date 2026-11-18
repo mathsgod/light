@@ -1,5 +1,7 @@
 .env
 vendor
+.composer-light-auth-dev.json
+.composer-light-auth-dev.lock
 
 test.php
 uploads

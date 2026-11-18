@@ -6,7 +6,7 @@ namespace Light\Framework\Auth;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use GraphQL\Error\Error;
-use Light\Auth\{AttemptLimiter, Challenges, LoginService, Policy, Status, TotpEnrollment, TotpVerifier};
+use Light\Auth\{AttemptLimiter, Challenges, LoginService, Policy, RateLimitScope, Status, TotpEnrollment, TotpVerifier};
 use Light\Auth\Contract\StateStore;
 use Light\Auth\Pdo\PdoCredentialRepository;
 use Light\Auth\WebAuthn\{WebAuthnEnrollment, WebAuthnService};
@@ -35,10 +35,21 @@ final class Authentication
 
     public function policy(): Policy
     {
+        $attempts = max(1, (int) Config::Value('auth_lockout_attempts', '5'));
+        $seconds = max(1, (int) Config::Value('auth_lockout_duration', '15')) * 60;
+        $scope = Config::Value('auth_lockout_scope', 'username_ip') ?? 'username_ip';
+        // Older pinned installations retain their default behavior until light-auth is updated.
+        if (!enum_exists(RateLimitScope::class)) {
+            if ($scope !== 'username_ip') throw new \LogicException('Update mathsgod/light-auth before selecting an IP rate limit.');
+            return new Policy($attempts, $seconds, self::TTL);
+        }
+        $selected = RateLimitScope::tryFrom($scope);
+        if ($selected === null) throw new \InvalidArgumentException('auth_lockout_scope must be username_ip or ip.');
         return new Policy(
-            maxAttempts: max(1, (int) Config::Value('auth_lockout_attempts', '5')),
-            windowSeconds: max(1, (int) Config::Value('auth_lockout_duration', '15')) * 60,
+            maxAttempts: $attempts,
+            windowSeconds: $seconds,
             challengeSeconds: self::TTL,
+            scope: $selected,
         );
     }
 

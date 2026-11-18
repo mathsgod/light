@@ -6,7 +6,7 @@ Framework credential login, TOTP setup/verification and WebAuthn creation/assert
 
 Existing databases must apply [`migrations/20261117_light_auth.sql`](../migrations/20261117_light_auth.sql) before enabling new TOTP enrollments. This expands the existing `User.secret` column from 16 to 128 characters for OTPHP secrets and preserves existing values. New installations use the updated `db.json`. No tables are added.
 
-`composer install` uses the committed lock file, currently pinning `mathsgod/light-auth` to `dev-main` at `48dbdca`. The prototype has no stable release yet. Until a stable registry release is available, consuming applications must register its VCS repository and explicitly allow the development requirement in their **root** composer.json; Composer does not inherit dependency repositories or root stability flags:
+`composer install` uses the committed lock file, currently pinning `mathsgod/light-auth` to `dev-main` at `287abbb`. The prototype has no stable release yet. Until a stable registry release is available, consuming applications must register its VCS repository and explicitly allow the development requirement in their **root** composer.json; Composer does not inherit dependency repositories or root stability flags:
 
 ```json
 {
@@ -25,6 +25,7 @@ For an existing database, apply `migrations/20261117_light_auth.sql` before enab
 
 | Framework setting | Owner / mapping |
 | --- | --- |
+| `auth_lockout_scope` | `username_ip` (default) or `ip`; IP mode counts all login submissions across usernames and keeps quota after success |
 | `auth_lockout_attempts` | `Light\Auth\Policy::maxAttempts` |
 | `auth_lockout_duration` | Minutes converted to `Policy::windowSeconds` |
 | `password_expiration` | Enables the user repository's expiry calculation |
@@ -73,3 +74,9 @@ Integration tests cover original GraphQL setup payloads, configured lock/expiry 
 ```bash
 PHP_BINARY=php8.3 bash tests/run-with-mysql.sh
 ```
+
+## Developing the new rate-limit option
+
+`auth_lockout_scope` selects `username_ip` or `ip`. The security settings component offers both choices. IP mode shares one rolling quota across password/passkey submissions and usernames, and successful logins do not clear it. Older light-auth installations retain default username/IP behavior and explicitly reject IP mode until the dependency is updated.
+
+To test changes in a sibling light-auth checkout, run `bash scripts/use-local-light-auth.sh`. It symlinks the local library into vendor using a separate Composer manifest and lock. A normal `composer install` restores the version from the committed lock.

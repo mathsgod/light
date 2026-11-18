@@ -198,7 +198,16 @@ final class Authentication
         return $service->secondFactor($result->challengeToken, $code, $ip, $this->browserBinding())->status === Status::Authenticated;
     }
 
-    private function credentials(): PdoCredentialRepository { return new PdoCredentialRepository($this->app->getDatabase()->connection()); }
+    private function credentials(): PdoCredentialRepository
+    {
+        return new PdoCredentialRepository(
+            $this->app->getDatabase()->connection(),
+            table: 'User',
+            idColumn: 'user_id',
+            credentialColumn: 'credential',
+            wrapperKey: 'credential',
+        );
+    }
 
     /** @return list<string> */
     public function allowedOrigins(): array

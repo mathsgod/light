@@ -6,7 +6,7 @@ Framework credential login, TOTP setup/verification and WebAuthn creation/assert
 
 Existing databases must apply [`migrations/20261117_light_auth.sql`](../migrations/20261117_light_auth.sql) before enabling new TOTP enrollments. This expands the existing `User.secret` column from 16 to 128 characters for OTPHP secrets and preserves existing values. New installations use the updated `db.json`. No tables are added.
 
-`composer install` uses the committed lock file, currently pinning `mathsgod/light-auth` to `dev-main` at `287abbb`. The prototype has no stable release yet. Until a stable registry release is available, consuming applications must register its VCS repository and explicitly allow the development requirement in their **root** composer.json; Composer does not inherit dependency repositories or root stability flags:
+`composer install` uses the committed lock file, currently pinning `mathsgod/light-auth` to `dev-main` at `5c6c4e9`. The prototype has no stable release yet. Until a stable registry release is available, consuming applications must register its VCS repository and explicitly allow the development requirement in their **root** composer.json; Composer does not inherit dependency repositories or root stability flags:
 
 ```json
 {

@@ -143,6 +143,26 @@ final class LightAuthIntegrationTest extends TestCase
         self::assertTrue($controller->login($this->app, 'alice', 'correct-password'));
     }
 
+    public function testAccountLimitAppliesAcrossIps(): void
+    {
+        $this->user();
+        $controller = new AuthController();
+        for ($attempt = 1; $attempt <= 20; $attempt++) {
+            $_SERVER['REMOTE_ADDR'] = '192.0.2.' . $attempt;
+            try {
+                $controller->login($this->app, 'alice', 'wrong');
+                self::fail('Invalid password was accepted');
+            } catch (Error $error) {
+                self::assertSame('user not found or password error', $error->getMessage());
+            }
+        }
+
+        $_SERVER['REMOTE_ADDR'] = '192.0.2.21';
+        $this->expectException(Error::class);
+        $this->expectExceptionMessage('user is locked for');
+        $controller->login($this->app, 'alice', 'correct-password');
+    }
+
     public function testResetPasswordUsesConfiguredPasswordPolicy(): void
     {
         $this->config('password_min_length', '12');

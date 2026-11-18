@@ -1903,12 +1903,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/mathsgod/light-auth.git",
-                "reference": "f53f75caeb7a2df10b2ac91b2901debafee4999d"
+                "reference": "5c6c4e9616d6239fc6fc7d2a25446c2ed5ba745d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mathsgod/light-auth/zipball/f53f75caeb7a2df10b2ac91b2901debafee4999d",
-                "reference": "f53f75caeb7a2df10b2ac91b2901debafee4999d",
+                "url": "https://api.github.com/repos/mathsgod/light-auth/zipball/5c6c4e9616d6239fc6fc7d2a25446c2ed5ba745d",
+                "reference": "5c6c4e9616d6239fc6fc7d2a25446c2ed5ba745d",
                 "shasum": ""
             },
             "require": {
@@ -1956,7 +1956,7 @@
                 "source": "https://github.com/mathsgod/light-auth/tree/main",
                 "issues": "https://github.com/mathsgod/light-auth/issues"
             },
-            "time": "2026-11-18T02:42:07+00:00"
+            "time": "2026-11-18T05:09:37+00:00"
         },
         {
             "name": "mathsgod/light-collections",

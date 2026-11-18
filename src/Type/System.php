@@ -234,73 +234,24 @@ class System
     #[Logged]
     public function getPasswordPolicy(): string
     {
-        $policy = ["required"];
-        if (Config::Value("password_contains_uppercase")) {
-            $policy[] = "contains_uppercase";
-        }
-        if (Config::Value("password_contains_lowercase")) {
-            $policy[] = "contains_lowercase";
-        }
-        if (Config::Value("password_contains_numeric")) {
-            $policy[] = "contains_numeric";
-        }
-        if (Config::Value("password_contains_symbol")) {
-            $policy[] = "contains_symbol";
-        }
-        if (Config::Value("password_min_length")) {
-            $policy[] = "length:" . Config::Value("password_min_length");
-        }
-
-        //join to string
-        $policy = implode("|", $policy);
-        return $policy;
+        return implode('|', $this->passwordPolicy()->rules());
     }
 
-
-    /**
-     * Check if the given password is valid.
-     *
-     * @param string $password The password to validate.
-     * @return bool Returns true if the password is valid, false otherwise.
-     */
-    public function isValidPassword(string $password)
+    public function isValidPassword(#[\SensitiveParameter] string $password): bool
     {
-
-        $policy = $this->getPasswordPolicy();
-        //explode to array
-        $policy = explode("|", $policy);
-
-
-        foreach ($policy as $rule) {
-            if ($rule === "required") {
-                if (empty($password)) return false;
-            }
-
-            if ($rule === "contains_uppercase") {
-                if (!preg_match("/[A-Z]/", $password)) return false;
-            }
-
-            if ($rule === "contains_lowercase") {
-                if (!preg_match("/[a-z]/", $password)) return false;
-            }
-
-            if ($rule === "contains_numeric") {
-                if (!preg_match("/[0-9]/", $password)) return false;
-            }
-
-            if ($rule === "contains_symbol") {
-                if (!preg_match("/[!@#$%^&*()\-_=+{};:,<.>]/", $password)) return false;
-            }
-
-            if (strpos($rule, "length:") !== false) {
-                $minLength = (int) str_replace("length:", "", $rule);
-                if (strlen($password) < $minLength) return false;
-            }
-        }
-
-        return true;
+        return $this->passwordPolicy()->accepts($password);
     }
 
+    private function passwordPolicy(): \Light\Auth\PasswordPolicy
+    {
+        return new \Light\Auth\PasswordPolicy(
+            minLength: (int) Config::Value('password_min_length'),
+            requireUppercase: (bool) Config::Value('password_contains_uppercase'),
+            requireLowercase: (bool) Config::Value('password_contains_lowercase'),
+            requireNumeric: (bool) Config::Value('password_contains_numeric'),
+            requireSymbol: (bool) Config::Value('password_contains_symbol'),
+        );
+    }
 
     #[Field]
     public function getCompany(): string

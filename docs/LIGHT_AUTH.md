@@ -32,7 +32,7 @@ For an existing database, apply `migrations/20261117_light_auth.sql` before enab
 | `password_expiration_duration` | Days added to `User.password_dt`, supplied as a Unix expiry timestamp |
 | `two_factor_authentication` | Framework still blocks password login until unenrolled users complete setup |
 | `access_token_expire` / `refresh_token_expire` | Unchanged Framework token/session issuance |
-| Password creation/reset policy | Unchanged `Type\System::isValidPassword()` |
+| Password creation/reset policy | Framework maps existing settings to `Light\Auth\PasswordPolicy` |
 | `RP_ID` / `WEBAUTHN_ALLOWED_ORIGINS` | Passed to light-auth's relying-party validation |
 
 Set exact allowed origins (comma-separated) when the browser origin differs from `https://RP_ID`, including nondefault ports. HTTP is accepted only for explicit localhost origins, e.g. `RP_ID=localhost` and `WEBAUTHN_ALLOWED_ORIGINS=http://localhost:3000`. Forwarding a client-supplied origin into this allowlist is not supported.

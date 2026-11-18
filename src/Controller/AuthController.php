@@ -571,7 +571,8 @@ class AuthController
         User::Query([
             "user_id" => $user->user_id
         ])->update([
-            "password" => password_hash($password, PASSWORD_DEFAULT)
+            "password" => password_hash($password, PASSWORD_DEFAULT),
+            "password_dt" => date("Y-m-d H:i:s"),
         ]);
 
         return true;

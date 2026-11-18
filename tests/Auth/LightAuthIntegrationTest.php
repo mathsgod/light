@@ -143,6 +143,42 @@ final class LightAuthIntegrationTest extends TestCase
         self::assertTrue($controller->login($this->app, 'alice', 'correct-password'));
     }
 
+    public function testResetPasswordUsesConfiguredPasswordPolicy(): void
+    {
+        $this->config('password_min_length', '12');
+        $this->config('password_expiration', '1');
+        $this->config('password_expiration_duration', '10');
+        $user = $this->user();
+        $expiredAt = date('Y-m-d H:i:s', time() - 11 * 86400);
+        $user->password_dt = $expiredAt;
+        $user->save();
+        $code = '123456';
+        $jwt = TokenManager::encode([
+            'type' => 'reset_password',
+            'user_id' => $user->user_id,
+            'code_hash' => hash('sha256', $code . TokenManager::applicationSecret()),
+            'exp' => time() + 300,
+        ]);
+        $controller = new AuthController();
+
+        try {
+            $controller->login($this->app, $user->username, 'correct-password');
+            self::fail('Expired password was accepted');
+        } catch (Error $error) {
+            self::assertSame('password is expired', $error->getMessage());
+        }
+
+        try {
+            $controller->resetPassword($this->app, $jwt, 'too-short', $code);
+            self::fail('Password policy was bypassed');
+        } catch (Error $error) {
+            self::assertSame('Password is not valid to the password policy', $error->getMessage());
+        }
+        self::assertSame($expiredAt, User::Get($user->user_id)->password_dt);
+        self::assertTrue($controller->resetPassword($this->app, $jwt, 'new-password!', $code));
+        self::assertTrue($controller->login($this->app, $user->username, 'new-password!'));
+    }
+
     public function testLoggedInUserCanSetUpTotpThroughExistingApiAndSecretCannotBeInvented(): void
     {
         $user = $this->user();

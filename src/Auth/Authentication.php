@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Light\Framework\Auth;
 
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
 use GraphQL\Error\Error;
 use Light\Auth\{AttemptLimiter, Challenges, LoginService, Policy, RateLimitScope, Status, TotpEnrollment, TotpVerifier};
 use Light\Auth\Contract\StateStore;
@@ -157,8 +155,7 @@ final class Authentication
         $setup = $this->enrollment()->begin((string) $user->user_id, $user->username, $host, $this->browserBinding());
         parse_str(parse_url($setup->provisioningUri, PHP_URL_QUERY), $parameters);
         $this->remember('totp_setup', (string) $user->user_id, ['token' => $setup->setupToken, 'secretHash' => hash('sha256', $parameters['secret'])]);
-        $image = (new PngWriter())->write(QrCode::create($setup->provisioningUri))->getDataUri();
-        return ['secret' => $parameters['secret'], 'host' => $host, 'image' => $image, 'setupToken' => $setup->setupToken];
+        return ['secret' => $parameters['secret'], 'host' => $host, 'provisioningUri' => $setup->provisioningUri, 'setupToken' => $setup->setupToken];
     }
 
     public function confirmTotp(User $user, #[\SensitiveParameter] string $secret, #[\SensitiveParameter] string $code): bool

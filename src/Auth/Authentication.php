@@ -152,17 +152,29 @@ final class Authentication
         if ($user->isTwoFactorEnabled()) throw new Error('Two-factor authentication is already enabled');
         if (!$this->canSetup($user)) throw new Error('Password verification is required to set up two-factor authentication');
         $host = $this->app->getRpId();
-        $setup = $this->enrollment()->begin((string) $user->user_id, $user->username, $host, $this->browserBinding());
+        // OTP URIs use a colon to separate issuer and account labels.
+        $label = str_ireplace(['%3a', ':'], '-', $user->username);
+        $issuer = str_ireplace(['%3a', ':'], '-', $host);
+        $setup = $this->enrollment()->begin((string) $user->user_id, $label, $issuer, $this->browserBinding());
         parse_str(parse_url($setup->provisioningUri, PHP_URL_QUERY), $parameters);
         $this->remember('totp_setup', (string) $user->user_id, ['token' => $setup->setupToken, 'secretHash' => hash('sha256', $parameters['secret'])]);
         return ['secret' => $parameters['secret'], 'host' => $host, 'provisioningUri' => $setup->provisioningUri, 'setupToken' => $setup->setupToken];
     }
 
-    public function confirmTotp(User $user, #[\SensitiveParameter] string $secret, #[\SensitiveParameter] string $code): bool
-    {
+    public function confirmTotp(
+        User $user,
+        #[\SensitiveParameter] string $secret,
+        #[\SensitiveParameter] string $code,
+        bool $reportStaleSetup = false,
+    ): bool {
         if ($user->isTwoFactorEnabled()) throw new Error('Two-factor authentication is already enabled');
         $pending = $this->recall('totp_setup', (string) $user->user_id);
-        if (!$pending || !hash_equals($pending['secretHash'], hash('sha256', $secret))) return false;
+        if (!$pending || !hash_equals($pending['secretHash'], hash('sha256', $secret))) {
+            if ($reportStaleSetup) {
+                throw new Error('Two-factor setup expired or was replaced. Start setup again and scan the new QR code.');
+            }
+            return false;
+        }
         $confirmed = $this->enrollment()->confirm((string) $user->user_id, $pending['token'], $code, $this->browserBinding());
         if ($confirmed === null) return false;
         $saved = $this->withUserLock($confirmed->userId, static function (User $current) use ($confirmed): bool {

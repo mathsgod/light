@@ -215,7 +215,9 @@ final class LightAuthIntegrationTest extends TestCase
         try {
             $controller->updateMy2FA($user, $invented->getSecret(), $invented->now(), $this->app);
             self::fail('Client-supplied secret was accepted');
-        } catch (Error $error) { self::assertSame('two factor authentication error', $error->getMessage()); }
+        } catch (Error $error) {
+            self::assertSame('Two-factor setup expired or was replaced. Start setup again and scan the new QR code.', $error->getMessage());
+        }
         self::assertTrue($controller->updateMy2FA($user, $setup['secret'], TOTP::createFromSecret($setup['secret'])->now(), $this->app));
         self::assertSame($setup['secret'], User::Get($user->user_id)->secret);
     }
@@ -229,9 +231,9 @@ final class LightAuthIntegrationTest extends TestCase
         catch (Error $error) { self::assertSame('setup_2fa_required', $error->getMessage()); }
         self::assertSame(0, UserLog::Query(['result' => 'SUCCESS'])->count());
         $setup = (new \Light\Framework\Type\App())->generate2FASecret('alice', $this->app);
+        self::assertStringStartsWith('otpauth://totp/', $setup['provisioningUri']);
         self::assertTrue($controller->updateTwoFactorAuthentication('alice', 'correct-password', $setup['secret'], TOTP::createFromSecret($setup['secret'])->now(), $this->app));
         self::assertSame($setup['secret'], User::Get($user->user_id)->secret);
-        self::assertStringStartsWith('otpauth://totp/', $setup['provisioningUri']);
         self::assertSame(0, UserLog::Query(['result' => 'SUCCESS'])->count());
     }
 
@@ -245,7 +247,8 @@ final class LightAuthIntegrationTest extends TestCase
 
     public function testGraphqlTotpSetupRetainsTheExistingFrontendShape(): void
     {
-        $user = $this->user();
+        $_ENV['RP_ID'] = 'example.test:8443';
+        $user = $this->user('team:alice');
         $this->process($user);
         $request = $this->request->withMethod('POST')->withParsedBody(['query' => 'query { my { my2FA } }']);
         $out = $this->app->execute($request)->toArray();

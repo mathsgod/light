@@ -421,7 +421,9 @@ class AuthController
     public function updateMy2FA(#[InjectUser] User $user, string $secret, string $code, #[Autowire] App $app): bool
     {
         if ($user->isTwoFactorEnabled()) throw new Error("Two-factor authentication is already enabled");
-        if (!$app->getAuthentication()->confirmTotp($user, $secret, $code)) throw new Error("two factor authentication error");
+        if (!$app->getAuthentication()->confirmTotp($user, $secret, $code, reportStaleSetup: true)) {
+            throw new Error('Two-factor verification failed. Try a fresh code. If it still fails, restart setup.');
+        }
         return true;
     }
 

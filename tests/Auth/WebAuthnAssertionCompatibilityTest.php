@@ -7,7 +7,7 @@ use GraphQL\Error\Error;
 use Laminas\Diactoros\ServerRequest;
 use Light\Framework\App;
 use Light\Framework\Controller\WebAuthnController;
-use Light\Framework\WebAuthn\Serializer;
+use Light\Auth\WebAuthn\Serializer;
 use ParagonIE\ConstantTime\Base64UrlSafe;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;

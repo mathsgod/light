@@ -167,8 +167,7 @@ class App
     #[Field]
     public function hasBioAuth(): bool
     {
-        //check if webauthn is enabled
-        return \Composer\InstalledVersions::isInstalled("web-auth/webauthn-lib");
+        return class_exists(\Light\Auth\WebAuthn\WebAuthnService::class);
     }
 
     #[Field]

@@ -297,6 +297,7 @@ final class LightAuthIntegrationTest extends TestCase
         $authenticator = new PasskeyAuthenticator();
         $creation = $type->getWebAuthnCreationOptions($user, $this->app);
         self::assertSame('required', $creation['authenticatorSelection']['residentKey']);
+        self::assertArrayNotHasKey('authenticatorAttachment', $creation['authenticatorSelection']);
         self::assertTrue($controller->webAuthnRegister($user, $this->app, $authenticator->attestation(new RegistrationRequest('', $creation)), $this->request));
         $fresh = User::Get($user->user_id);
         self::assertCount(1, $fresh->credential);

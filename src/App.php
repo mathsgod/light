@@ -38,7 +38,6 @@ use Ramsey\Uuid\Uuid;
 use Symfony\Component\Yaml\Yaml;
 use TheCodingMachine\GraphQLite\Context\Context;
 use TheCodingMachine\GraphQLite\SchemaFactory;
-use Webauthn\PublicKeyCredentialRpEntity;
 
 class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, RequestHandlerInterface
 {
@@ -955,12 +954,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         }
         return $name;
     }
-
-    public function getRpEntity(): PublicKeyCredentialRpEntity
-    {
-        return PublicKeyCredentialRpEntity::create($this->getRpId(), $this->getRpId());
-    }
-
 
     public function getDrive(int $index): Drive
     {

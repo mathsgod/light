@@ -53,7 +53,7 @@ The new verifier accepts the current 30-second TOTP step only (the old helper ac
 
 Passkeys use discoverable credentials with required user verification and `attestation: none`. Existing numeric user handles still work for assertion; newly enrolled handles are opaque. Serialized credential records and existing uuid/IP/user-agent/timestamp metadata stay in `User.credential`. Registration checks and writes are serialized and use `Database::transaction()` with row locks and model saves, preserving audit hooks. Counter updates use the library's optimistic-concurrency repository.
 
-`Security\TwoFactorAuthentication`, `WebAuthn\OriginPolicy` and `WebAuthn\Serializer` remain thin compatibility facades; normal credential flows no longer implement verification there. OAuth's existing call to `AuthController::login()` uses the same new flow without changing its public signature.
+`Security\TwoFactorAuthentication` remains a compatibility facade. WebAuthn serialization is provided by `Light\Auth\WebAuthn\Serializer`. OAuth's existing call to `AuthController::login()` uses the same new flow without changing its public signature.
 
 ## Shared atomic storage
 

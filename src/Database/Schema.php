@@ -74,6 +74,62 @@ class Schema
         return $result;
     }
 
+    #[Field(outputType: "mixed")]
+    #[Right("system.database.metadata")]
+    public function getProcedures(#[Autowire] App $app): array
+    {
+        return $this->listRoutines($app, 'PROCEDURE');
+    }
+
+    #[Field(outputType: "mixed")]
+    #[Right("system.database.metadata")]
+    public function getFunctions(#[Autowire] App $app): array
+    {
+        return $this->listRoutines($app, 'FUNCTION');
+    }
+
+    #[Field(outputType: "mixed")]
+    #[Right("system.database.metadata")]
+    public function getProcedure(#[Autowire] App $app, string $name): array
+    {
+        return $this->getRoutineDefinition($app, 'PROCEDURE', $name);
+    }
+
+    #[Field(outputType: "mixed")]
+    #[Right("system.database.metadata")]
+    public function getFunction(#[Autowire] App $app, string $name): array
+    {
+        return $this->getRoutineDefinition($app, 'FUNCTION', $name);
+    }
+
+    private function getRoutineDefinition(App $app, string $type, string $name): array
+    {
+        try {
+            $definition = $app->getDatabase()->connection()
+                ->query('SHOW CREATE ' . $type . ' ' . Sql::identifier($name))
+                ->fetch(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            if (($e->errorInfo[1] ?? null) === 1305) {
+                throw new \GraphQL\Error\UserError('Routine not found.');
+            }
+            throw $e;
+        }
+        if ($definition === false) {
+            throw new \GraphQL\Error\UserError('Routine not found.');
+        }
+        return $definition;
+    }
+
+    private function listRoutines(App $app, string $type): array
+    {
+        $statement = $app->getDatabase()->connection()->prepare(
+            'SELECT ROUTINE_NAME AS name, DATA_TYPE AS return_type, CREATED AS created, LAST_ALTERED AS last_altered '
+            . 'FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = DATABASE() AND ROUTINE_TYPE = ? ORDER BY ROUTINE_NAME'
+        );
+        $statement->execute([$type]);
+        return $statement->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
     #[Field]
     #[Right("system.database.event")]
     /**

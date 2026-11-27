@@ -28,6 +28,7 @@
         "mathsgod/light-graphql": "^1.3",
         "guzzlehttp/guzzle": "^7.15.2",
         "mathsgod/light-db": "^2.2.1",
+        "mathsgod/light-entity": "dev-main as 1.3.0",
         "mathsgod/light-db-graphqlite-mappers": "^2.0",
         "mathsgod/json-to-sql": "^1.0",
         "mathsgod/mysql-schema-migrate": "^1.0",

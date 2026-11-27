@@ -7,7 +7,11 @@ use Firebase\JWT\JWT;
 use Google\Service\MigrationCenterAPI\UploadFileInfo;
 use GraphQL\Error\Error;
 use JsonToSql;
+use Light\Entity\DatabaseFacade;
+use Light\Entity\Migrations\MigrationBuilder;
+use Light\Entity\Migrations\TableBuilder;
 use Light\Framework\App;
+use Light\Framework\Database\Sql;
 use Light\Framework\Type\System;
 use Ramsey\Uuid\Uuid;
 use TheCodingMachine\GraphQLite\Annotations\Autowire;
@@ -81,12 +85,12 @@ class DatabaseController
     {
         $db = $app->getDatabase();
         try {
-            $db->connection()->exec("DROP TABLE " . \Light\Framework\Database\Sql::identifier($table));
-            $db->clearMetadata();
+            $migration = (new MigrationBuilder())->dropTable($table);
+            (new DatabaseFacade($db->connection()))->executeMigration($migration);
         } catch (Exception $e) {
             throw new Error($e->getMessage());
         }
-        \Light\Db\Database::getDefault()->clearMetadata();
+        $db->clearMetadata();
         return true;
     }
 
@@ -95,47 +99,116 @@ class DatabaseController
     #[Right("system.database.field.add")]
     public function addDatabaseField(#[Autowire] App $app, string $table, string $field, string $type, string $length, string $default, bool $nullable, bool $autoincrement): bool
     {
-        $db = $app->getDatabase();
-        try {
-            $typeStr = $length !== '' ? "$type($length)" : $type;
-            $defaultStr = $default !== '' ? "DEFAULT '$default'" : ($nullable ? "DEFAULT NULL" : "");
-            $nullStr = $nullable ? "NULL" : "NOT NULL";
-            $autoStr = $autoincrement ? "AUTO_INCREMENT" : "";
-
-            $db->connection()->exec("ALTER TABLE `$table` ADD `$field` $typeStr $nullStr $defaultStr $autoStr");
-        } catch (Exception $e) {
-            throw new Error($e->getMessage());
-        }
-        \Light\Db\Database::getDefault()->clearMetadata();
-        return true;
+        return $this->changeDatabaseField($app, $table, $field, $type, $length, $default, $nullable, $autoincrement, false);
     }
-
 
     #[Mutation(name: "lightDatabaseEditField")]
     #[Right("system.database.field.add")]
     public function editDatabaseField(#[Autowire] App $app, string $table, string $field, string $type, string $length, string $default, bool $nullable, bool $autoincrement): bool
     {
-        $db = $app->getDatabase();
-        try {
-            $typeStr = $length !== '' ? "$type($length)" : $type;
-            $defaultStr = $default !== '' ? "DEFAULT '$default'" : ($nullable ? "DEFAULT NULL" : "");
-            $nullStr = $nullable ? "NULL" : "NOT NULL";
-            $autoStr = $autoincrement ? "AUTO_INCREMENT" : "";
+        return $this->changeDatabaseField($app, $table, $field, $type, $length, $default, $nullable, $autoincrement, true);
+    }
 
-            // If changing to NOT NULL, fill existing NULLs with a default value first
-            if (!$nullable) {
-                $fillValue = in_array(strtolower($type), ['int', 'tinyint', 'smallint', 'mediumint', 'bigint', 'float', 'double', 'decimal']) ? 0 : '';
-                $db->connection()->exec("UPDATE `$table` SET `$field` = '$fillValue' WHERE `$field` IS NULL");
+    private function changeDatabaseField(App $app, string $table, string $field, string $type, string $length, string $default, bool $nullable, bool $autoincrement, bool $edit): bool
+    {
+        $db = $app->getDatabase();
+        $connection = $db->connection();
+        $facade = new DatabaseFacade($connection);
+        $tableName = Sql::identifier($table);
+        $fieldName = Sql::identifier($field);
+        $normalizedType = strtolower(trim($type));
+        $baseType = explode(' ', $normalizedType, 2)[0];
+        $typeSql = $length !== '' ? "$type($length)" : $type;
+        $numericType = in_array($baseType, [
+            'int', 'integer', 'tinyint', 'smallint', 'mediumint', 'bigint', 'float', 'double',
+            'real', 'decimal', 'numeric', 'bool', 'boolean', 'bit',
+        ], true);
+        $defaultValue = $default === '' ? null : $default;
+        $requiresQuotedNumericDefault = false;
+        if ($numericType && $defaultValue !== null) {
+            $integer = filter_var($defaultValue, FILTER_VALIDATE_INT);
+            if ($integer !== false) {
+                $defaultValue = $integer;
+            } elseif (is_numeric($defaultValue) && is_finite((float) $defaultValue)
+                && strlen(preg_replace('/[^0-9]/', '', $defaultValue)) <= 15) {
+                $defaultValue = (float) $defaultValue;
+            } else {
+                // Keep exact numeric literals that cannot safely pass through a PHP float.
+                $requiresQuotedNumericDefault = true;
+            }
+        }
+
+        try {
+            $migration = null;
+            $members = [];
+            // The builder requires an inline primary key for AUTO_INCREMENT.
+            if (!$autoincrement && !$requiresQuotedNumericDefault) {
+                $members = in_array($normalizedType, ['enum', 'set'], true) ? $this->parseColumnMembers($length) : [];
+                $migration = new MigrationBuilder();
+                $configure = static function (TableBuilder $builder) use ($field, $normalizedType, $members, $typeSql, $nullable, $defaultValue): void {
+                    $column = match ($normalizedType) {
+                        'enum' => $builder->enum($field, $members),
+                        'set' => $builder->set($field, $members),
+                        default => $builder->text($field)->columnType($typeSql),
+                    };
+                    $column->nullable($nullable);
+                    if ($defaultValue !== null || $nullable) {
+                        $column->defaultValue($defaultValue);
+                    }
+                };
+                if ($edit) {
+                    $migration->alterColumn($table, $configure);
+                } else {
+                    $migration->addColumn($table, $configure);
+                }
             }
 
-            $db->connection()->exec("ALTER TABLE `$table` MODIFY `$field` $typeStr $nullStr $defaultStr $autoStr");
+            if ($edit && !$nullable) {
+                $fillValue = in_array($normalizedType, ['int', 'tinyint', 'smallint', 'mediumint', 'bigint', 'float', 'double', 'decimal'], true) ? 0 : '';
+                if ($members !== [] && $normalizedType === 'enum') {
+                    $fillValue = $defaultValue ?? $members[0];
+                }
+                $facade->executeSql("UPDATE $tableName SET $fieldName = ? WHERE $fieldName IS NULL", [$fillValue]);
+            }
+
+            if ($migration !== null) {
+                $facade->executeMigration($migration);
+            } else {
+                // Keep MySQL column definitions that light-entity's builder cannot represent.
+                $defaultSql = $default !== '' ? 'DEFAULT ' . $connection->quote($default) : ($nullable ? 'DEFAULT NULL' : '');
+                $nullSql = $nullable ? 'NULL' : 'NOT NULL';
+                $autoSql = $autoincrement ? 'AUTO_INCREMENT' : '';
+                $operation = $edit ? 'MODIFY' : 'ADD';
+                $connection->exec("ALTER TABLE $tableName $operation $fieldName $typeSql $nullSql $defaultSql $autoSql");
+            }
         } catch (Exception $e) {
             throw new Error($e->getMessage());
         }
-        \Light\Db\Database::getDefault()->clearMetadata();
+
+        $db->clearMetadata();
         return true;
     }
 
+    /** @return list<string> */
+    private function parseColumnMembers(string $length): array
+    {
+        $pattern = <<<'REGEX'
+~\G\s*(?:'((?:[^'\\]|'')*)'|"((?:[^"\\]|"")*)")\s*(,|\z)~
+REGEX;
+        $members = [];
+        $offset = 0;
+        do {
+            if (!preg_match($pattern, $length, $match, PREG_UNMATCHED_AS_NULL, $offset)) {
+                throw new \InvalidArgumentException('Expected a comma-separated list of quoted ENUM or SET members.');
+            }
+            $members[] = $match[1] !== null
+                ? str_replace("''", "'", $match[1])
+                : str_replace('""', '"', $match[2]);
+            $offset += strlen($match[0]);
+        } while ($match[3] === ',');
+
+        return $members;
+    }
 
     #[Mutation(name: "lightDatabaseRemoveFields")]
     #[Right("system.database.field.remove")]
@@ -145,17 +218,19 @@ class DatabaseController
     public function removeDatabaseFields(#[Autowire] App $app, string $table, array $fields): bool
     {
         $db = $app->getDatabase();
+        $migration = new MigrationBuilder();
         foreach ($fields as $field) {
-            try {
-                $db->connection()->exec("ALTER TABLE $table DROP COLUMN $field");
-            } catch (Exception $e) {
-                throw new Error($e->getMessage());
-            }
+            $migration->dropColumn($table, $field);
         }
-        \Light\Db\Database::getDefault()->clearMetadata();
+        try {
+            (new DatabaseFacade($db->connection()))->executeMigration($migration);
+        } catch (Exception $e) {
+            throw new Error($e->getMessage());
+        } finally {
+            $db->clearMetadata();
+        }
         return true;
     }
-
 
     #[Mutation(name: "lightDatabaseCreateTable")]
     #[Right("system.database.table.create")]
@@ -167,23 +242,31 @@ class DatabaseController
     {
         $db = $app->getDatabase();
 
-        $definitions = [];
-        foreach ($fields as $column) {
-            $type = match ($column->type) {
-                'int' => 'INT',
-                'varchar' => 'VARCHAR(' . max(1, (int)($column->length ?? 255)) . ')',
-                'text' => 'TEXT', 'boolean' => 'BOOLEAN', 'date' => 'DATE',
-                default => throw new \InvalidArgumentException('Unsupported column type: ' . $column->type),
-            };
-            $definitions[] = \Light\Framework\Database\Sql::identifier($column->name) . ' ' . $type . (($column->nullable ?? false) ? ' NULL' : ' NOT NULL');
+        if ($fields === []) {
+            throw new \InvalidArgumentException('A table requires columns.');
         }
-        if ($definitions === []) throw new \InvalidArgumentException('A table needs columns.');
+
+        $migration = new MigrationBuilder();
+        $migration->createTable($name, static function (TableBuilder $table) use ($fields): void {
+            foreach ($fields as $column) {
+                $definition = match ($column->type) {
+                    'int' => $table->integer($column->name),
+                    'varchar' => $table->string($column->name, max(1, $column->length ?? 255)),
+                    'text' => $table->text($column->name),
+                    'boolean' => $table->boolean($column->name),
+                    'date' => $table->date($column->name),
+                    default => throw new \InvalidArgumentException('Unsupported column type: ' . $column->type),
+                };
+                $definition->nullable($column->nullable ?? false);
+            }
+        });
+
         try {
-            $db->connection()->exec('CREATE TABLE ' . \Light\Framework\Database\Sql::identifier($name) . ' (' . implode(', ', $definitions) . ')');
-        } catch (\Exception $e) {
+            (new DatabaseFacade($db->connection()))->executeMigration($migration);
+        } catch (Exception $e) {
             throw new Error($e->getMessage());
         }
-        \Light\Db\Database::getDefault()->clearMetadata();
+        $db->clearMetadata();
         return true;
     }
 
@@ -259,94 +342,62 @@ class DatabaseController
         return true;
         }
 
-        // Process differences and apply fixes
-        foreach ($tableResult['differences'] as $diff) {
-            try {
-                if ($diff['type'] === 'missing_column') {
-                    // Add missing column
-                    $colDef = $diff['expected'];
-                    $columnType = strtoupper($colDef['type']);
-                    $length = $colDef['length'] ?? null;
-                    $nullable = $colDef['nullable'] ?? true ? 'NULL' : 'NOT NULL';
-                    $default = $colDef['default'] ?? null;
-                    $unsigned = $colDef['unsigned'] ?? false ? 'UNSIGNED' : '';
-                    $autoIncrement = $colDef['auto_increment'] ?? false ? 'AUTO_INCREMENT' : '';
+        $tables = array_column(json_decode(file_get_contents(__DIR__ . '/../../db.json'), true), null, 'name');
+        $expectedColumns = array_column($tables[$name]['columns'], null, 'name');
+        $connection = $db->connection();
+        $facade = new DatabaseFacade($connection);
+        try {
+            foreach ($tableResult['differences'] as $diff) {
+                $column = $diff['column'];
+                $migration = new MigrationBuilder();
+                if ($diff['type'] === 'extra_column') {
+                    $migration->dropColumn($name, $column);
+                } else {
+                    $expected = $expectedColumns[$column];
+                    $type = strtoupper($expected['type']);
+                    if (!empty($expected['length'])) {
+                        $type .= '(' . $expected['length'] . ')';
+                    }
+                    if (!empty($expected['unsigned'])) {
+                        $type .= ' UNSIGNED';
+                    }
+                    $nullable = $expected['nullable'] ?? true;
+                    $default = $expected['default'] ?? null;
+                    $add = $diff['type'] === 'missing_column';
 
-                    $sql = "ALTER TABLE `$name` ADD `{$diff['column']}` $columnType";
-
-                    if ($length) {
-                        $sql .= "($length)";
+                    if (!empty($expected['auto_increment'])) {
+                        // Keep the existing key without redeclaring it as a primary key.
+                        $operation = $add ? 'ADD COLUMN' : 'MODIFY COLUMN';
+                        $nullSql = $nullable ? 'NULL' : 'NOT NULL';
+                        $connection->exec('ALTER TABLE ' . Sql::identifier($name) . " $operation "
+                            . Sql::identifier($column) . " $type $nullSql AUTO_INCREMENT");
+                        continue;
                     }
 
-                    if ($unsigned) {
-                        $sql .= " $unsigned";
+                    if (is_string($default) && is_numeric($default)
+                        && in_array(strtolower($expected['type']), ['int', 'tinyint'], true)) {
+                        $default = (int) $default;
                     }
-
-                    $sql .= " $nullable";
-
-                    if ($default !== null) {
-                        $sql .= " DEFAULT '$default'";
-                    }
-
-                    if ($autoIncrement) {
-                        $sql .= " $autoIncrement";
-                    }
-
-                    $db->connection()->exec($sql);
-                } elseif ($diff['type'] === 'column_mismatch') {
-                    // Modify column to match expected definition
-                    $colDef = $diff['differences'];
-                    $expectedDef = null;
-
-                    // Get expected definition from db.json
-                    $tables = json_decode(file_get_contents(__DIR__ . "/../../db.json"), true);
-                    foreach ($tables as $tableSchema) {
-                        if ($tableSchema['name'] === $name) {
-                            foreach ($tableSchema['columns'] as $col) {
-                                if ($col['name'] === $diff['column']) {
-                                    $expectedDef = $col;
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                    }
-
-                    if ($expectedDef) {
-                        $columnType = strtoupper($expectedDef['type']);
-                        $length = $expectedDef['length'] ?? null;
-                        $nullable = $expectedDef['nullable'] ?? true ? 'NULL' : 'NOT NULL';
-                        $default = $expectedDef['default'] ?? null;
-                        $unsigned = $expectedDef['unsigned'] ?? false ? 'UNSIGNED' : '';
-
-                        $sql = "ALTER TABLE `$name` MODIFY `{$diff['column']}` $columnType";
-
-                        if ($length) {
-                            $sql .= "($length)";
-                        }
-
-                        if ($unsigned) {
-                            $sql .= " $unsigned";
-                        }
-
-                        $sql .= " $nullable";
-
+                    $configure = static function (TableBuilder $table) use ($column, $type, $nullable, $default): void {
+                        $definition = $table->text($column)->columnType($type)->nullable($nullable);
                         if ($default !== null) {
-                            $sql .= " DEFAULT '$default'";
+                            $definition->defaultValue($default);
                         }
-
-                        $db->connection()->exec($sql);
+                    };
+                    if ($add) {
+                        $migration->addColumn($name, $configure);
+                    } else {
+                        $migration->alterColumn($name, $configure);
                     }
-                } elseif ($diff['type'] === 'extra_column') {
-                    // Remove extra column
-                    $db->connection()->exec("ALTER TABLE `$name` DROP COLUMN `{$diff['column']}`");
                 }
-            } catch (Exception $e) {
-                throw new Error("Failed to fix column '{$diff['column']}': {$e->getMessage()}");
+                $facade->executeMigration($migration);
             }
+        } catch (Exception $e) {
+            throw new Error("Failed fix column '$column': {$e->getMessage()}");
+        } finally {
+            $db->clearMetadata();
         }
 
-        \Light\Db\Database::getDefault()->clearMetadata();
         return true;
     }
 }

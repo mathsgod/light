@@ -207,7 +207,7 @@ final class LightAuthIntegrationTest extends TestCase
         self::assertStringStartsWith('otpauth://totp/', $setup['provisioningUri']);
         parse_str(parse_url($setup['provisioningUri'], PHP_URL_QUERY), $parameters);
         self::assertSame($setup['secret'], $parameters['secret']);
-        self::assertArrayNotHasKey('image', $setup);
+        self::assertStringStartsWith('data:image/png;base64,iVBORw0KGgo', $setup['image']);
         self::assertGreaterThan(16, strlen($setup['secret']));
         self::assertEmpty(User::Get($user->user_id)->secret);
         $controller = new AuthController();
@@ -232,6 +232,7 @@ final class LightAuthIntegrationTest extends TestCase
         self::assertSame(0, UserLog::Query(['result' => 'SUCCESS'])->count());
         $setup = (new \Light\Framework\Type\App())->generate2FASecret('alice', $this->app);
         self::assertStringStartsWith('otpauth://totp/', $setup['provisioningUri']);
+        self::assertStringStartsWith('data:image/png;base64,iVBORw0KGgo', $setup['image']);
         self::assertTrue($controller->updateTwoFactorAuthentication('alice', 'correct-password', $setup['secret'], TOTP::createFromSecret($setup['secret'])->now(), $this->app));
         self::assertSame($setup['secret'], User::Get($user->user_id)->secret);
         self::assertSame(0, UserLog::Query(['result' => 'SUCCESS'])->count());
@@ -256,6 +257,7 @@ final class LightAuthIntegrationTest extends TestCase
         $setup = $out['data']['my']['my2FA'];
         self::assertArrayHasKey('secret', $setup);
         self::assertStringStartsWith('otpauth://totp/', $setup['provisioningUri']);
+        self::assertStringStartsWith('data:image/png;base64,iVBORw0KGgo', $setup['image']);
         $request = $this->request->withMethod('POST')->withParsedBody([
             'query' => 'mutation($s:String!,$c:String!){ updateMy2FA(secret:$s,code:$c) }',
             'variables' => ['s' => $setup['secret'], 'c' => TOTP::createFromSecret($setup['secret'])->now()],

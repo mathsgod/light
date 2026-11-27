@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Light\Framework\Auth;
 
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 use GraphQL\Error\Error;
 use Light\Auth\{AttemptLimiter, Challenges, LoginService, Policy, RateLimitScope, Status, TotpEnrollment, TotpVerifier};
 use Light\Auth\Contract\StateStore;
@@ -146,7 +148,7 @@ final class Authentication
         return $proof !== null && hash_equals($proof['version'], hash('sha256', $user->password));
     }
 
-    /** @return array{secret: string, host: string, image: string, setupToken: string} */
+    /** @return array{secret: string, host: string, image: string, provisioningUri: string, setupToken: string} */
     public function beginTotp(User $user): array
     {
         if ($user->isTwoFactorEnabled()) throw new Error('Two-factor authentication is already enabled');
@@ -157,8 +159,15 @@ final class Authentication
         $issuer = str_ireplace(['%3a', ':'], '-', $host);
         $setup = $this->enrollment()->begin((string) $user->user_id, $label, $issuer, $this->browserBinding());
         parse_str(parse_url($setup->provisioningUri, PHP_URL_QUERY), $parameters);
+        $image = (new PngWriter())->write(QrCode::create($setup->provisioningUri))->getDataUri();
         $this->remember('totp_setup', (string) $user->user_id, ['token' => $setup->setupToken, 'secretHash' => hash('sha256', $parameters['secret'])]);
-        return ['secret' => $parameters['secret'], 'host' => $host, 'provisioningUri' => $setup->provisioningUri, 'setupToken' => $setup->setupToken];
+        return [
+            'secret' => $parameters['secret'],
+            'host' => $host,
+            'image' => $image,
+            'provisioningUri' => $setup->provisioningUri,
+            'setupToken' => $setup->setupToken,
+        ];
     }
 
     public function confirmTotp(

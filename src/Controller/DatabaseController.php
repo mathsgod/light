@@ -11,6 +11,7 @@ use Light\Entity\DatabaseFacade;
 use Light\Entity\Migrations\MigrationBuilder;
 use Light\Entity\Migrations\TableBuilder;
 use Light\Framework\App;
+use Light\Framework\Database\Dump;
 use Light\Framework\Database\Sql;
 use Light\Framework\Type\System;
 use Ramsey\Uuid\Uuid;
@@ -118,10 +119,9 @@ class DatabaseController
         $fieldName = Sql::identifier($field);
         $normalizedType = strtolower(trim($type));
         $baseType = explode(' ', $normalizedType, 2)[0];
-        $typeSql = $length !== '' ? "$type($length)" : $type;
         $numericType = in_array($baseType, [
             'int', 'integer', 'tinyint', 'smallint', 'mediumint', 'bigint', 'float', 'double',
-            'real', 'decimal', 'numeric', 'bool', 'boolean', 'bit',
+            'real', 'decimal', 'dec', 'numeric', 'fixed', 'bool', 'boolean', 'bit',
         ], true);
         $defaultValue = $default === '' ? null : $default;
         $requiresQuotedNumericDefault = false;
@@ -139,6 +139,7 @@ class DatabaseController
         }
 
         try {
+            $typeSql = $this->columnTypeSql($normalizedType, $baseType, $length, $autoincrement);
             $migration = null;
             $members = [];
             // The builder requires an inline primary key for AUTO_INCREMENT.
@@ -187,6 +188,37 @@ class DatabaseController
 
         $db->clearMetadata();
         return true;
+    }
+
+    private function columnTypeSql(string $type, string $baseType, string $length, bool $autoincrement): string
+    {
+        $integers = ['int', 'integer', 'tinyint', 'smallint', 'mediumint', 'bigint'];
+        $decimals = ['decimal', 'dec', 'numeric', 'fixed', 'float', 'double', 'real', 'double precision'];
+        $singleArgument = ['bit', 'char', 'varchar', 'binary', 'varbinary', 'time', 'datetime', 'timestamp', 'year', 'text', 'blob'];
+        $noArguments = ['bool', 'boolean', 'date', 'json', 'tinytext', 'mediumtext', 'longtext', 'tinyblob', 'mediumblob', 'longblob', 'geometry', 'point', 'linestring', 'polygon', 'multipoint', 'multilinestring', 'multipolygon', 'geometrycollection', 'enum', 'set'];
+        $unsigned = str_ends_with($type, ' unsigned');
+        $name = $unsigned ? substr($type, 0, -9) : $type;
+        $isInteger = in_array($name, $integers, true);
+        $isDecimal = in_array($name, $decimals, true);
+        $allowsOneArgument = $isInteger || in_array($name, $singleArgument, true);
+        if ((!$allowsOneArgument && !$isDecimal && !in_array($name, $noArguments, true))
+            || ($unsigned && !$isInteger && !$isDecimal)
+            || ($autoincrement && !$isInteger)) {
+            throw new \InvalidArgumentException('Unsupported MySQL column type or modifier.');
+        }
+
+        // Member lists are handled by the ENUM and SET builders.
+        if (in_array($baseType, ['enum', 'set'], true)) {
+            return strtoupper($name);
+        }
+
+        $length = trim($length);
+        if ($length !== '' && (!$allowsOneArgument && !$isDecimal
+            || !preg_match($isDecimal ? '/\A[0-9]+(?: *, *[0-9]+)?\z/' : '/\A[0-9]+\z/', $length))) {
+            throw new \InvalidArgumentException('Invalid MySQL column type arguments.');
+        }
+        $name = $name === 'double precision' ? 'double' : $name;
+        return strtoupper($name) . ($length === '' ? '' : '(' . $length . ')') . ($unsigned ? ' UNSIGNED' : '');
     }
 
     /** @return list<string> */
@@ -274,20 +306,7 @@ REGEX;
     #[Right("system.database.restore")]
     public function restoreDatabase(#[Autowire] App $app, UploadedFileInterface $file): bool
     {
-
-        $username = $_ENV["DATABASE_USERNAME"];
-        $password = $_ENV["DATABASE_PASSWORD"];
-        $database = $_ENV["DATABASE_DATABASE"];
-        $host = $_ENV["DATABASE_HOSTNAME"];
-        $port = $_ENV["DATABASE_PORT"];
-
-        $command = "mysql -u $username -p$password --database $database --host $host --port $port < " . $file->getStream()->getMetadata("uri");
-
-        //exec
-        $output = [];
-        exec($command, $output);
-
-        \Light\Db\Database::getDefault()->clearMetadata();
+        Dump::import($app->getDatabase(), $file->getStream());
         return true;
     }
 

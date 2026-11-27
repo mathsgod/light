@@ -138,7 +138,7 @@ class Schema
     public function getEvent(#[Autowire] App $app, string $name)
     {
         $db = $app->getDatabase();
-        $result = $db->connection()->query("SHOW CREATE EVENT $name")->fetchAll(\PDO::FETCH_ASSOC);
+        $result = $db->connection()->query('SHOW CREATE EVENT ' . Sql::identifier($name))->fetchAll(\PDO::FETCH_ASSOC);
         return $result[0];
     }
 
@@ -238,19 +238,7 @@ class Schema
     #[Right("system.database.export")]
     public function export(#[Autowire] App $app): string
     {
-        $username = $_ENV["DATABASE_USERNAME"];
-        $password = $_ENV["DATABASE_PASSWORD"];
-        $database = $_ENV["DATABASE_DATABASE"];
-        $host = $_ENV["DATABASE_HOSTNAME"];
-        $port = $_ENV["DATABASE_PORT"];
-
-        $command = "mysqldump -u $username -p$password --databases $database --host $host --port $port";
-
-        //exec
-        $output = [];
-        exec($command, $output);
-
-        return implode("\n", $output);
+        return Dump::export();
     }
 
 
@@ -258,19 +246,7 @@ class Schema
     #[Right("system.database.import")]
     public function import(#[Autowire] App $app, UploadedFileInterface $file): bool
     {
-
-        $username = $_ENV["DATABASE_USERNAME"];
-        $password = $_ENV["DATABASE_PASSWORD"];
-        $database = $_ENV["DATABASE_DATABASE"];
-        $host = $_ENV["DATABASE_HOSTNAME"];
-        $port = $_ENV["DATABASE_PORT"];
-
-        $command = "mysql -u $username -p$password --database $database --host $host --port $port < " . $file->getStream()->getMetadata("uri");
-
-        //exec
-        $output = [];
-        exec($command, $output);
-
+        Dump::import($app->getDatabase(), $file->getStream());
         return true;
     }
 

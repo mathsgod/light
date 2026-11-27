@@ -10,6 +10,29 @@ use Light\Framework\Tests\TestCase;
 
 final class DatabaseControllerTest extends TestCase
 {
+    public function testInvalidColumnDeclarationsAreRejectedBeforeUpdatingRows(): void
+    {
+        $app = new App();
+        $connection = $app->getDatabase()->connection();
+        $controller = new DatabaseController();
+        $connection->exec('CREATE TABLE test_invalid_column (quantity INT NULL)');
+
+        try {
+            $connection->exec('INSERT INTO test_invalid_column VALUES (NULL)');
+            foreach ([['INT', '1.5'], ['VARCHAR', '10,2'], ['DATE', '2'], ['UNKNOWN_TYPE', '']] as [$type, $length]) {
+                try {
+                    $controller->editDatabaseField($app, 'test_invalid_column', 'quantity', $type, $length, '', false, true);
+                    self::fail('Expected the invalid column declaration to be rejected.');
+                } catch (\GraphQL\Error\Error $error) {
+                    self::assertMatchesRegularExpression('/^(Invalid MySQL column type arguments|Unsupported MySQL column type or modifier)\./', $error->getMessage());
+                }
+            }
+            self::assertNull($connection->query('SELECT quantity FROM test_invalid_column')->fetchColumn());
+        } finally {
+            $connection->exec('DROP TABLE test_invalid_column');
+        }
+    }
+
     public function testFixTableRepairsColumnsAndRecreatesMissingTable(): void
     {
         $app = new App();

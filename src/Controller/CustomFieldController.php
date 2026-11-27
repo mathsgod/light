@@ -3,7 +3,8 @@
 namespace Light\Framework\Controller;
 
 use Light\Framework\Model\CustomField;
-use TheCodingMachine\GraphQLite\Annotations\Autowire;
+use Light\Framework\GraphQL\Annotations\LoadModel;
+use TheCodingMachine\GraphQLite\Annotations\Security;
 use TheCodingMachine\GraphQLite\Annotations\InjectUser;
 use TheCodingMachine\GraphQLite\Annotations\Query;
 use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -41,10 +42,12 @@ class CustomFieldController
     #[Mutation]
     #[Logged]
     #[Right("customfield.update")]
-    public function updateCustomField(int $id, #[UseInputType(inputType: "UpdateCustomFieldInput")] \Light\Framework\Input\CustomField $data, #[InjectUser] \Light\Framework\Model\User $user): bool
+    #[Security('obj.canUpdate(user)', failWith: false)]
+    public function updateCustomField(
+        #[LoadModel] CustomField $obj,
+        #[UseInputType(inputType: "UpdateCustomFieldInput")] \Light\Framework\Input\CustomField $data,
+    ): bool
     {
-        if (!$obj = CustomField::Get($id)) return false;
-        if (!$obj->canUpdate($user)) return false;
         $obj->bind($data);
         $obj->save();
         return true;
@@ -53,10 +56,9 @@ class CustomFieldController
     #[Mutation]
     #[Logged]
     #[Right("customfield.delete")]
-    public function deleteCustomField(int $id, #[InjectUser] \Light\Framework\Model\User $user): bool
+    #[Security('obj.canDelete(user)', failWith: false)]
+    public function deleteCustomField(#[LoadModel] CustomField $obj): bool
     {
-        if (!$obj = CustomField::Get($id)) return false;
-        if (!$obj->canDelete($user)) return false;
         $obj->delete();
         return true;
     }

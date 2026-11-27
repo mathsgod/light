@@ -458,32 +458,19 @@ class FileSystemControllerTest extends TestCase
         $this->processRequest($this->app, $this->adminToken);
         $this->assertSame(
             "first user",
-            $this->app->getDrive(0)->getFilesystem()->read("shared.txt"),
+            $this->app->getMountManager()->read("local://shared.txt"),
         );
         $this->processRequest($this->app, $secondToken);
         $this->assertSame(
             "second user",
-            $this->app->getDrive(0)->getFilesystem()->read("shared.txt"),
+            $this->app->getMountManager()->read("local://shared.txt"),
         );
 
-        $legacyFirstWrite = $this->gqlAs(
+        $legacyWrite = $this->gqlAs(
             $this->adminToken,
-            'mutation { fsWriteFile(path:"legacy.txt", content:"legacy first") }',
+            'mutation { fsWriteFile(path:"legacy.txt", content:"legacy") }',
         );
-        $legacySecondWrite = $this->gqlAs(
-            $secondToken,
-            'mutation { fsWriteFile(path:"legacy.txt", content:"legacy second") }',
-        );
-        $this->assertArrayNotHasKey("errors", $legacyFirstWrite, json_encode($legacyFirstWrite));
-        $this->assertArrayNotHasKey("errors", $legacySecondWrite, json_encode($legacySecondWrite));
-        $this->assertSame(
-            "legacy first",
-            file_get_contents($this->tmpDir . '/' . $this->adminUser->user_id . '/legacy.txt'),
-        );
-        $this->assertSame(
-            "legacy second",
-            file_get_contents($this->tmpDir . '/' . $secondUser->user_id . '/legacy.txt'),
-        );
+        $this->assertStringContainsString('Cannot query field "fsWriteFile"', $legacyWrite['errors'][0]['message']);
 
         $viewAsToken = $this->makeToken(
             $this->adminUser->user_id,

@@ -413,9 +413,9 @@ class User extends \Light\Framework\Model
      * @return UserLog[]
      * @param ?mixed $filters
      */
-    public function getUserLog($filters = null,  ?string $sort = ''): \Light\Db\Query
+    public function getUserLog($filters = null,  ?string $sort = '', #[InjectUser] ?User $viewer = null): \Light\Db\Query
     {
-        return UserLog::Query(["user_id" => $this->user_id])->filters($filters)->sort($sort);
+        return UserLog::visibleTo($viewer, $filters, $sort)->where(['user_id' => $this->user_id]);
     }
 
     #[Field]

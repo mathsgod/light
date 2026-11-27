@@ -22,6 +22,6 @@ class UserLogController
     #[Right("user_log.list")]
     public function listUserLog(#[InjectUser] \Light\Framework\Model\User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
     {
-        return UserLog::Query()->filters($filters)->sort($sort);
+        return UserLog::visibleTo($user, $filters, $sort);
     }
 }

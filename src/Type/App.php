@@ -374,55 +374,6 @@ class App
     }
 
     #[Field]
-    #[Logged]
-    /**
-     * @return string[]
-     */
-    function getDriveTypes(): array
-    {
-        $type = [];
-        $type = ["local"];
-
-        if (\Composer\InstalledVersions::isInstalled("league/flysystem-aws-s3-v3")) {
-            $type[] = "s3";
-        }
-
-        if (\Composer\InstalledVersions::isInstalled("hostlink/hostlink-storage-adapter")) {
-            $type[] = "hostlink";
-        }
-
-        if (\Composer\InstalledVersions::isInstalled("alphasnow/aliyun-oss-flysystem")) {
-            $type[] = "aliyun-oss";
-        }
-        return $type;
-    }
-
-    #[Field]
-    #[Logged]
-    function getDrive(#[Autowire] LightApp $app, ?int $index = 0): \Light\Framework\Drive\Drive
-    {
-        $config = $app->getFSConfig();
-        $fs = $config[$index] ?? $config[0];
-        return new \Light\Framework\Drive\Drive($fs["name"], $app->getFS($index), $index, $fs["data"]);
-    }
-
-    #[Field]
-    #[Logged]
-    /**
-     * @return \Light\Framework\Drive\Drive[]
-     */
-    function getDrives(#[Autowire] LightApp $app)
-    {
-        $config = $app->getFSConfig();
-
-        $result = [];
-        foreach ($config as $key => $fs) {
-            $result[] = new \Light\Framework\Drive\Drive($fs["name"], $app->getFS($key), $key, $fs["data"]);
-        }
-        return $result;
-    }
-
-    #[Field]
     /**
      * @param ?mixed $filters
      * @return \Light\Framework\Model\MailLog[]
@@ -561,9 +512,9 @@ class App
      * @param ?mixed $filters
      */
     #[Right("user_log.list")]
-    public function listUserLog($filters = null,  ?string $sort = ''): \Light\Db\Query
+    public function listUserLog(#[InjectUser] User $user, $filters = null,  ?string $sort = ''): \Light\Db\Query
     {
-        return UserLog::Query()->filters($filters)->sort($sort);
+        return UserLog::visibleTo($user, $filters, $sort);
     }
 
     #[Field]

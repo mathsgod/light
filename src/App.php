@@ -25,7 +25,6 @@ use Light\Framework\Model\Role;
 use Light\Framework\Model\User;
 use Light\Framework\Model\UserLog;
 use Light\Framework\Model\UserRole;
-use Light\Framework\Drive\Drive;
 use Light\Framework\Mailer;
 use PHPMailer\PHPMailer\PHPMailer;
 use League\Container\DefinitionContainerInterface;
@@ -104,9 +103,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->container->add(Controller\ConfigController::class);
         $this->container->add(Controller\UserLogController::class);
         $this->container->add(Controller\MailLogController::class);
-        $this->container->add(Controller\FileManagerController::class, function () {
-            return new Controller\FileManagerController($this);
-        });
         $this->container->add(Controller\TranslateController::class);
         $this->container->add(Controller\WebAuthnController::class);
         $this->container->add(Controller\SystemValueController::class);
@@ -114,7 +110,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->container->add(Controller\FileSystemController::class);
         $this->container->add(Controller\RevisionController::class);
         $this->container->add(Controller\DatabaseController::class);
-        $this->container->add(Controller\DriveController::class);
         $this->container->add(Controller\CustomFieldController::class);
         $this->container->add(Controller\APIKeyController::class);
 
@@ -682,33 +677,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     }
 
 
-    public function getDriveResponse(int $index, string $path): ResponseInterface
-    {
-        $config = json_decode(Config::Value("fs", "[]"), true);
-        if (count($config) == 0) {
-            $config[] = ["name" => "default"];
-        }
-
-        if ($index < 0 || $index >= count($config)) {
-            return new \Laminas\Diactoros\Response\EmptyResponse(404);
-        }
-
-        $drive = $this->getDrive($index);
-        $fs = $drive->getFilesystem();
-
-        if (!$fs->has($path)) {
-            return new \Laminas\Diactoros\Response\EmptyResponse(404);
-        }
-
-
-
-        $response = new \Laminas\Diactoros\Response();
-        $response = $response->withHeader("Content-Type", $fs->mimeType($path));
-        $response->getBody()->write($fs->read($path));
-        return $response;
-    }
-
-
     public function execute(ServerRequestInterface $request): \GraphQL\Executor\ExecutionResult
     {
         $this->currentRequest = $request;
@@ -951,16 +919,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         return $name;
     }
 
-    public function getDrive(int $index): Drive
-    {
-        $config = $this->getFSConfig();
-        if (!isset($config[$index])) {
-            throw new \RuntimeException('Filesystem not found');
-        }
-        $fs = $config[$index];
-        return new Drive($fs["name"], $this->getFS($index), $index, $fs["data"]);
-    }
-
     public function handleRefreshToken(ServerRequestInterface $request): ResponseInterface
     {
         $token = $request->getCookieParams()["refresh_token"] ?? null;
@@ -1118,16 +1076,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             return new TextResponse("Unauthorized", 401);
         });
 
-        $router->map("GET", $basePath . "/drive/{index}/{path:.*}", function (ServerRequestInterface $request, array $args) {
-
-            $auth = $this->createAuthService($request);
-
-            if ($auth->isLogged()) {
-                return $this->getDriveResponse($args["index"], $args["path"]);
-            }
-            return new TextResponse("Unauthorized", 401);
-        });
-
         $refreshHandler = function (ServerRequestInterface $request): ResponseInterface {
             return $this->handleRefreshToken($request);
         };
@@ -1146,7 +1094,11 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         if ($basePath !== '') {
             $router->map('GET', $basePath . '/.well-known/jwks.json', $jwksHandler);
         }
-        $this->server->run();
+        try {
+            $this->server->run();
+        } catch (\League\Route\Http\Exception\NotFoundException) {
+            (new \Laminas\HttpHandlerRunner\Emitter\SapiEmitter())->emit(new EmptyResponse(404));
+        }
     }
 
     public function getIpLocation(string $ip): mixed

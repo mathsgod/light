@@ -268,7 +268,6 @@ index.php → Light\Framework\App::run()
   → Middleware pipeline (CORS, JWT auth, file upload)
   → Router:
       GET  /fs/{protocol}/{path}   — Flysystem file serving
-      GET  /drive/{index}/{path}   — Drive/storage access
       POST /refresh_token          — JWT token refresh
       *                            — GraphQL execution
 ```
@@ -293,7 +292,7 @@ index.php → Light\Framework\App::run()
 | `src/Type/` | GraphQL output types |
 | `src/Command/` | Symfony Console CLI commands |
 | `src/Auth/` | JWT auth & authorization logic |
-| `src/Drive/` | Flysystem drive abstraction |
+| `src/Filesystem/` | Flysystem adapters and GraphQL filesystem nodes |
 | `function/` | Global helper functions (auto-loaded) |
 | `pages/` | Optional plain-PHP pages (return JSON) |
 | `db.json` | Database schema definition |

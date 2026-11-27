@@ -6,6 +6,7 @@ use Firebase\JWT\JWT;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\UploadedFile;
+use League\Flysystem\MountManager;
 use Light\Framework\App;
 use Light\Framework\Model\Config;
 use Light\Framework\Model\User;
@@ -546,9 +547,31 @@ class FileSystemControllerTest extends TestCase
     public function testAnonymousRequestCanStartWithUserScopedFilesystemConfigured(): void
     {
         $this->enableAuthenticatedUserScope();
+        $app = new class extends App {
+            public int $filesystemConfigLoads = 0;
 
-        $this->processRequest($this->app);
+            public function getFSConfig(): array
+            {
+                $this->filesystemConfigLoads++;
+                return parent::getFSConfig();
+            }
+        };
 
-        $this->assertNotNull($this->app->getMountManager());
+        $request = (new ServerRequest())->withMethod('POST')->withParsedBody([
+            'query' => '{ app { version } }',
+        ]);
+        $this->processRequest($app);
+        $response = $app->execute($request)->toArray();
+        $this->assertArrayNotHasKey('errors', $response);
+        $this->assertSame(0, $app->filesystemConfigLoads);
+
+        $manager = $app->getContainer()->get(MountManager::class);
+        $this->assertSame($manager, $app->getMountManager());
+        $this->assertSame(1, $app->filesystemConfigLoads);
+
+        $this->processRequest($app, $this->adminToken);
+        $this->assertSame(1, $app->filesystemConfigLoads);
+        $this->assertNotSame($manager, $app->getContainer()->get(MountManager::class));
+        $this->assertSame(2, $app->filesystemConfigLoads);
     }
 }

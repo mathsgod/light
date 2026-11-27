@@ -66,6 +66,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
     private array $extensions = [];
 
     protected array $menus = [];
+    private bool $menusLoaded = false;
     /** @var string[] Permissions exposed by registered extensions. */
     protected array $extensionPermissions = [];
 
@@ -154,7 +155,6 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
         $this->rbac = new Rbac();
         $this->rbac->setPermissionSeparator(".");
         $this->loadRbac();
-        $this->loadMenu();
     }
 
     public function getMountManager(): MountManager
@@ -189,36 +189,31 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
 
 
-    private function loadMenu()
+    private function loadMenu(): array
     {
-        $this->addMenus(Yaml::parseFile(dirname(__DIR__) . '/menus.yml')); //system default
-
-        $this->addMenus($this->getCustomMenus());
-
-        //if file manager is enabled, add to menus
+        $menus = array_merge(
+            array_values(Yaml::parseFile(dirname(__DIR__) . '/menus.yml')),
+            array_values($this->getCustomMenus()),
+        );
         if ($this->isFileManagerEnabled()) {
-            $this->addMenus([
-                [
-                    "label" => "File Manager",
-                    "to" => "/FileManager",
-                    "icon" => "sym_o_folder",
-                    "permission" => "file_manager.index"
-                ]
-            ]);
+            $menus[] = [
+                "label" => "File Manager",
+                "to" => "/FileManager",
+                "icon" => "sym_o_folder",
+                "permission" => "file_manager.index"
+            ];
         }
+        return $menus;
     }
-
 
     public function getFlatMenus(): array
     {
         $result = [];
-        $stack = $this->menus;
+        $stack = $this->getMenus();
         while (count($stack) > 0) {
             $item = array_shift($stack);
-            if ($item["children"]) {
-                foreach ($item["children"] as $child) {
-                    $stack[] = $child;
-                }
+            foreach ($item["children"] ?? [] as $child) {
+                $stack[] = $child;
             }
             unset($item["children"]);
             $result[] = $item;
@@ -228,6 +223,10 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
     public function getMenus(): array
     {
+        if (!$this->menusLoaded) {
+            $this->menus = array_merge($this->loadMenu(), $this->menus);
+            $this->menusLoaded = true;
+        }
         return $this->menus;
     }
 
@@ -494,7 +493,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
             }
         }
 
-        foreach ($this->getMenusPermission($this->menus) as $p) {
+        foreach ($this->getMenusPermission($this->getMenus()) as $p) {
             $permissions[] = $p;
         }
 
@@ -670,10 +669,7 @@ class App implements MiddlewareInterface, \League\Event\EventDispatcherAware, Re
 
         $auth_service = $this->createAuthService($request);
         $this->auth_service = $auth_service;
-        $this->mountManager = $this->filesystemFactory->createMountManager(
-            $this->getFSConfig(),
-            $this->getFilesystemUser(),
-        );
+        $this->mountManager = null;
 
         $this->factory->setAuthenticationService($auth_service);
         $this->factory->setAuthorizationService($auth_service);

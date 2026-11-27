@@ -4,22 +4,12 @@ Framework credential login, TOTP setup/verification and WebAuthn creation/assert
 
 ## Install and upgrade
 
-Existing databases must apply [`migrations/20261117_light_auth.sql`](../migrations/20261117_light_auth.sql) before enabling new TOTP enrollments. This expands the existing `User.secret` column from 16 to 128 characters for OTPHP secrets and preserves existing values. New installations use the updated `db.json`. No tables are added.
+### Upgrade to Framework 2.1.0
 
-`composer install` uses the committed lock file, currently pinning `mathsgod/light-auth` to `dev-main` at `5c6c4e9`. The prototype has no stable release yet. Until a stable registry release is available, consuming applications must register its VCS repository and explicitly allow the development requirement in their **root** composer.json; Composer does not inherit dependency repositories or root stability flags:
-
-```json
-{
-  "repositories": [
-    {"type": "vcs", "url": "https://github.com/mathsgod/light-auth.git"}
-  ],
-  "require": {
-    "mathsgod/light-auth": "dev-main"
-  }
-}
-```
-
-For an existing database, apply `migrations/20261117_light_auth.sql` before enabling setup. It widens **the existing** `User.secret` field from 16 to 128 characters to accommodate OTPHP's generated Base32 secrets. It preserves existing secrets; no extra tables are created. New installs use the updated `db.json`.
+1. Enable PHP’s GD extension (`ext-gd`) in the environment that serves Framework requests. Framework generates a PNG QR code for the legacy `image` field and also returns `provisioningUri` for clients that render QR codes locally.
+2. Install the release through Composer. Framework requires the published `mathsgod/light-auth` version **1.0.0**. If the application previously added an explicit `dev-main` requirement or a VCS repository solely for the prototype, remove those overrides or change the direct requirement to `1.0.0`.
+3. On an existing database, apply [`migrations/20261117_light_auth.sql`](../migrations/20261117_light_auth.sql) before enabling new TOTP enrollments. It expands `User.secret` from 16 to 128 characters and preserves existing secrets. New installations use the updated `db.json`.
+4. Deploy compatible `@hostlink/light` and `@hostlink/nuxt-light` builds when upgrading applications that used Drive. Replace `app.drive`, `app.drives`, and `lightDrive*` calls with the Filesystem API (`app.fs` and `lightFS*`). Replace stored or generated `/drive/{index}/{path}` URLs with `/fs/{protocol}/{path}`. Old Drive URLs return HTTP 404.
 
 ## Existing configuration
 

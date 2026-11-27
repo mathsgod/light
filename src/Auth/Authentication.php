@@ -159,7 +159,7 @@ final class Authentication
         $issuer = str_ireplace(['%3a', ':'], '-', $host);
         $setup = $this->enrollment()->begin((string) $user->user_id, $label, $issuer, $this->browserBinding());
         parse_str(parse_url($setup->provisioningUri, PHP_URL_QUERY), $parameters);
-        $image = (new PngWriter())->write(QrCode::create($setup->provisioningUri))->getDataUri();
+        $image = (new PngWriter())->write(new QrCode($setup->provisioningUri))->getDataUri();
         $this->remember('totp_setup', (string) $user->user_id, ['token' => $setup->setupToken, 'secretHash' => hash('sha256', $parameters['secret'])]);
         return [
             'secret' => $parameters['secret'],

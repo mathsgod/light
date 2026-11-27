@@ -34,7 +34,7 @@
         "symfony/console": "^7.4",
         "thecodingmachine/graphqlite": "^8.3",
         "mathsgod/light-auth": "1.0.0",
-        "endroid/qr-code": "^4.8",
+        "endroid/qr-code": "^6.0.9",
         "ext-gd": "*"
     },
     "require-dev": {
